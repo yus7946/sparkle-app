@@ -1,0 +1,27 @@
+{
+  "name": "Sparkle — English becomes your adventure",
+  "short_name": "Sparkle",
+  "description": "通勤5分で、世界を旅する英語。TOEIC 650対応。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5EAD8",
+  "theme_color": "#F5EAD8",
+  "lang": "ja",
+  "categories": ["education", "travel", "productivity"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='42' fill='%23402310'/><circle cx='96' cy='96' r='60' fill='url(%23g)'/><defs><radialGradient id='g' cx='35%25' cy='30%25'><stop offset='0' stop-color='%23D67F48'/><stop offset='1' stop-color='%238C491A'/></radialGradient></defs><polygon points='96,60 106,86 132,88 112,106 118,132 96,118 74,132 80,106 60,88 86,86' fill='%23FFC6A5'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%23402310'/><circle cx='256' cy='256' r='160' fill='url(%23g)'/><defs><radialGradient id='g' cx='35%25' cy='30%25'><stop offset='0' stop-color='%23D67F48'/><stop offset='1' stop-color='%238C491A'/></radialGradient></defs><polygon points='256,160 282,232 358,236 296,282 312,354 256,314 200,354 216,282 154,236 230,232' fill='%23FFC6A5'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
