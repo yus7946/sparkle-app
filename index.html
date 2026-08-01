@@ -316,6 +316,9 @@ svg{display:block;flex-shrink:0}
 .locked-card{opacity:.5}
 .locked-card .lk{display:flex;align-items:center;gap:var(--space-sm);font-weight:600;font-size:var(--text-sm)}
 .locked-card .lk-sub{font-size:var(--text-xs);color:var(--text-muted);margin-top:4px}
+.ab-row{display:flex;flex-wrap:wrap;gap:8px}
+.ab-swatch{background:var(--surface);border:2px solid transparent;border-radius:12px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;transition:border-color var(--duration-fast)}
+.ab-swatch.on{border-color:var(--sparkle)}
 
 /* mission card */
 .mission-card{background:linear-gradient(160deg,color-mix(in srgb,var(--gold) 6%,transparent) 0%,var(--surface) 100%);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);position:relative;overflow:hidden}
@@ -711,6 +714,83 @@ const ICONS = {
   clock:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
   globe:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
 };
+
+/* ========== 2Dアバター（自分の分身、$0のSVGカスタマイズ） ========== */
+const AVATAR_SKINS=['#FFE0BD','#F1C27D','#E0AC69','#C68642','#8D5524'];
+const AVATAR_HAIR_COLORS=['#2B1B0E','#5C3A21','#A9752F','#D9B382','#6B6B6B','#8C491A'];
+const AVATAR_OUTFITS=['#C67139','#534AB7','#1D9E75','#FF8A65','#F5C84C','#56633F'];
+const AVATAR_HAIRSTYLES=[
+  {id:'short',label:'ショート'},{id:'long',label:'ロング'},{id:'bun',label:'お団子'},
+  {id:'cap',label:'キャップ'},{id:'bald',label:'なし'},
+];
+const AVATAR_ACCESSORIES=[
+  {id:'none',label:'なし'},{id:'glasses',label:'メガネ'},{id:'starclip',label:'星のクリップ'},
+];
+function defaultAvatarCfg(){return{skin:0,hairStyle:'short',hairColor:0,outfit:0,accessory:'none'}}
+function avatarSVG(cfg,size){
+  cfg=Object.assign(defaultAvatarCfg(),cfg||{});
+  size=size||100;
+  const skin=AVATAR_SKINS[cfg.skin]||AVATAR_SKINS[0];
+  const hairCol=AVATAR_HAIR_COLORS[cfg.hairColor]||AVATAR_HAIR_COLORS[0];
+  const outfit=AVATAR_OUTFITS[cfg.outfit]||AVATAR_OUTFITS[0];
+  const backHair=cfg.hairStyle==='long'?`<path d="M20 50 Q16 8 60 8 Q104 8 100 50 L100 82 Q90 68 90 48 Q90 26 60 26 Q30 26 30 48 Q30 68 20 82Z" fill="${hairCol}"/>`:'';
+  let topHair='';
+  if(cfg.hairStyle==='short'||cfg.hairStyle==='long')topHair=`<path d="M24 48 Q22 10 60 10 Q98 10 96 48 Q88 28 60 28 Q32 28 24 48Z" fill="${hairCol}"/>`;
+  else if(cfg.hairStyle==='bun')topHair=`<path d="M24 48 Q22 12 60 12 Q98 12 96 48 Q88 30 60 30 Q32 30 24 48Z" fill="${hairCol}"/><circle cx="60" cy="8" r="11" fill="${hairCol}"/>`;
+  else if(cfg.hairStyle==='cap')topHair=`<path d="M20 42 Q20 8 60 8 Q100 8 100 42 L100 46 L20 46Z" fill="${hairCol}"/><rect x="18" y="40" width="84" height="9" rx="4.5" fill="${hairCol}"/>`;
+  let acc='';
+  if(cfg.accessory==='glasses')acc=`<circle cx="46" cy="58" r="9" fill="none" stroke="#402310" stroke-width="3"/><circle cx="74" cy="58" r="9" fill="none" stroke="#402310" stroke-width="3"/><line x1="55" y1="58" x2="65" y2="58" stroke="#402310" stroke-width="3"/>`;
+  else if(cfg.accessory==='starclip')acc=`<g transform="translate(78 22) scale(0.55)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F5C84C"/></g>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="あなたのアバター">
+    ${backHair}
+    <rect x="10" y="88" width="100" height="32" rx="18" fill="${outfit}"/>
+    <circle cx="60" cy="58" r="34" fill="${skin}"/>
+    <circle cx="48" cy="60" r="3" fill="#402310"/>
+    <circle cx="72" cy="60" r="3" fill="#402310"/>
+    <path d="M52 72 Q60 78 68 72" fill="none" stroke="#402310" stroke-width="2.5" stroke-linecap="round"/>
+    ${topHair}
+    ${acc}
+  </svg>`;
+}
+function openAvatarBuilder(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('screen-review');el.classList.add('active');
+  window.scrollTo(0,0);
+  PROG.avatar=Object.assign(defaultAvatarCfg(),PROG.avatar||{});
+  renderAvatarBuilder();
+}
+function renderAvatarBuilder(){
+  const el=document.getElementById('screen-review');
+  const cfg=PROG.avatar;
+  const swatchRow=(items,key,renderSwatch)=>items.map((it,i)=>{
+    const val=typeof it==='object'?it.id:i;
+    const on=cfg[key]===val;
+    return `<button class="ab-swatch${on?' on':''}" data-ab-key="${key}" data-ab-val="${val}" aria-label="${typeof it==='object'?it.label:val}">${renderSwatch(it,i)}</button>`;
+  }).join('');
+  el.innerHTML=`<div class="back-row"><button class="icon-btn" onclick="go('profile')" aria-label="戻る">${ICONS.arrowLeft}</button><h2>アバターを編集</h2></div>
+    <div style="display:flex;justify-content:center;margin:10px 0 18px" id="ab-preview">${avatarSVG(cfg,140)}</div>
+    <div class="card">
+      <div style="font-weight:700;font-size:var(--text-sm);margin-bottom:8px">肌の色</div>
+      <div class="ab-row">${swatchRow(AVATAR_SKINS,'skin',(c)=>`<span style="display:block;width:28px;height:28px;border-radius:50%;background:${c}"></span>`)}</div>
+      <div style="font-weight:700;font-size:var(--text-sm);margin:14px 0 8px">髪型</div>
+      <div class="ab-row">${swatchRow(AVATAR_HAIRSTYLES,'hairStyle',(h)=>`<span style="font-size:11px;font-weight:600">${h.label}</span>`)}</div>
+      <div style="font-weight:700;font-size:var(--text-sm);margin:14px 0 8px">髪の色</div>
+      <div class="ab-row">${swatchRow(AVATAR_HAIR_COLORS,'hairColor',(c)=>`<span style="display:block;width:28px;height:28px;border-radius:50%;background:${c}"></span>`)}</div>
+      <div style="font-weight:700;font-size:var(--text-sm);margin:14px 0 8px">服の色</div>
+      <div class="ab-row">${swatchRow(AVATAR_OUTFITS,'outfit',(c)=>`<span style="display:block;width:28px;height:28px;border-radius:50%;background:${c}"></span>`)}</div>
+      <div style="font-weight:700;font-size:var(--text-sm);margin:14px 0 8px">アクセサリー</div>
+      <div class="ab-row">${swatchRow(AVATAR_ACCESSORIES,'accessory',(a)=>`<span style="font-size:11px;font-weight:600">${a.label}</span>`)}</div>
+    </div>
+    <button class="btn btn-gold btn-block" style="margin-top:14px" onclick="go('profile')">${ICONS.check} 保存して戻る</button>`;
+  el.querySelectorAll('[data-ab-key]').forEach(b=>b.onclick=()=>{
+    const key=b.dataset.abKey;
+    let val=b.dataset.abVal;
+    if(key==='skin'||key==='hairColor'||key==='outfit')val=+val;
+    PROG.avatar[key]=val;commit();
+    renderAvatarBuilder();
+    sfx('tap');
+  });
+}
 
 /* ========== SCENARIOS DATA ========== */
 const SCENARIOS = {
@@ -3533,6 +3613,9 @@ function pickStoryChoice(i){
   const turn=st.turns[step];
   const choice=turn.choices[i];
   storyState.picks=storyState.picks||[];storyState.picks.push(choice.q);
+  // 診断機能用に全期間の選択傾向を蓄積（会話瞬発力＝伝達効率の軸に使う）
+  PROG.commPicks=PROG.commPicks||{perfect:0,ok:0,ng:0};
+  PROG.commPicks[choice.q]=(PROG.commPicks[choice.q]||0)+1;commit();
   const box=document.getElementById('story-choices');
   const btns=box.querySelectorAll('.choice-btn');
   btns.forEach((b,idx)=>{b.disabled=true;if(idx===i)b.classList.add('q-'+choice.q)});
@@ -3593,7 +3676,7 @@ function sparkHeroHTML(mood){
 const LS={prog:'sparkle_progress',streak:'sparkle_streak',bm:'sparkle_bookmarks',travel:'sparkle_travel',seen:'sparkle_seen'};
 function loadProg(){try{return JSON.parse(localStorage.getItem(LS.prog))||{}}catch{return{}}}
 function saveProg(p){localStorage.setItem(LS.prog,JSON.stringify(p))}
-function defProg(){return{phrases:{},scenarios:{},xp:0,badges:[],commuteSessions:0,weeklyGoalXP:300,streakFreezes:1}}
+function defProg(){return{phrases:{},scenarios:{},xp:0,badges:[],commuteSessions:0,weeklyGoalXP:300,streakFreezes:1,avatar:defaultAvatarCfg()}}
 let PROG=Object.assign(defProg(),loadProg());
 PROG.phrases=PROG.phrases||{};PROG.scenarios=PROG.scenarios||{};PROG.badges=PROG.badges||[];PROG.xp=PROG.xp||0;
 function commit(){saveProg(PROG)}
@@ -5240,6 +5323,166 @@ function bindWeaknessRows(){
     el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();row.action()}};
   });
 }
+/* ========== 英語タイプ診断（日常会話〜資格知識を横断） ==========
+   軸1: 知識力＝TOEIC/語彙の正答率。軸2: 実践力＝シナリオ/WDWフレーズの正答率＋
+   ストーリー内の伝達効率(perfect/ok/ng比率)。既存の学習データをそのまま流用し、
+   新規トラッキングはPROG.commPicksのみ追加する。 */
+const DIAGNOSIS_TYPES={
+  hh:{id:'hh',name:'パーフェクト・トラベラー',tag:'知識も度胸も兼ね備えた旅人',color:'#1D9E75',
+    desc:'文法・語彙の土台がしっかりある上に、実際の会話でも臆さず言葉を出せるタイプ。TOEICのスコアも、現地での会話も両方まとまって伸びていくはずです。',
+    tip:'次は難易度の高い都市（Sydney・NYC）や商談シナリオで、スピードとフォーマルさの両方に慣れておくとさらに強くなります。'},
+  hl:{id:'hl',name:'物知り学者タイプ',tag:'知識はあるのに本番で固まりがち',color:'#534AB7',
+    desc:'文法・語彙の正答率は高いのに、実際の会話になると言葉が出てこない「頭ではわかっているのに」タイプ。日本人学習者に非常に多いパターンです。',
+    tip:'知識は十分なので、あとは「間違ってもいいから声に出す」回数がスコアに直結します。シナリオやCity Passportで実践量を増やしましょう。'},
+  lh:{id:'lh',name:'出川イングリッシュ・タイプ',tag:'文法は粗くても度胸で乗り切る',color:'#FF8A65',
+    desc:'文法の正確さより先に、伝えることを優先できるタイプ。実際の会話では強い武器になりますが、TOEICのような形式知識のスコアには反映されにくい弱点があります。',
+    tip:'その度胸を活かしたまま、語彙・文法を並行して固めると一気に伸びます。TOEIC語彙タブと弱点分析を活用しましょう。'},
+  ll:{id:'ll',name:'これから型トラベラー',tag:'伸びしろしかない旅の始まり',color:'#F5C84C',
+    desc:'まだ学習量が少なく、知識・実践どちらもこれから積み上げていく段階。裏を返せば、どちらの方向にも伸びしろしかないということです。',
+    tip:'まずは「今日のトレーニング」を1本道で毎日続けることが一番の近道。3週間続けると数値がはっきり変わってきます。'},
+};
+function diagnosisAxes(){
+  const idx=buildCategoryIndex();
+  let kCorrect=0,kAttempts=0,pCorrect=0,pAttempts=0;
+  Object.keys(PROG.phrases||{}).forEach(id=>{
+    const meta=idx[id];if(!meta)return;
+    const r=PROG.phrases[id];
+    const attempts=(r.correct||0)+(r.incorrect||0);
+    if(attempts<1)return;
+    if(meta.group==='toeic'||meta.group==='vocab'){kCorrect+=r.correct||0;kAttempts+=attempts}
+    else{pCorrect+=r.correct||0;pAttempts+=attempts}
+  });
+  const cp=PROG.commPicks||{perfect:0,ok:0,ng:0};
+  const cpTotal=cp.perfect+cp.ok+cp.ng;
+  const commScore=cpTotal>0?(cp.perfect*100+cp.ok*65+cp.ng*25)/cpTotal:null;
+  const knowledgeAcc=kAttempts>=5?kCorrect/kAttempts*100:null;
+  let practicalAcc=null;
+  if(pAttempts>=5&&commScore!=null)practicalAcc=(pCorrect/pAttempts*100*0.5)+(commScore*0.5);
+  else if(pAttempts>=5)practicalAcc=pCorrect/pAttempts*100;
+  else if(commScore!=null)practicalAcc=commScore;
+  return{knowledgeAcc,practicalAcc,kAttempts,pAttempts,cpTotal};
+}
+function classifyDiagnosis(){
+  const a=diagnosisAxes();
+  const hasEnough=a.kAttempts>=5&&(a.pAttempts>=5||a.cpTotal>=3);
+  if(!hasEnough)return{type:null,needMore:true,...a};
+  const kHigh=a.knowledgeAcc>=65,pHigh=a.practicalAcc>=65;
+  const key=(kHigh?'h':'l')+(pHigh?'h':'l');
+  return{type:DIAGNOSIS_TYPES[key],needMore:false,knowledgeAcc:Math.round(a.knowledgeAcc),practicalAcc:Math.round(a.practicalAcc)};
+}
+function openDiagnosis(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('screen-review');el.classList.add('active');
+  window.scrollTo(0,0);
+  renderDiagnosisResult(classifyDiagnosis());
+}
+function renderDiagnosisResult(res){
+  const el=document.getElementById('screen-review');
+  if(res.needMore){
+    el.innerHTML=`<div class="back-row"><button class="icon-btn" onclick="go('profile')" aria-label="戻る">${ICONS.arrowLeft}</button><h2>英語タイプ診断</h2></div>
+      ${sparkHeroHTML('hello')}
+      <div class="card result-card">
+        <div class="result-score">まだデータが足りません</div>
+        <div class="result-msg">TOEIC/語彙を5問以上、シナリオやCity Passportの会話を3回以上進めると、正確な診断が出せるようになります。今すぐ結果を見たい場合は、履歴不要のお試し診断もどうぞ。</div>
+        <button class="btn btn-gold btn-block" style="margin-top:12px" onclick="openQuickQuiz()">${ICONS.star} お試し診断(1分)を受ける</button>
+        <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="go('home')">今日のトレーニングへ</button>
+      </div>`;
+    return;
+  }
+  const t=res.type;
+  const av=avatarSVG(PROG.avatar||defaultAvatarCfg(),132);
+  el.innerHTML=`<div class="back-row"><button class="icon-btn" onclick="go('profile')" aria-label="戻る">${ICONS.arrowLeft}</button><h2>英語タイプ診断</h2></div>
+    <div class="card result-card" id="diag-card" style="text-align:center">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">${av}</div>
+      <div style="font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:.06em;margin-bottom:2px">YOUR TYPE</div>
+      <div style="font-size:var(--text-xl);font-weight:800;color:${t.color}">${esc(t.name)}</div>
+      <div style="font-size:var(--text-sm);color:var(--text-secondary);margin-top:2px">${esc(t.tag)}</div>
+      <div style="text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:14px">
+        <div style="font-size:var(--text-sm);line-height:1.7">${esc(t.desc)}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin:14px 0">
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 4px">
+          <div style="font-size:var(--text-lg);font-weight:800;color:var(--gold)">${res.knowledgeAcc}%</div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:600">知識力（TOEIC/語彙）</div>
+        </div>
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 4px">
+          <div style="font-size:var(--text-lg);font-weight:800;color:var(--enchanted)">${res.practicalAcc}%</div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:600">実践力（会話/伝達効率）</div>
+        </div>
+      </div>
+      <div style="text-align:left;font-size:12px;color:var(--text-secondary);background:rgba(245,200,76,.1);border-radius:10px;padding:10px">${ICONS.star} ${esc(t.tip)}</div>
+      <button class="btn btn-gold btn-block" style="margin-top:14px" id="diag-share-btn">${ICONS.play||'🎬'} 診断結果をシェア画像で作る</button>
+      <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="openAvatarBuilder()">${ICONS.user} アバターを編集する</button>
+      ${res.quick?`<div style="font-size:12px;color:var(--text-muted);margin-top:14px">この結果はお試し診断(簡易8問)によるものです。</div>
+      <button class="btn btn-gold btn-block" style="margin-top:8px" onclick="go('home')">${ICONS.arrowRight} Sparkleで本格的に学習を始める</button>`:''}
+    </div>`;
+  const shareBtn=document.getElementById('diag-share-btn');
+  if(shareBtn)shareBtn.onclick=()=>openDiagnosisShareModal(res);
+  anim('#diag-card',{opacity:0,y:12},{opacity:1,y:0,duration:0.4,ease:'power2.out'});
+}
+/* ---- お試し診断（履歴不要・シェアの着地先） ---- */
+const QUICK_QUIZ_KNOWLEDGE=[
+  {q:"He _____ to work by train every day.",choices:["go","goes","going","gone"],correct:1},
+  {q:"'Could you _____ the door, please?'（すみませんがドアを閉めていただけますか）",choices:["close","closes","closed","closing"],correct:0},
+  {q:"'The meeting has been _____ to 3 PM.'（会議は3時に延期されました）",choices:["postpone","postponed","postponing","postpones"],correct:1},
+  {q:"'I'm looking forward _____ you next week.'（来週お会いできるのを楽しみにしています）",choices:["to see","to seeing","seeing","see"],correct:1},
+];
+const QUICK_QUIZ_SITUATIONAL=[
+  {scene:"カフェで店員に何か聞かれたが、単語が一瞬出てこない。あなたなら？",choices:[
+    {label:"わかる単語だけでとにかく聞き返す（Sorry? One more time?）",bold:true},
+    {label:"完璧な文を頭の中で組み立ててから話す",bold:false}]},
+  {scene:"道を尋ねられたが、地名の発音に自信がない。あなたなら？",choices:[
+    {label:"多少発音が違っても指差しながら伝える",bold:true},
+    {label:"自信がないので愛想笑いでやり過ごす",bold:false}]},
+  {scene:"海外のスタッフに商品の欠陥を伝える必要がある。あなたなら？",choices:[
+    {label:"単語を並べてでも今すぐ状況を伝える",bold:true},
+    {label:"正しい表現を後で調べてから伝える",bold:false}]},
+  {scene:"外国人観光客に日本語で話しかけられ、思わず身構えた。あなたなら？",choices:[
+    {label:"知っている英単語だけでもとりあえず返してみる",bold:true},
+    {label:"間違えるのが怖くて他の人に助けを求める",bold:false}]},
+];
+let quickQuizState=null;
+function openQuickQuiz(){
+  quickQuizState={i:0,knowledgeCorrect:0,boldCount:0};
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('screen-review');el.classList.add('active');
+  window.scrollTo(0,0);
+  renderQuickQuizStep();
+}
+function renderQuickQuizStep(){
+  const el=document.getElementById('screen-review');
+  const kLen=QUICK_QUIZ_KNOWLEDGE.length,sLen=QUICK_QUIZ_SITUATIONAL.length,total=kLen+sLen;
+  const i=quickQuizState.i;
+  if(i>=total)return renderQuickQuizResult();
+  const isKnowledge=i<kLen;
+  const item=isKnowledge?QUICK_QUIZ_KNOWLEDGE[i]:QUICK_QUIZ_SITUATIONAL[i-kLen];
+  const body=isKnowledge
+    ?`<div class="q-ctx">Q${i+1} / ${total} · 知識チェック</div>
+      <div style="font-size:var(--text-lg);font-weight:700;margin:14px 0;line-height:1.6">${esc(item.q)}</div>
+      <div id="qq-choices">${item.choices.map((c,ci)=>`<button class="choice-btn" data-qi="${ci}">${esc(c)}</button>`).join('')}</div>`
+    :`<div class="q-ctx">Q${i+1} / ${total} · シチュエーション</div>
+      <div style="font-size:var(--text-base);line-height:1.7;margin:14px 0">${esc(item.scene)}</div>
+      <div id="qq-choices">${item.choices.map((c,ci)=>`<button class="choice-btn" data-qi="${ci}">${esc(c.label)}</button>`).join('')}</div>`;
+  el.innerHTML=`<div class="back-row"><button class="icon-btn" onclick="go('home')" aria-label="閉じる">${ICONS.arrowLeft}</button><h2>英語タイプ診断（お試し版）</h2></div>
+    <div class="prog" style="margin-bottom:10px"><div class="prog-fill" style="width:${Math.round(i/total*100)}%"></div></div>
+    ${body}`;
+  el.querySelectorAll('[data-qi]').forEach(b=>b.onclick=()=>{
+    const ci=+b.dataset.qi;
+    if(isKnowledge){if(ci===item.correct)quickQuizState.knowledgeCorrect++}
+    else{if(item.choices[ci].bold)quickQuizState.boldCount++}
+    quickQuizState.i++;
+    renderQuickQuizStep();
+  });
+  anim(el,{opacity:0,y:8},{opacity:1,y:0,duration:0.25});
+}
+function renderQuickQuizResult(){
+  const kLen=QUICK_QUIZ_KNOWLEDGE.length,sLen=QUICK_QUIZ_SITUATIONAL.length;
+  const knowledgeAcc=Math.round(quickQuizState.knowledgeCorrect/kLen*100);
+  const practicalAcc=Math.round(quickQuizState.boldCount/sLen*100);
+  const kHigh=knowledgeAcc>=65,pHigh=practicalAcc>=65;
+  const t=DIAGNOSIS_TYPES[(kHigh?'h':'l')+(pHigh?'h':'l')];
+  renderDiagnosisResult({type:t,knowledgeAcc,practicalAcc,needMore:false,quick:true});
+}
 function scoreTrendHTML(){
   const hist=(PROG.scoreHist||[]);
   const target=toeicTarget();
@@ -6100,6 +6343,14 @@ function renderProfile(){
   if(curProfileTab==='overview'){
     body.innerHTML=`
       <div class="stat-grid">${stats.map(([ic,v,l])=>`<div class="card stat-card">${ic}<div class="stat-val">${v}</div><div class="stat-lbl">${l}</div></div>`).join('')}</div>
+      <div class="card glow-card" id="diag-entry" role="button" tabindex="0" aria-label="英語タイプ診断を受ける" style="cursor:pointer">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--sparkle),var(--gold));display:flex;align-items:center;justify-content:center;color:var(--night)">${ICONS.star}</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:var(--text-sm)">英語タイプ診断</div>
+          <div style="font-size:11px;color:var(--text-muted)">あなたのタイプを診断してシェアしよう</div></div>
+          <div style="color:var(--ember);font-weight:800;font-size:var(--text-sm)">START ${ICONS.arrowRight}</div>
+        </div>
+      </div>
       <div class="sec-title">${ICONS.award} Badges</div>
       <div class="card"><div class="badge-grid" id="badge-grid"></div></div>`;
     document.getElementById('badge-grid').innerHTML=BADGES.map(b=>{
@@ -6110,6 +6361,9 @@ function renderProfile(){
         <div class="badge-cond">${esc(b.cond)}</div></div>`;
     }).join('');
     document.querySelectorAll('[data-badge]').forEach(c=>c.onclick=()=>c.classList.toggle('show-tip'));
+    const diagEntry=document.getElementById('diag-entry');
+    if(diagEntry){diagEntry.onclick=()=>openDiagnosis();diagEntry.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openDiagnosis()}}}
+    bindGlow();
     anim('.stat-card',{y:20,opacity:0},{y:0,opacity:1,duration:0.4,stagger:0.05,ease:'power2.out'});
   }else{
     body.innerHTML=`
@@ -6352,6 +6606,111 @@ function openClearVideoModal(opts){
   }).catch(e=>{
     const status=document.getElementById('cv-status');
     if(status)status.textContent='動画の作成に失敗しました：'+(e&&e.message?e.message:'不明なエラー');
+  });
+}
+
+/* ========== 診断結果の静止画シェアカード（動画より軽く即時、$0） ========== */
+function svgToImage(svgString){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=reject;
+    img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svgString)));
+  });
+}
+async function generateDiagnosisShareBlob(res){
+  const W=720,H=1280;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#F5EAD8');g.addColorStop(0.55,'#F0A06B');g.addColorStop(1,'#C67139');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const seed=[[0.15,0.1],[0.85,0.15],[0.1,0.75],[0.88,0.8]];
+  seed.forEach(p=>drawStar(ctx,p[0]*W,p[1]*H,12,'#FFC6A5'));
+  ctx.textAlign='center';
+  ctx.font='500 24px Figtree, sans-serif';ctx.fillStyle='#5c3416';
+  ctx.fillText('My English Type',W/2,150);
+  const avImg=await svgToImage(avatarSVG(PROG.avatar||defaultAvatarCfg(),260));
+  ctx.save();
+  ctx.beginPath();ctx.arc(W/2,330,140,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.35)';ctx.fill();
+  ctx.drawImage(avImg,W/2-130,200,260,260);
+  ctx.restore();
+  ctx.font='700 48px Figtree, sans-serif';ctx.fillStyle='#402310';
+  wrapText(ctx,res.type.name,W/2,520,640,54);
+  ctx.font='500 26px "Noto Sans JP", sans-serif';ctx.fillStyle='#5c3416';
+  ctx.fillText(res.type.tag,W/2,590);
+  // stats
+  ctx.textAlign='left';
+  const barX=100,barW=W-200;
+  [['知識力（TOEIC/語彙）',res.knowledgeAcc,'#8C491A',680],['実践力（会話/伝達効率）',res.practicalAcc,'#56633F',780]].forEach(([label,pct,color,y])=>{
+    ctx.font='600 24px "Noto Sans JP", sans-serif';ctx.fillStyle='#402310';
+    ctx.fillText(label+'  '+pct+'%',barX,y);
+    ctx.fillStyle='rgba(64,35,16,.15)';ctx.fillRect(barX,y+14,barW,14);
+    ctx.fillStyle=color;ctx.fillRect(barX,y+14,barW*Math.min(1,pct/100),14);
+  });
+  ctx.textAlign='center';
+  ctx.font='500 22px "Noto Sans JP", sans-serif';ctx.fillStyle='#402310';
+  wrapText(ctx,res.type.desc,W/2,900,600,32);
+  ctx.font='700 34px Caprasimo, cursive';ctx.fillStyle='#402310';
+  ctx.fillText('Sparkle',W/2,1180);
+  ctx.font='400 18px Figtree, sans-serif';ctx.fillStyle='#5c3416';
+  ctx.fillText('English becomes your adventure.',W/2,1206);
+  return new Promise(resolve=>cv.toBlob(b=>resolve(b),'image/png'));
+}
+function wrapText(ctx,text,cx,y,maxW,lineH){
+  const words=text.split('');// 日本語は文字単位で折り返す
+  let line='',lines=[];
+  words.forEach(ch=>{
+    const test=line+ch;
+    if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=ch}else line=test;
+  });
+  if(line)lines.push(line);
+  lines.slice(0,3).forEach((l,i)=>ctx.fillText(l,cx,y+i*lineH));
+}
+function openDiagnosisShareModal(res){
+  const m=document.createElement('div');m.className='modal-back';m.id='diag-share-modal';
+  m.innerHTML=`<div class="modal" style="text-align:center;max-width:340px">
+    <div style="font-size:var(--text-lg);font-weight:800;margin-bottom:10px">シェア画像を作成中…</div>
+    <div id="diag-share-host" style="background:#0002;border-radius:16px;overflow:hidden;min-height:200px;display:flex;align-items:center;justify-content:center;color:#fff8">${ICONS.star}</div>
+    <div id="ds-actions" style="display:none;gap:8px;flex-direction:column;margin-top:12px"></div>
+    <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="document.getElementById('diag-share-modal').remove()">閉じる</button>
+  </div>`;
+  document.body.appendChild(m);
+  m.onclick=e=>{if(e.target===m)m.remove()};
+  if(window.gsap&&!PREF_REDUCED)gsap.fromTo(m.querySelector('.modal'),{scale:.9,opacity:0},{scale:1,opacity:1,duration:.35,ease:'back.out(1.6)'});
+  generateDiagnosisShareBlob(res).then(blob=>{
+    const url=URL.createObjectURL(blob);
+    const host=document.getElementById('diag-share-host');
+    if(host){
+      const img=document.createElement('img');
+      img.src=url;img.style.width='100%';img.style.display='block';img.style.borderRadius='16px';
+      host.innerHTML='';host.appendChild(img);
+    }
+    const title=document.querySelector('#diag-share-modal .modal > div');
+    if(title)title.textContent='完成！';
+    const actions=document.getElementById('ds-actions');
+    if(actions){
+      actions.style.display='flex';
+      const dlBtn=document.createElement('a');
+      dlBtn.className='btn btn-gold btn-block';dlBtn.textContent='ダウンロード';
+      dlBtn.href=url;dlBtn.download='sparkle-diagnosis.png';
+      actions.appendChild(dlBtn);
+      if(navigator.share){
+        const shareBtn=document.createElement('button');
+        shareBtn.className='btn btn-primary btn-block';shareBtn.textContent='SNSでシェア';
+        shareBtn.onclick=async()=>{
+          try{
+            const file=new File([blob],'sparkle-diagnosis.png',{type:'image/png'});
+            if(navigator.canShare&&!navigator.canShare({files:[file]})){window.open(url,'_blank');return}
+            await navigator.share({files:[file],title:'Sparkle 英語タイプ診断',text:'私の英語タイプは「'+res.type.name+'」でした！ #Sparkle'});
+          }catch(e){/* share cancelled */}
+        };
+        actions.appendChild(shareBtn);
+      }
+    }
+  }).catch(e=>{
+    const host=document.getElementById('diag-share-host');
+    if(host)host.textContent='作成に失敗しました：'+(e&&e.message?e.message:'不明なエラー');
   });
 }
 
@@ -6678,7 +7037,7 @@ function renderObSlide1(body){
       <div class="tagline" id="ob-tag">English becomes<br><span style="color:var(--gold)">your adventure.</span></div>
     </div>
     <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:0 var(--space-xl) calc(var(--space-lg) + env(safe-area-inset-bottom,0px))">
-      <div class="ob-sub" id="ob-sub">通勤5分で、世界を旅する英語。<br>Sparkと一緒に、7つの街を巡ろう。</div>
+      <div class="ob-sub" id="ob-sub">通勤5分で、世界を旅する英語。<br>Sparkと一緒に、9つの街を巡ろう。</div>
       ${OB_STATE.returning?'':obDotsHTML()}
       <button class="btn btn-gold ob-cta" id="ob-cta" style="width:100%;max-width:320px;margin-top:${OB_STATE.returning?'var(--space-lg)':'0'}" onclick="${ctaFn}">はじめる ${ICONS.arrowRight}</button>
     </div>`;
@@ -6750,7 +7109,15 @@ function startApp(){
   // Install-to-Home prompt handling
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window._sparkleInstall=e});
 }
-initOnboarding();
+// シェアされた診断リンク(?quiz=1)から来た訪問者は、オンボーディングを飛ばして
+// 履歴不要のお試し診断に直接着地させる（バイラル導線の着地先問題への対応）
+if(new URLSearchParams(location.search).get('quiz')==='1'){
+  document.getElementById('onboarding').classList.add('hidden');
+  startApp();
+  openQuickQuiz();
+}else{
+  initOnboarding();
+}
 </script>
 </body>
 </html>
