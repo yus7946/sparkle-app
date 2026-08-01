@@ -2060,11 +2060,16 @@ function renderDaySessionComplete(){
       <div class="result-msg">お疲れさまでした。${steps}ステップ・約${mins}分・+${gainedXP}XP。<br>この毎日の積み重ねが、確実にスコアになります。また明日、同じ時間に会いましょう。</div>
       ${todayGrowthHTML()}
       <button class="btn btn-gold btn-block" style="margin-top:12px" onclick="go('home')">Home ${ICONS.arrowRight}</button>
-      <button class="btn btn-secondary btn-block" style="margin-top:8px" id="cv-open-day">${ICONS.play||'🎬'} クリア動画で振り返る</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-secondary" style="flex:1" id="ss-open-day">${ICONS.star} 画像でサッと共有</button>
+        <button class="btn btn-secondary" style="flex:1" id="cv-open-day">${ICONS.play||'🎬'} クリア動画で振り返る</button>
+      </div>
     </div>`;
   anim('.result-card',{opacity:0,y:12},{opacity:1,y:0,duration:0.4,ease:'power2.out'});
   const cvBtn=document.getElementById('cv-open-day');
   if(cvBtn)cvBtn.onclick=()=>openClearVideoModal({title:'Training Complete!',subtitle:steps+' steps · '+mins+' min',xp:gainedXP,streak:getStreak()});
+  const ssBtn=document.getElementById('ss-open-day');
+  if(ssBtn)ssBtn.onclick=()=>openStillShareModal({title:'Training Complete!',subtitle:steps+' steps · '+mins+' min',xp:gainedXP,streak:getStreak()});
   // 明日への予告＋デイリーチェスト報酬（ツァイガルニク効果で翌日の復帰率を上げる）
   setTimeout(()=>openDailyChest(),650);
 }
@@ -5199,6 +5204,7 @@ function weekXPChartHTML(){
       <div style="font-size:var(--text-xs);color:var(--text-muted)">${total} XP</div>
     </div>
     <div style="display:flex;gap:6px;align-items:flex-end">${bars}</div>
+    <button class="btn btn-secondary btn-block" style="margin-top:12px" id="wrapped-share-btn">${ICONS.star} 今週のWrappedをシェア</button>
   </div>`;
 }
 function weeklyGoalHTML(){
@@ -6218,7 +6224,7 @@ function shToggleRecord(p){
       stream.getTracks().forEach(t=>t.stop());
       const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
       if(shRecState&&shRecState.url)URL.revokeObjectURL(shRecState.url);
-      shRecState={recording:false,url:URL.createObjectURL(blob)};
+      shRecState={recording:false,url:URL.createObjectURL(blob),blob,phraseEn:p.en};
       renderShRecordControls(p);sfx('tap');
     };
     recorder.start();
@@ -6232,8 +6238,9 @@ function renderShRecordControls(p){
   if(shRecState&&shRecState.recording){
     slot.innerHTML=`<button class="btn btn-gold mic-active" id="sh-rec-btn" aria-label="録音を停止">${ICONS.mic} 停止</button><div class="shadow-msg" id="sh-rec-msg" style="width:100%;margin-top:2px">録音中... もう一度押すと停止します</div>`;
   }else if(shRecState&&shRecState.url){
-    slot.innerHTML=`<button class="btn btn-secondary" id="sh-rec-play" aria-label="自分の録音を聞く">${ICONS.play} 自分の発音を聞く</button><button class="btn btn-secondary" id="sh-rec-btn" aria-label="録音し直す">${ICONS.mic} 録音し直す</button><div class="shadow-msg" id="sh-rec-msg" style="width:100%;margin-top:2px"></div>`;
+    slot.innerHTML=`<button class="btn btn-secondary" id="sh-rec-play" aria-label="自分の録音を聞く">${ICONS.play} 自分の発音を聞く</button><button class="btn btn-secondary" id="sh-rec-btn" aria-label="録音し直す">${ICONS.mic} 録音し直す</button><button class="btn btn-secondary" id="sh-rec-share" aria-label="発音をシェア">${ICONS.star} シェア</button><div class="shadow-msg" id="sh-rec-msg" style="width:100%;margin-top:2px"></div>`;
     document.getElementById('sh-rec-play').onclick=()=>new Audio(shRecState.url).play();
+    document.getElementById('sh-rec-share').onclick=()=>shareShRecording();
   }else{
     slot.innerHTML=`<button class="btn btn-secondary" id="sh-rec-btn" aria-label="自分の発音を録音">${ICONS.mic} 録音する</button><div class="shadow-msg" id="sh-rec-msg" style="width:100%;margin-top:2px">ネイティブ音声のあと、自分の発音を録音して聞き比べできます。</div>`;
   }
@@ -6247,6 +6254,23 @@ function stopShRecording(){
     if(shRecState.url){URL.revokeObjectURL(shRecState.url)}
   }
   shRecState=null;
+}
+async function shareShRecording(){
+  if(!shRecState||!shRecState.blob)return;
+  const blob=shRecState.blob;
+  const ext=(blob.type||'').includes('mp4')?'m4a':'webm';
+  try{
+    if(navigator.share){
+      const file=new File([blob],'sparkle-pronunciation.'+ext,{type:blob.type||'audio/webm'});
+      if(!(navigator.canShare&&!navigator.canShare({files:[file]}))){
+        await navigator.share({files:[file],title:'Sparkle',text:'自分の発音を録ってみた：'+(shRecState.phraseEn||'')});
+        return;
+      }
+    }
+  }catch(e){/* share cancelled or failed, fall through to download */}
+  const a=document.createElement('a');
+  a.href=shRecState.url;a.download='sparkle-pronunciation.'+ext;
+  document.body.appendChild(a);a.click();a.remove();
 }
 function loopShadow(p){
   stopShLoop();let n=0;
@@ -6382,6 +6406,8 @@ function renderProfile(){
       <button class="btn btn-gold btn-block" style="margin-top:8px" id="install-btn" aria-label="ホーム画面に追加">${ICONS.globe} ホーム画面に追加</button>
       <div style="font-size:var(--text-xs);color:var(--text-muted);text-align:center;margin-top:8px;line-height:1.6">iOS: Safariの「共有」→「ホーム画面に追加」<br>Android: メニューから「アプリをインストール」</div>`;
     bindWeaknessRows();bindWeeklyGoalCard();
+    const wrappedBtn=document.getElementById('wrapped-share-btn');
+    if(wrappedBtn)wrappedBtn.onclick=()=>openWrappedModal();
     const mt=document.getElementById('mute-toggle');
     if(mt)mt.onclick=()=>{const cur=localStorage.getItem('sparkle_mute')==='1';localStorage.setItem('sparkle_mute',cur?'0':'1');document.getElementById('mute-label').textContent=cur?'効果音: ON':'効果音: OFF';if(!cur)sfx('tap')};
     const ib=document.getElementById('install-btn');
@@ -6556,6 +6582,65 @@ function generateClearVideoBlob(opts,durationMs,onProgress){
     }catch(e){reject(e)}
   });
 }
+function generateStillCardBlob(opts){
+  // 動画版(generateClearVideoBlob)より軽い、即時の静止画版。同じdrawClearCardFrame()をt=1(完成状態)で1回描くだけ。
+  return new Promise((resolve,reject)=>{
+    try{
+      const W=720,H=1280;
+      const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+      const ctx=cv.getContext('2d');
+      opts._seedT=Date.now();
+      drawClearCardFrame(ctx,W,H,1,opts);
+      cv.toBlob(b=>b?resolve(b):reject(new Error('画像の生成に失敗しました')),'image/png');
+    }catch(e){reject(e)}
+  });
+}
+function openStillShareModal(opts){
+  const m=document.createElement('div');m.className='modal-back';m.id='still-share-modal';
+  m.innerHTML=`<div class="modal" style="text-align:center;max-width:340px">
+    <div style="font-size:var(--text-lg);font-weight:800;margin-bottom:10px">画像を作成中…</div>
+    <div id="still-share-host" style="background:#0002;border-radius:16px;overflow:hidden;min-height:200px;display:flex;align-items:center;justify-content:center;color:#fff8">${ICONS.star}</div>
+    <div id="ss-actions" style="display:none;gap:8px;flex-direction:column;margin-top:12px"></div>
+    <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="document.getElementById('still-share-modal').remove()">閉じる</button>
+  </div>`;
+  document.body.appendChild(m);
+  m.onclick=e=>{if(e.target===m)m.remove()};
+  if(window.gsap&&!PREF_REDUCED)gsap.fromTo(m.querySelector('.modal'),{scale:.9,opacity:0},{scale:1,opacity:1,duration:.35,ease:'back.out(1.6)'});
+  generateStillCardBlob(opts).then(blob=>{
+    const url=URL.createObjectURL(blob);
+    const host=document.getElementById('still-share-host');
+    if(host){
+      const img=document.createElement('img');
+      img.src=url;img.style.width='100%';img.style.display='block';img.style.borderRadius='16px';
+      host.innerHTML='';host.appendChild(img);
+    }
+    const title=document.querySelector('#still-share-modal .modal > div');
+    if(title)title.textContent='完成！家族や友達に送ってみよう';
+    const actions=document.getElementById('ss-actions');
+    if(actions){
+      actions.style.display='flex';
+      const dlBtn=document.createElement('a');
+      dlBtn.className='btn btn-gold btn-block';dlBtn.textContent='ダウンロード';
+      dlBtn.href=url;dlBtn.download='sparkle-today.png';
+      actions.appendChild(dlBtn);
+      if(navigator.share){
+        const shareBtn=document.createElement('button');
+        shareBtn.className='btn btn-primary btn-block';shareBtn.textContent='シェア';
+        shareBtn.onclick=async()=>{
+          try{
+            const file=new File([blob],'sparkle-today.png',{type:'image/png'});
+            if(navigator.canShare&&!navigator.canShare({files:[file]})){window.open(url,'_blank');return}
+            await navigator.share({files:[file],title:'Sparkle',text:opts.title||'今日のSparkle記録'});
+          }catch(e){/* share cancelled */}
+        };
+        actions.appendChild(shareBtn);
+      }
+    }
+  }).catch(e=>{
+    const host=document.getElementById('still-share-host');
+    if(host)host.textContent='作成に失敗しました：'+(e&&e.message?e.message:'不明なエラー');
+  });
+}
 function openClearVideoModal(opts){
   const m=document.createElement('div');m.className='modal-back';m.id='clear-video-modal';
   m.innerHTML=`<div class="modal" style="text-align:center;max-width:340px">
@@ -6710,6 +6795,100 @@ function openDiagnosisShareModal(res){
     }
   }).catch(e=>{
     const host=document.getElementById('diag-share-host');
+    if(host)host.textContent='作成に失敗しました：'+(e&&e.message?e.message:'不明なエラー');
+  });
+}
+
+/* ========== 週次Wrapped（Spotify Wrapped的な週間振り返りシェアカード） ========== */
+function weeklyWrappedStats(){
+  const week=weekXPData();
+  const totalXP=week.reduce((s,d)=>s+d.xp,0);
+  const activeDays=week.filter(d=>d.xp>0).length;
+  const best=week.reduce((a,b)=>(b.xp>a.xp?b:a),week[0]);
+  const citiesTotal=CITY_ROTATION.filter(c=>(CITY_STORIES[c.key]||[]).some(s=>storyDone(s.id))).length;
+  return{totalXP,activeDays,bestDay:best.day,bestXP:best.xp,streak:getStreak(),citiesTotal,citiesAll:CITY_ROTATION.length};
+}
+async function generateWrappedBlob(){
+  const stats=weeklyWrappedStats();
+  const W=720,H=1280;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#402310');g.addColorStop(0.5,'#8C491A');g.addColorStop(1,'#C67139');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  [[0.12,0.08],[0.85,0.12],[0.12,0.9],[0.85,0.92],[0.5,0.05]].forEach(p=>drawStar(ctx,p[0]*W,p[1]*H,10,'rgba(255,255,255,.5)'));
+  ctx.textAlign='center';
+  ctx.font='500 26px Figtree, sans-serif';ctx.fillStyle='rgba(255,255,255,.75)';
+  ctx.fillText('THIS WEEK IN',W/2,110);
+  ctx.font='700 60px Caprasimo, cursive';ctx.fillStyle='#FFD6A6';
+  ctx.fillText('Sparkle',W/2,182);
+  try{
+    const avImg=await svgToImage(avatarSVG(PROG.avatar||defaultAvatarCfg(),200));
+    ctx.drawImage(avImg,W/2-100,220,200,200);
+  }catch(e){/* avatar draw failed, continue without it */}
+  const rows=[
+    [stats.totalXP+' XP','今週の合計'],
+    [stats.activeDays+' / 7 日','学習した日数'],
+    ['Day '+stats.streak,'現在のストリーク'],
+    [stats.citiesTotal+' / '+stats.citiesAll,'訪れた都市'],
+  ];
+  let y=560;
+  rows.forEach(([big,label])=>{
+    ctx.font='800 56px Figtree, sans-serif';ctx.fillStyle='#fff';
+    ctx.fillText(big,W/2,y);
+    ctx.font='500 22px "Noto Sans JP", sans-serif';ctx.fillStyle='rgba(255,255,255,.7)';
+    ctx.fillText(label,W/2,y+34);
+    y+=138;
+  });
+  ctx.font='600 24px "Noto Sans JP", sans-serif';ctx.fillStyle='#FFD6A6';
+  ctx.fillText(stats.bestDay+'曜日が今週のベストデー（+'+stats.bestXP+' XP）',W/2,y+16);
+  ctx.font='400 18px Figtree, sans-serif';ctx.fillStyle='rgba(255,255,255,.6)';
+  ctx.fillText('English becomes your adventure.',W/2,1220);
+  return new Promise(resolve=>cv.toBlob(b=>resolve(b),'image/png'));
+}
+function openWrappedModal(){
+  const m=document.createElement('div');m.className='modal-back';m.id='wrapped-modal';
+  m.innerHTML=`<div class="modal" style="text-align:center;max-width:340px">
+    <div style="font-size:var(--text-lg);font-weight:800;margin-bottom:10px">今週のWrappedを作成中…</div>
+    <div id="wrapped-host" style="background:#0002;border-radius:16px;overflow:hidden;min-height:200px;display:flex;align-items:center;justify-content:center;color:#fff8">${ICONS.star}</div>
+    <div id="wr-actions" style="display:none;gap:8px;flex-direction:column;margin-top:12px"></div>
+    <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="document.getElementById('wrapped-modal').remove()">閉じる</button>
+  </div>`;
+  document.body.appendChild(m);
+  m.onclick=e=>{if(e.target===m)m.remove()};
+  if(window.gsap&&!PREF_REDUCED)gsap.fromTo(m.querySelector('.modal'),{scale:.9,opacity:0},{scale:1,opacity:1,duration:.35,ease:'back.out(1.6)'});
+  generateWrappedBlob().then(blob=>{
+    const url=URL.createObjectURL(blob);
+    const host=document.getElementById('wrapped-host');
+    if(host){
+      const img=document.createElement('img');
+      img.src=url;img.style.width='100%';img.style.display='block';img.style.borderRadius='16px';
+      host.innerHTML='';host.appendChild(img);
+    }
+    const title=document.querySelector('#wrapped-modal .modal > div');
+    if(title)title.textContent='完成！';
+    const actions=document.getElementById('wr-actions');
+    if(actions){
+      actions.style.display='flex';
+      const dlBtn=document.createElement('a');
+      dlBtn.className='btn btn-gold btn-block';dlBtn.textContent='ダウンロード';
+      dlBtn.href=url;dlBtn.download='sparkle-wrapped.png';
+      actions.appendChild(dlBtn);
+      if(navigator.share){
+        const shareBtn=document.createElement('button');
+        shareBtn.className='btn btn-primary btn-block';shareBtn.textContent='SNSでシェア';
+        shareBtn.onclick=async()=>{
+          try{
+            const file=new File([blob],'sparkle-wrapped.png',{type:'image/png'});
+            if(navigator.canShare&&!navigator.canShare({files:[file]})){window.open(url,'_blank');return}
+            await navigator.share({files:[file],title:'Sparkle Wrapped',text:'今週のSparkle記録'});
+          }catch(e){/* share cancelled */}
+        };
+        actions.appendChild(shareBtn);
+      }
+    }
+  }).catch(e=>{
+    const host=document.getElementById('wrapped-host');
     if(host)host.textContent='作成に失敗しました：'+(e&&e.message?e.message:'不明なエラー');
   });
 }
