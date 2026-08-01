@@ -1400,7 +1400,7 @@ const SCENARIOS = {
 };
 
 /* ========== CONFIG ========== */
-const XP_TABLE={phrase_view:2,phrase_bookmark:5,shadowing_attempt:10,shadowing_high_score:20,conv_complete:30,quiz_perfect:50,streak_bonus:15};
+const XP_TABLE={phrase_view:2,phrase_bookmark:5,shadowing_attempt:10,shadowing_high_score:20,conv_complete:30,quiz_perfect:50,streak_bonus:15,story_natural:15};
 const BADGES=[
   {id:'first_phrase',icon:'award',name:'First Step',nameJa:'初めの一歩',cond:'フレーズを初めて見た'},
   {id:'airport_clear',icon:'plane',name:'Airport Master',nameJa:'空港マスター',cond:'空港シナリオ全会話クリア'},
@@ -1980,8 +1980,11 @@ function renderDaySessionComplete(){
       <div class="result-msg">お疲れさまでした。${steps}ステップ・約${mins}分・+${gainedXP}XP。<br>この毎日の積み重ねが、確実にスコアになります。また明日、同じ時間に会いましょう。</div>
       ${todayGrowthHTML()}
       <button class="btn btn-gold btn-block" style="margin-top:12px" onclick="go('home')">Home ${ICONS.arrowRight}</button>
+      <button class="btn btn-secondary btn-block" style="margin-top:8px" id="cv-open-day">${ICONS.play||'🎬'} クリア動画で振り返る</button>
     </div>`;
   anim('.result-card',{opacity:0,y:12},{opacity:1,y:0,duration:0.4,ease:'power2.out'});
+  const cvBtn=document.getElementById('cv-open-day');
+  if(cvBtn)cvBtn.onclick=()=>openClearVideoModal({title:'Training Complete!',subtitle:steps+' steps · '+mins+' min',xp:gainedXP,streak:getStreak()});
   // 明日への予告＋デイリーチェスト報酬（ツァイガルニク効果で翌日の復帰率を上げる）
   setTimeout(()=>openDailyChest(),650);
 }
@@ -2919,6 +2922,10 @@ function sparkFallbackSVG(){
 }
 /* ========== TRAVEL POSTCARDS ========== */
 const CITY_SILHOUETTES={
+  // Hawaii - Diamond Head + palm trees
+  hawaii:`<svg viewBox="0 0 400 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><g fill="#0a0725" opacity=".92"><rect x="0" y="72" width="400" height="18"/><path d="M60 90 L90 40 L150 30 L200 55 L215 90 Z"/><rect x="20" y="58" width="22" height="32"/><rect x="230" y="60" width="20" height="30"/><rect x="255" y="52" width="18" height="38"/><rect x="278" y="62" width="24" height="28"/><rect x="308" y="55" width="18" height="35"/><rect x="332" y="63" width="22" height="27"/><rect x="360" y="58" width="18" height="32"/></g><g fill="#1a5c3a" opacity=".9"><path d="M40 90 L40 48 Q30 44 24 34 Q34 40 40 40 Q40 30 34 18 Q46 26 44 40 Q50 34 60 32 Q52 42 44 46 L46 90 Z"/><path d="M400 90 L400 50 Q392 46 387 36 Q396 42 400 42 Q400 32 395 22 Q405 30 403 42 Q408 36 396 34 Q390 44 402 48 L402 90 Z"/></g><g fill="rgba(255,220,120,.7)"><rect x="26" y="65" width="3" height="3"/><rect x="236" y="66" width="3" height="3"/><rect x="260" y="58" width="2" height="3"/><rect x="284" y="68" width="3" height="3"/><rect x="314" y="60" width="2" height="3"/><rect x="366" y="64" width="3" height="3"/></g></svg>`,
+  // Singapore - Marina Bay Sands
+  singapore:`<svg viewBox="0 0 400 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><g fill="#0a0725" opacity=".92"><rect x="0" y="70" width="400" height="20"/><rect x="10" y="50" width="16" height="40"/><rect x="34" y="58" width="20" height="32"/><rect x="62" y="42" width="16" height="48"/><rect x="86" y="55" width="20" height="35"/><g><rect x="130" y="30" width="14" height="55"/><rect x="150" y="24" width="14" height="61"/><rect x="170" y="30" width="14" height="55"/><path d="M126 30 Q157 8 188 30 L184 40 Q157 22 130 40 Z"/></g><rect x="205" y="55" width="18" height="35"/><rect x="230" y="45" width="20" height="45"/><rect x="258" y="60" width="22" height="30"/><rect x="288" y="50" width="16" height="40"/><path d="M320 90 L320 65 Q320 55 330 55 Q340 55 340 65 L340 90 Z"/><rect x="350" y="58" width="18" height="32"/><rect x="376" y="62" width="16" height="28"/></g><g fill="rgba(255,220,120,.7)"><rect x="16" y="58" width="2" height="3"/><rect x="40" y="65" width="3" height="3"/><rect x="68" y="50" width="2" height="3"/><rect x="136" y="45" width="2" height="4"/><rect x="156" y="40" width="2" height="4"/><rect x="176" y="45" width="2" height="4"/><rect x="211" y="62" width="2" height="3"/><rect x="356" y="65" width="3" height="3"/></g></svg>`,
   // Sunday - Paris (Eiffel)
   paris:`<svg viewBox="0 0 400 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><g fill="#0a0725" opacity=".92"><rect x="0" y="70" width="400" height="20"/><rect x="20" y="55" width="30" height="35"/><rect x="55" y="45" width="18" height="45"/><rect x="80" y="60" width="35" height="30"/><rect x="120" y="50" width="22" height="40"/><rect x="150" y="65" width="28" height="25"/><path d="M195 90 L200 25 L205 90 Z"/><path d="M188 90 L200 5 L212 90 Z"/><rect x="197" y="40" width="6" height="4"/><rect x="196" y="55" width="8" height="3"/><rect x="220" y="58" width="24" height="32"/><rect x="248" y="48" width="20" height="42"/><rect x="272" y="62" width="30" height="28"/><rect x="305" y="52" width="18" height="38"/><rect x="325" y="60" width="26" height="30"/><rect x="355" y="45" width="20" height="45"/><rect x="378" y="65" width="22" height="25"/></g><g fill="rgba(255,220,120,.7)"><rect x="26" y="62" width="3" height="3"/><rect x="35" y="70" width="3" height="3"/><rect x="60" y="58" width="2" height="3"/><rect x="90" y="70" width="3" height="3"/><rect x="130" y="65" width="2" height="3"/><rect x="225" y="70" width="3" height="3"/><rect x="253" y="62" width="3" height="3"/><rect x="280" y="72" width="3" height="3"/><rect x="360" y="60" width="3" height="3"/></g></svg>`,
   // Monday - New York
@@ -2937,6 +2944,130 @@ const CITY_SILHOUETTES={
 /* ========== CITY STORIES ========== */
 // Each city: 2 mini-stories with local flavor. Uses same conv turn format.
 const CITY_STORIES={
+  hawaii:[
+    {id:'hawaii_shaveice',title:'Shave Ice Stand',titleJa:'シェイブアイス屋台で',scene:'📍 Beach stand in Waikiki',color:'#FF6F59',char:{name:'Kai',role:'Stand Owner',origin:'Honolulu, HI',avatar:'K',color:'#FF6F59'},estMin:3,turns:[
+      {who:'char',en:"Aloha! First time trying shave ice?",ja:"アロハ！シェイブアイスは初めて？"},
+      {who:'user',choices:[
+        {en:"Aloha! Yes, first time. What flavors do you have?",ja:"アロハ！はい、初めてです。フレーバーは何がありますか？",q:'perfect',fb:"完璧！「Aloha」を返すだけで一気に距離が縮まります。ハワイの合言葉です。"},
+        {en:"Yes, first time. Flavors?",ja:"はい、初めてです。フレーバーは？",q:'ok',fb:"通じます。「What flavors do you have?」と最後まで言うとより丁寧です。"},
+        {en:"First time. What is this?",ja:"初めて。これは何？",q:'ng',fb:"「Aloha! What is shave ice?」と挨拶から入りましょう。ハワイでは特に大切です。"}
+      ]},
+      {who:'char',en:"We've got mango, lilikoi, and rainbow. Want ice cream at the bottom too?",ja:"マンゴー、リリコイ（パッションフルーツ）、レインボーがあるよ。下にアイスクリームも入れる？"},
+      {who:'user',choices:[
+        {en:"Rainbow, please! And yes, ice cream at the bottom sounds great.",ja:"レインボーでお願いします！アイスクリーム入りもいいですね。",q:'perfect',fb:"完璧！好みをはっきり伝えつつ、相手の提案にも乗れています。"},
+        {en:"Rainbow please.",ja:"レインボーで。",q:'ok',fb:"通じます。アイスクリームの提案には「Yes, please」か「No, thanks」で答えるとさらに自然。"},
+        {en:"That one.",ja:"それ。",q:'ng',fb:"「Rainbow, please.」とフレーバー名をはっきり伝えましょう。"}
+      ]},
+      {who:'char',en:"Here you go! That's $6. Enjoy the beach!",ja:"はいどうぞ！6ドルです。ビーチを楽しんでね！"},
+      {who:'user',choices:[
+        {en:"Mahalo! This looks amazing. Have a great day!",ja:"マハロ（ありがとう）！最高に美味しそう。良い一日を！",q:'perfect',fb:"「Mahalo」を使えると現地の人がとても喜びます。旅の一言はこういう場面で活きます。"},
+        {en:"Thanks!",ja:"ありがとう！",q:'ok',fb:"通じます。「Mahalo!」の一言を足すとハワイらしさが出ます。"},
+        {en:"OK.",ja:"はい。",q:'ng',fb:"「Thank you! Have a good one!」と気持ちよく返しましょう。"}
+      ]}
+    ]},
+    {id:'hawaii_luau',title:'Luau Check-in',titleJa:'ルアウ（宴）の受付で',scene:'📍 Luau entrance at sunset',color:'#2EC4B6',char:{name:'Malia',role:'Host',origin:'Oahu, HI',avatar:'M',color:'#2EC4B6'},estMin:3,turns:[
+      {who:'char',en:"Aloha! Welcome. Do you have a reservation?",ja:"アロハ！ようこそ。ご予約はお持ちですか？"},
+      {who:'user',choices:[
+        {en:"Aloha! Yes, under the name Tanaka, party of two.",ja:"アロハ！はい、田中の名前で2名で予約しています。",q:'perfect',fb:"完璧！名前と人数を一度に伝えられると受付がとてもスムーズです。"},
+        {en:"Yes, Tanaka.",ja:"はい、田中です。",q:'ok',fb:"通じます。「party of two」と人数も添えるとより親切です。"},
+        {en:"Reservation, yes.",ja:"予約、はい。",q:'ng',fb:"「Yes, under Tanaka.」と名前を伝えましょう。"}
+      ]},
+      {who:'char',en:"Great, found it! Do you have any food allergies we should know about?",ja:"見つかりました！食物アレルギーはありますか？"},
+      {who:'user',choices:[
+        {en:"No allergies, but my son doesn't like spicy food.",ja:"アレルギーはありませんが、息子が辛い物が苦手です。",q:'perfect',fb:"完璧！アレルギーだけでなく好みまで伝えられると当日困りません。"},
+        {en:"No allergies.",ja:"アレルギーはありません。",q:'ok',fb:"通じます。聞かれたことに正しく答えられています。"},
+        {en:"No.",ja:"いいえ。",q:'ng',fb:"「No allergies.」のように一言足すと誤解がありません。"}
+      ]},
+      {who:'char',en:"Perfect. Here are your leis — the show starts in 20 minutes!",ja:"完璧です。こちらレイをどうぞ — ショーは20分後に始まります！"},
+      {who:'user',choices:[
+        {en:"Beautiful, thank you! Where should we sit?",ja:"素敵、ありがとうございます！どこに座ればいいですか？",q:'perfect',fb:"感謝と次の行動確認をセットで聞けています。旅先で迷わないための鉄板の聞き方。"},
+        {en:"Thank you.",ja:"ありがとう。",q:'ok',fb:"通じます。「Where should we sit?」も聞けるとスムーズです。"},
+        {en:"OK.",ja:"はい。",q:'ng',fb:"「Thank you! Where do we sit?」と一言添えましょう。"}
+      ]}
+    ]},
+    {id:'hawaii_surf',title:'Surf Lesson Sign-up',titleJa:'サーフレッスンの申し込み',scene:'📍 Surf shack on Waikiki Beach',color:'#FFC857',char:{name:'Josh',role:'Surf Instructor',origin:'North Shore, HI',avatar:'J',color:'#FFC857'},estMin:3,turns:[
+      {who:'char',en:"Hey! You looking to try surfing today?",ja:"やあ！今日サーフィンに挑戦してみる？"},
+      {who:'user',choices:[
+        {en:"Yes! I've never surfed before — is that OK?",ja:"はい！サーフィンは未経験なんですが大丈夫ですか？",q:'perfect',fb:"完璧！初心者であることを先に伝えると、指導者が合わせてくれます。"},
+        {en:"Yes, I'm a beginner.",ja:"はい、初心者です。",q:'ok',fb:"通じます。「Is that OK?」と確認するとさらに丁寧です。"},
+        {en:"Surf, yes.",ja:"サーフィン、はい。",q:'ng',fb:"「Yes, I'm a total beginner.」とレベルを伝えましょう。"}
+      ]},
+      {who:'char',en:"No worries, we'll start slow! Group lesson or private?",ja:"心配ないよ、ゆっくり始めよう！グループレッスンとプライベート、どっちにする？"},
+      {who:'user',choices:[
+        {en:"Group is fine. How much does it cost?",ja:"グループで大丈夫です。料金はいくらですか？",q:'perfect',fb:"希望を伝えつつ料金も確認できています。実用的な会話の型です。"},
+        {en:"Group, please.",ja:"グループで。",q:'ok',fb:"通じます。「How much?」も続けて聞けるとより実用的です。"},
+        {en:"Group.",ja:"グループ。",q:'ng',fb:"「Group, please. How much is it?」まで伝えましょう。"}
+      ]},
+      {who:'char',en:"That'll be $80 for an hour, board included. Ready to grab a board?",ja:"1時間80ドル、ボード込みだよ。ボードを取りに行く準備はいい？"},
+      {who:'user',choices:[
+        {en:"Sounds good, let's go! I'm a little nervous, though.",ja:"いいですね、行きましょう！ちょっと緊張してますけど。",q:'perfect',fb:"完璧！正直な気持ちを伝えると相手も配慮してくれます。旅先の会話は完璧より正直さが効きます。"},
+        {en:"Yes, let's go.",ja:"はい、行きましょう。",q:'ok',fb:"通じます。テンポよく答えられています。"},
+        {en:"OK go.",ja:"はい行く。",q:'ng',fb:"「OK, let's go!」のように自然な形にしましょう。"}
+      ]}
+    ]}
+  ],
+  singapore:[
+    {id:'singapore_hawker',title:'Hawker Centre Order',titleJa:'ホーカーセンターで注文',scene:'📍 Maxwell Food Centre',color:'#E63946',char:{name:'Mrs. Lim',role:'Stall Owner',origin:'Singapore',avatar:'L',color:'#E63946'},estMin:3,turns:[
+      {who:'char',en:"Hello! What would you like — chicken rice or laksa?",ja:"いらっしゃい！チキンライスとラクサ、どちらにする？"},
+      {who:'user',choices:[
+        {en:"Chicken rice, please. Is it spicy?",ja:"チキンライスをお願いします。辛いですか？",q:'perfect',fb:"完璧！注文と確認を一度に伝えられています。屋台では会話がテンポよく進むので効率的です。"},
+        {en:"Chicken rice please.",ja:"チキンライスで。",q:'ok',fb:"通じます。「Is it spicy?」も聞けると安心です。"},
+        {en:"Chicken.",ja:"チキン。",q:'ng',fb:"「Chicken rice, please.」とメニュー名を伝えましょう。"}
+      ]},
+      {who:'char',en:"Not spicy at all! Eat here or take away?",ja:"全然辛くないよ！ここで食べる？持ち帰り？"},
+      {who:'user',choices:[
+        {en:"Eat here, please. And a cold drink too?",ja:"ここで食べます。それと冷たい飲み物もお願いできますか？",q:'perfect',fb:"完璧！追加注文まで自然に続けられています。屋台の実践会話として理想的です。"},
+        {en:"Eat here.",ja:"ここで食べます。",q:'ok',fb:"通じます。「Eat here, please.」の方が丁寧です。"},
+        {en:"Here.",ja:"ここ。",q:'ng',fb:"「Eat here, please.」と伝えましょう。"}
+      ]},
+      {who:'char',en:"Sure, iced tea coming up. That's $6 total. Cash only, ya!",ja:"了解、アイスティー出すね。全部で6ドル。現金のみだからね！"},
+      {who:'user',choices:[
+        {en:"No problem, here's cash. Thank you, it smells amazing!",ja:"大丈夫です、こちらお金です。ありがとう、すごくいい匂い！",q:'perfect',fb:"完璧！感想を一言添えると屋台のおばちゃんとの距離がぐっと縮まります。"},
+        {en:"OK, here.",ja:"はい、どうぞ。",q:'ok',fb:"通じます。「Thank you!」を添えるとより自然です。"},
+        {en:"Cash.",ja:"現金。",q:'ng',fb:"「OK, here's cash. Thank you!」と伝えましょう。"}
+      ]}
+    ]},
+    {id:'singapore_mrt',title:'MRT Directions',titleJa:'MRT（地下鉄）で道を聞く',scene:'📍 Bugis MRT Station',color:'#06AED5',char:{name:'Farid',role:'Station Staff',origin:'Singapore',avatar:'F',color:'#06AED5'},estMin:3,turns:[
+      {who:'char',en:"Hi there, how can I help you?",ja:"こんにちは、どうしましたか？"},
+      {who:'user',choices:[
+        {en:"Excuse me, which line goes to Marina Bay Sands?",ja:"すみません、マリーナベイ・サンズに行くにはどの路線ですか？",q:'perfect',fb:"完璧！「Which line goes to ~?」はMRTで一番使う聞き方です。"},
+        {en:"Marina Bay Sands, which line?",ja:"マリーナベイ・サンズ、どの路線？",q:'ok',fb:"通じます。「Excuse me」から始めるとより丁寧です。"},
+        {en:"Marina Bay?",ja:"マリーナベイ？",q:'ng',fb:"「Excuse me, how do I get to Marina Bay Sands?」と聞きましょう。"}
+      ]},
+      {who:'char',en:"Take the Downtown Line to Bayfront, it's about 4 stops. Do you have an EZ-Link card?",ja:"ダウンタウン線でベイフロント駅まで、約4駅です。EZ-Linkカードはお持ちですか？"},
+      {who:'user',choices:[
+        {en:"Not yet — where can I buy one?",ja:"まだ持っていません。どこで買えますか？",q:'perfect',fb:"完璧！状況を伝えつつ次の行動を確認できています。旅先で迷子にならない鉄板の聞き方です。"},
+        {en:"No, where?",ja:"いいえ、どこ？",q:'ok',fb:"通じます。「Not yet, where can I buy one?」の方が自然です。"},
+        {en:"No card.",ja:"カードない。",q:'ng',fb:"「Not yet. Where can I get one?」と伝えましょう。"}
+      ]},
+      {who:'char',en:"Right over there at the machine. It's easy, I can show you!",ja:"あそこの券売機で買えますよ。簡単だから案内しますよ！"},
+      {who:'user',choices:[
+        {en:"That would be great, thank you so much for your help!",ja:"それは助かります、本当にありがとうございます！",q:'perfect',fb:"完璧！助けてもらった時のお礼はしっかり伝えると気持ちがいいですね。"},
+        {en:"Thank you.",ja:"ありがとう。",q:'ok',fb:"通じます。「Thank you so much!」の方がより気持ちが伝わります。"},
+        {en:"OK thanks.",ja:"はいありがとう。",q:'ng',fb:"「Thank you so much for your help!」と伝えましょう。"}
+      ]}
+    ]},
+    {id:'singapore_merlion',title:'Merlion Park Photo',titleJa:'マーライオン公園で写真をお願いする',scene:'📍 Merlion Park, Marina Bay',color:'#F4A261',char:{name:'Aisha',role:'Fellow Tourist',origin:'Singapore',avatar:'A',color:'#F4A261'},estMin:3,turns:[
+      {who:'char',en:"Beautiful view, isn't it? Are you visiting Singapore?",ja:"いい眺めですよね？シンガポールに旅行で来てるんですか？"},
+      {who:'user',choices:[
+        {en:"Yes, it's our first time here! Could you take a photo of us?",ja:"はい、初めて来ました！写真を撮っていただけますか？",q:'perfect',fb:"完璧！雑談から自然に頼み事へつなげられています。声かけの理想形です。"},
+        {en:"Yes, first time. Photo please?",ja:"はい、初めて。写真お願いできますか？",q:'ok',fb:"通じます。「Could you take a photo of us?」の方がより丁寧です。"},
+        {en:"Photo?",ja:"写真？",q:'ng',fb:"「Could you take a photo of us, please?」と伝えましょう。"}
+      ]},
+      {who:'char',en:"Of course! Do you want the Merlion and the Marina Bay Sands in the back?",ja:"もちろん！マーライオンとマリーナベイ・サンズを後ろに入れましょうか？"},
+      {who:'user',choices:[
+        {en:"Yes, please! Both of them, if that's possible.",ja:"はい、お願いします！両方入れられたら嬉しいです。",q:'perfect',fb:"完璧！希望を具体的に伝えられています。写真をお願いする時の理想的な返し方です。"},
+        {en:"Yes, both please.",ja:"はい、両方で。",q:'ok',fb:"通じます。「if that's possible」を添えると柔らかい印象になります。"},
+        {en:"Yes both.",ja:"はい両方。",q:'ng',fb:"「Yes, both please, if you can.」のように丁寧に伝えましょう。"}
+      ]},
+      {who:'char',en:"Got it! Say cheese... perfect shot! Here you go.",ja:"撮れました！はい、チーズ…完璧な一枚！どうぞ。"},
+      {who:'user',choices:[
+        {en:"Thank you so much! Would you like one too? I can take it for you.",ja:"本当にありがとうございます！あなたも撮りましょうか？私が撮りますよ。",q:'perfect',fb:"完璧！お礼だけでなくお返しを申し出られると、旅先での交流がぐっと豊かになります。"},
+        {en:"Thank you very much!",ja:"どうもありがとうございます！",q:'ok',fb:"通じます。十分丁寧なお礼です。"},
+        {en:"Thanks.",ja:"どうも。",q:'ng',fb:"「Thank you so much!」としっかり伝えましょう。"}
+      ]}
+    ]}
+  ],
   paris:[
     {id:'paris_bakery',title:'Morning at the Bakery',titleJa:'朝のブーランジェで',scene:'📍 Boulangerie in Le Marais',color:'#F5C84C',char:{name:'Camille',role:'Baker',origin:'Paris, France',avatar:'C',color:'#F5C84C'},estMin:3,turns:[
       {who:'char',en:"Bonjour! What can I get you this morning?",ja:"ボンジュール！今朝は何にしましょう？"},
@@ -3253,16 +3384,24 @@ const CITY_STORIES={
   ],
 };
 
+// 難易度は易→難の「旅の進行順」。ttsLang/ttsRateは発音再生(speak())に反映し、
+// 国ごとにアクセント・速度が変わる疑似ロールプレイ体験を$0(ブラウザ内蔵TTSのみ)で実現する。
 const CITY_ROTATION=[
-  {key:'paris',en:'Paris',ja:'パリ',country:'France',code:'FR'},
-  {key:'nyc',en:'New York',ja:'ニューヨーク',country:'USA',code:'US'},
-  {key:'orlando',en:'Orlando',ja:'オーランド',country:'USA',code:'FL'},
-  {key:'london',en:'London',ja:'ロンドン',country:'UK',code:'UK'},
-  {key:'rome',en:'Rome',ja:'ローマ',country:'Italy',code:'IT'},
-  {key:'bangkok',en:'Bangkok',ja:'バンコク',country:'Thailand',code:'TH'},
-  {key:'sydney',en:'Sydney',ja:'シドニー',country:'Australia',code:'AU'},
+  {key:'hawaii',en:'Honolulu',ja:'ホノルル',country:'USA',code:'HI',difficulty:1,accentNote:'ゆっくり・親切な観光地英語',ttsLang:'en-US',ttsRate:0.92},
+  {key:'singapore',en:'Singapore',ja:'シンガポール',country:'Singapore',code:'SG',difficulty:2,accentNote:'多国籍でクリアな発音',ttsLang:'en-SG',ttsRate:0.98},
+  {key:'orlando',en:'Orlando',ja:'オーランド',country:'USA',code:'FL',difficulty:3,accentNote:'標準的なアメリカ英語（WDW直結）',ttsLang:'en-US',ttsRate:1.0},
+  {key:'paris',en:'Paris',ja:'パリ',country:'France',code:'FR',difficulty:4,accentNote:'丁寧なフランス式の言い回し',ttsLang:'en-US',ttsRate:1.0},
+  {key:'london',en:'London',ja:'ロンドン',country:'UK',code:'UK',difficulty:5,accentNote:'イギリス英語・フォーマル',ttsLang:'en-GB',ttsRate:1.03},
+  {key:'rome',en:'Rome',ja:'ローマ',country:'Italy',code:'IT',difficulty:6,accentNote:'観光地らしい早口',ttsLang:'en-US',ttsRate:1.05},
+  {key:'bangkok',en:'Bangkok',ja:'バンコク',country:'Thailand',code:'TH',difficulty:7,accentNote:'フレンドリーだがテンポ速め',ttsLang:'en-US',ttsRate:1.05},
+  {key:'sydney',en:'Sydney',ja:'シドニー',country:'Australia',code:'AU',difficulty:8,accentNote:'オーストラリア訛り',ttsLang:'en-AU',ttsRate:1.08},
+  {key:'nyc',en:'New York',ja:'ニューヨーク',country:'USA',code:'US',difficulty:9,accentNote:'最速・ビジネスライク',ttsLang:'en-US',ttsRate:1.12},
 ];
-function todaysCity(){return CITY_ROTATION[new Date().getDay()]}
+// 「今日の目的地」＝難易度順で最初に未クリアの都市（直線的な旅の進行）。全クリア後は最終都市に留まる。
+function todaysCity(){
+  const next=CITY_ROTATION.find(c=>(CITY_STORIES[c.key]||[]).some(s=>!storyDone(s.id)));
+  return next||CITY_ROTATION[CITY_ROTATION.length-1];
+}
 function storyDone(id){return (PROG.stories||[]).includes(id)}
 function markStoryDone(id){PROG.stories=PROG.stories||[];if(!PROG.stories.includes(id)){PROG.stories.push(id);PROG.commuteSessions=(PROG.commuteSessions||0)+1;addXP('conv_complete');commit();checkClearBadges();launchConfetti()}}
 function storyCardHTML(cityKey,st){
@@ -3279,7 +3418,7 @@ let storyState=null;
 function openStory(cityKey,storyId){
   const st=(CITY_STORIES[cityKey]||[]).find(s=>s.id===storyId);
   if(!st)return;
-  storyState={st,step:0,history:[]};
+  storyState={st,step:0,history:[],cityKey};
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('screen-review');el.classList.add('active');
   window.scrollTo(0,0);renderStoryStep();
@@ -3287,14 +3426,17 @@ function openStory(cityKey,storyId){
 }
 function renderStoryStep(){
   const el=document.getElementById('screen-review');
-  const {st,step,history}=storyState;
+  const {st,step,history,cityKey}=storyState;
+  const city=CITY_ROTATION.find(c=>c.key===cityKey);
   let html=`<div class="back-row"><button class="icon-btn" onclick="go('home')" aria-label="ストーリーを終了">${ICONS.arrowLeft}</button><h2>${esc(st.title)}</h2></div>
     <div class="char-bar"><div class="avatar" style="background:${st.char.color}">${st.char.avatar}</div>
-    <div><div class="char-name">${esc(st.char.name)}</div><div class="char-role">${esc(st.char.role)} · ${esc(st.char.origin)}</div></div></div>
+    <div><div class="char-name">${esc(st.char.name)}</div><div class="char-role">${esc(st.char.role)} · ${esc(st.char.origin)}</div></div>
+    ${city?`<div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--gold);font-weight:700">難易度 ${city.difficulty}/9</div><div style="font-size:10px;color:var(--text-muted)">${esc(city.accentNote||'')}</div></div>`:''}
+    </div>
     <div class="q-ctx">${esc(st.scene)}</div>
     <div class="chat">`;
-  history.forEach(h=>{
-    if(h.type==='char')html+=`<div class="msg msg-char"><div class="bubble">${esc(h.en)}</div><div class="bubble-ja">${esc(h.ja)}</div></div>`;
+  history.forEach((h,i)=>{
+    if(h.type==='char')html+=`<div class="msg msg-char"><div class="bubble">${esc(h.en)}<button class="icon-btn" data-listen-hi="${i}" aria-label="発音を聞く" style="width:22px;height:22px;margin-left:6px;vertical-align:middle;display:inline-flex">${ICONS.volume||'🔊'}</button></div><div class="bubble-ja">${esc(h.ja)}</div></div>`;
     else html+=`<div class="msg msg-user"><div class="bubble">${esc(h.en)}</div></div>`;
   });
   html+='</div>';
@@ -3309,15 +3451,47 @@ function renderStoryStep(){
     ).join('')+'</div>';
     el.innerHTML=html;
     el.querySelectorAll('[data-si]').forEach(b=>b.onclick=()=>pickStoryChoice(+b.dataset.si));
+    el.querySelectorAll('[data-listen-hi]').forEach(b=>b.onclick=e=>{
+      e.stopPropagation();
+      const h=storyState.history[+b.dataset.listenHi];
+      if(h)speak(h.en,city?city.ttsRate:1,undefined,city?city.ttsLang:'en-US');
+    });
     anim('.chat .msg:last-child',{opacity:0,y:8},{opacity:1,y:0,duration:0.3});
   }else{
-    // Completed
+    // Completed — 「文法の正確さ」ではなく「伝わったか(伝達効率)」を可視化するスコアリング
+    const wasNew=!storyDone(st.id);
     markStoryDone(st.id);
+    const picks=storyState.picks||[];
+    const weight={perfect:100,ok:65,ng:25};
+    const commScore=picks.length?Math.round(picks.reduce((s,q)=>s+(weight[q]||50),0)/picks.length):100;
+    const naturalCount=picks.filter(q=>q==='perfect').length;
+    let commMsg,commColor;
+    if(commScore>=88){commMsg='自分の言葉でしっかり伝えられました！現地の人も大喜びのはずです。';commColor='var(--enchanted)'}
+    else if(commScore>=65){commMsg='ちゃんと通じています。もう一歩、自分の言葉を足せるとさらに自然に。';commColor='var(--gold)'}
+    else{commMsg='最低限は伝わりました。次は単語だけでなく一文で伝える練習をしてみましょう。';commColor='var(--ember)'}
+    let bonusXP=0;
+    if(wasNew&&commScore>=88){bonusXP=XP_TABLE.story_natural;PROG.xp=(PROG.xp||0)+bonusXP;const t=todayStr();PROG.xpDaily=PROG.xpDaily||{};PROG.xpDaily[t]=(PROG.xpDaily[t]||0)+bonusXP;commit()}
     html+=sparkHeroHTML('win')+`<div class="card result-card">
       <div class="result-score">${st.titleJa} 完了！</div>
-      <div class="result-msg">現地の人との会話が自然にできました。この調子で世界のあちこちを旅していきましょう。</div>
-      ${inDaySession()?sessionNavHTML():`<button class="btn btn-gold btn-block" onclick="go('home')">Home ${ICONS.arrowRight}</button>`}</div>`;
+      <div class="result-msg">この調子で世界のあちこちを旅していきましょう。</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px;text-align:left">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:.06em">伝達効率スコア</span>
+          <span style="font-weight:800;color:${commColor};font-size:var(--text-lg)">${commScore}</span>
+        </div>
+        <div style="font-size:var(--text-sm);color:var(--text-secondary)">${esc(commMsg)}</div>
+        ${bonusXP?`<div style="margin-top:8px;font-size:12px;font-weight:700;color:var(--gold)">自力ボーナス +${bonusXP} XP（自分の言葉で伝えられた分の特典）</div>`:''}
+      </div>
+      <button class="btn btn-secondary btn-block" style="margin-top:10px" id="cv-open-story">${ICONS.play||'🎬'} クリア動画で振り返る</button>
+      ${inDaySession()?sessionNavHTML():`<button class="btn btn-gold btn-block" style="margin-top:8px" onclick="go('home')">Home ${ICONS.arrowRight}</button>`}</div>`;
     el.innerHTML=html;
+    const cvBtn=document.getElementById('cv-open-story');
+    if(cvBtn)cvBtn.onclick=()=>openClearVideoModal({title:st.title,subtitle:(city?city.en+' · ':'')+st.titleJa,xp:(wasNew?30+bonusXP:0),streak:getStreak()});
+    el.querySelectorAll('[data-listen-hi]').forEach(b=>b.onclick=e=>{
+      e.stopPropagation();
+      const h=storyState&&storyState.history[+b.dataset.listenHi];
+      if(h)speak(h.en,city?city.ttsRate:1,undefined,city?city.ttsLang:'en-US');
+    });
   }
 }
 function passportHTML(){
@@ -3358,6 +3532,7 @@ function pickStoryChoice(i){
   const {st,step}=storyState;
   const turn=st.turns[step];
   const choice=turn.choices[i];
+  storyState.picks=storyState.picks||[];storyState.picks.push(choice.q);
   const box=document.getElementById('story-choices');
   const btns=box.querySelectorAll('.choice-btn');
   btns.forEach((b,idx)=>{b.disabled=true;if(idx===i)b.classList.add('q-'+choice.q)});
@@ -5146,10 +5321,11 @@ if('speechSynthesis'in window){
   loadVoices();
   speechSynthesis.onvoiceschanged=loadVoices;
 }
-function pickVoice(pref){
+function pickVoice(pref,targetLang){
   // pref: 'female' | 'male' | undefined(お任せ)
+  // targetLang: 'en-GB'/'en-AU'/'en-SG'等を指定すると、その地域アクセントの声を優先(端末に無ければen-USへ自動フォールバック)
   if(!_voices.length)loadVoices();
-  const en=_voices.filter(v=>/^en(-|_)?(US|GB|AU)?/i.test(v.lang));
+  const en=_voices.filter(v=>/^en(-|_)?(US|GB|AU|IN|SG)?/i.test(v.lang));
   const pool=en.length?en:_voices;
   if(!pool.length)return null;
   const femaleHints=/female|samantha|zira|jenny|aria|susan|karen|moira|tessa|victoria|google us english/i;
@@ -5158,7 +5334,8 @@ function pickVoice(pref){
   const score=v=>{
     let s=0;
     if(natural.test(v.name))s+=5;
-    if(/en-US/i.test(v.lang))s+=3;
+    if(targetLang&&v.lang&&v.lang.toLowerCase()===targetLang.toLowerCase())s+=6;
+    else if(!targetLang&&/en-US/i.test(v.lang))s+=3;
     if(pref==='female'&&femaleHints.test(v.name))s+=4;
     if(pref==='male'&&maleHints.test(v.name))s+=4;
     if(v.localService)s+=1;
@@ -5167,17 +5344,17 @@ function pickVoice(pref){
   return pool.slice().sort((a,b)=>score(b)-score(a))[0]||pool[0];
 }
 function listenRate(base){return (base||0.92)*(PROG.listenSpeed||1)}
-function speak(t,rate,pref){
+function speak(t,rate,pref,lang){
   if(!('speechSynthesis'in window))return;
-  const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=listenRate(rate);
-  const v=pickVoice(pref);if(v)u.voice=v;
+  const u=new SpeechSynthesisUtterance(t);u.lang=lang||'en-US';u.rate=listenRate(rate);
+  const v=pickVoice(pref,lang);if(v)u.voice=v;
   speechSynthesis.cancel();speechSynthesis.speak(u);
 }
-function speakQueue(t,rate,pref){
+function speakQueue(t,rate,pref,lang){
   // cancel せずキューに追加（会話を連続再生するため）
   if(!('speechSynthesis'in window))return;
-  const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=listenRate(rate);
-  const v=pickVoice(pref);if(v)u.voice=v;
+  const u=new SpeechSynthesisUtterance(t);u.lang=lang||'en-US';u.rate=listenRate(rate);
+  const v=pickVoice(pref,lang);if(v)u.voice=v;
   speechSynthesis.speak(u);
 }
 function cycleListenSpeed(){
@@ -6001,6 +6178,181 @@ function launchConfetti(){
     P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;p.op-=.008;p.vy+=.06;if(p.op<=0)return;ctx.save();ctx.globalAlpha=Math.max(0,p.op);ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore()});
     if(++f<200)requestAnimationFrame(draw);else{ctx.clearRect(0,0,cv.width,cv.height);cv.style.display='none'}
   })();
+}
+
+/* ========== クリア動画の書き出し(サーバー不要・$0) ==========
+   Canvas+MediaRecorderでアニメーションをその場で録画し、SNSシェア/保存できるようにする。
+   有料LLM/API連携なしで実現できる範囲での「ゲームクリア動画」機能。 */
+function pickVideoMime(){
+  const cands=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+  if(!window.MediaRecorder)return '';
+  for(const m of cands){try{if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))return m}catch(e){}}
+  return '';
+}
+function drawClearCardFrame(ctx,W,H,t,opts){
+  // t: 0→1 の進行度
+  ctx.clearRect(0,0,W,H);
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#F5EAD8');g.addColorStop(0.55,'#F0A06B');g.addColorStop(1,'#C67139');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // 装飾の星
+  ctx.save();ctx.globalAlpha=0.5;
+  const seed=[[0.15,0.12],[0.82,0.18],[0.1,0.42],[0.88,0.5],[0.2,0.85],[0.78,0.82]];
+  seed.forEach((p,i)=>{
+    const tw=(Math.sin(t*6.28*2+i)+1)/2;
+    ctx.globalAlpha=0.25+tw*0.35;
+    drawStar(ctx,p[0]*W,p[1]*H,10+tw*4,'#FFC6A5');
+  });
+  ctx.restore();
+  const ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3);
+  // フェーズ1: Sparkマスコット(0〜0.3で拡大登場)
+  const p1=ease(t/0.3);
+  ctx.save();
+  ctx.translate(W/2,H*0.32);
+  ctx.scale(0.6+0.4*p1,0.6+0.4*p1);
+  ctx.globalAlpha=p1;
+  ctx.fillStyle='#8C491A';
+  ctx.beginPath();ctx.ellipse(0,0,90,100,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#FFD6A6';
+  drawStar(ctx,0,-118,22,'#FFD6A6');
+  ctx.restore();
+  // フェーズ2: タイトル(0.25〜0.55)
+  const p2=ease((t-0.25)/0.3);
+  if(p2>0){
+    ctx.save();ctx.globalAlpha=p2;ctx.textAlign='center';
+    ctx.fillStyle='#402310';
+    ctx.font='700 40px Figtree, sans-serif';
+    ctx.fillText(opts.title||'Training Complete!',W/2,H*0.5-(1-p2)*20);
+    ctx.font='500 24px "Noto Sans JP", sans-serif';
+    ctx.fillStyle='#5c3416';
+    ctx.fillText(opts.subtitle||'',W/2,H*0.5+38-(1-p2)*20);
+    ctx.restore();
+  }
+  // フェーズ3: XP/ストリーク数値(0.5〜0.8)
+  const p3=ease((t-0.5)/0.3);
+  if(p3>0){
+    ctx.save();ctx.globalAlpha=p3;ctx.textAlign='center';
+    const shown=Math.round((opts.xp||0)*Math.min(1,p3*1.3));
+    ctx.font='800 56px Figtree, sans-serif';ctx.fillStyle='#FFD6A6';
+    ctx.fillText('+'+shown+' XP',W/2,H*0.66);
+    if(opts.streak){ctx.font='600 22px "Noto Sans JP", sans-serif';ctx.fillStyle='#402310';ctx.fillText('連続 '+opts.streak+' 日目',W/2,H*0.66+40)}
+    ctx.restore();
+    // 紙吹雪(0.55〜1.0)
+    if(!drawClearCardFrame._P||drawClearCardFrame._seedT!==opts._seedT){
+      drawClearCardFrame._seedT=opts._seedT;
+      drawClearCardFrame._P=Array.from({length:50},()=>({x:Math.random()*W,y:-30-Math.random()*H*0.5,r:Math.random()*5+3,c:['#FFC6A5','#F6A06B','#AEBF92','#fff'][Math.random()*4|0],vy:Math.random()*3+2,rot:Math.random()*360,rv:(Math.random()-.5)*10}));
+    }
+    const conf=drawClearCardFrame._P;
+    const ct=Math.max(0,(t-0.55)/0.45);
+    conf.forEach(p=>{
+      const y=p.y+p.vy*ct*140;const rot=p.rot+p.rv*ct*140;
+      if(y>H+20)return;
+      ctx.save();ctx.translate(p.x,y);ctx.rotate(rot*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore();
+    });
+  }
+  // フェーズ4: ロゴ(0.8〜1.0)
+  const p4=ease((t-0.82)/0.18);
+  if(p4>0){
+    ctx.save();ctx.globalAlpha=p4;ctx.textAlign='center';
+    ctx.font='700 30px Caprasimo, cursive';ctx.fillStyle='#402310';
+    ctx.fillText('Sparkle',W/2,H*0.92);
+    ctx.font='400 15px Figtree, sans-serif';ctx.fillStyle='#5c3416';
+    ctx.fillText('English becomes your adventure.',W/2,H*0.92+22);
+    ctx.restore();
+  }
+}
+function drawStar(ctx,cx,cy,r,color){
+  ctx.save();ctx.translate(cx,cy);ctx.fillStyle=color;ctx.beginPath();
+  for(let i=0;i<5;i++){
+    const a1=(i*4*Math.PI)/5-Math.PI/2;
+    ctx.lineTo(Math.cos(a1)*r,Math.sin(a1)*r);
+    const a2=a1+2*Math.PI/5;
+    ctx.lineTo(Math.cos(a2)*(r*0.42),Math.sin(a2)*(r*0.42));
+  }
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function generateClearVideoBlob(opts,durationMs,onProgress){
+  return new Promise((resolve,reject)=>{
+    try{
+      const W=720,H=1280;
+      const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+      const ctx=cv.getContext('2d');
+      const previewHost=document.getElementById('clear-video-canvas-host');
+      if(previewHost){previewHost.innerHTML='';cv.style.width='100%';cv.style.borderRadius='16px';previewHost.appendChild(cv)}
+      opts._seedT=Date.now();
+      const mime=pickVideoMime();
+      if(!('captureStream'in cv)||!window.MediaRecorder){reject(new Error('この端末/ブラウザは動画書き出しに対応していません'));return}
+      const stream=cv.captureStream(30);
+      const rec=new MediaRecorder(stream,mime?{mimeType:mime}:{});
+      const chunks=[];
+      rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+      rec.onstop=()=>resolve({blob:new Blob(chunks,{type:mime||'video/webm'}),mime:mime||'video/webm'});
+      rec.onerror=e=>reject(e.error||new Error('recording error'));
+      rec.start();
+      const start=performance.now();
+      // requestAnimationFrameはタブが非表示になると完全停止するため、setTimeoutで駆動する
+      // （バックグラウンドではブラウザが間引くが完全には止まらず、復帰時に必ず完了する）
+      (function frame(){
+        const t=(performance.now()-start)/durationMs;
+        drawClearCardFrame(ctx,W,H,Math.min(1,t),opts);
+        onProgress&&onProgress(Math.min(1,t));
+        if(t<1)setTimeout(frame,33);
+        else setTimeout(()=>rec.stop(),150);
+      })();
+    }catch(e){reject(e)}
+  });
+}
+function openClearVideoModal(opts){
+  const m=document.createElement('div');m.className='modal-back';m.id='clear-video-modal';
+  m.innerHTML=`<div class="modal" style="text-align:center;max-width:340px">
+    <div style="font-size:var(--text-lg);font-weight:800;margin-bottom:10px">クリア動画を作成中…</div>
+    <div id="clear-video-canvas-host" style="background:#0002;border-radius:16px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center"></div>
+    <div class="prog" style="margin:14px 0 4px"><div class="prog-fill" id="cv-progress" style="width:0%"></div></div>
+    <div id="cv-status" style="font-size:12px;color:var(--text-muted);margin-bottom:10px">約8秒のクリップを録画しています…</div>
+    <div id="cv-actions" style="display:none;gap:8px;flex-direction:column"></div>
+    <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="document.getElementById('clear-video-modal').remove()">閉じる</button>
+  </div>`;
+  document.body.appendChild(m);
+  m.onclick=e=>{if(e.target===m)m.remove()};
+  if(window.gsap&&!PREF_REDUCED)gsap.fromTo(m.querySelector('.modal'),{scale:.9,opacity:0},{scale:1,opacity:1,duration:.35,ease:'back.out(1.6)'});
+  const DURATION=8000;
+  generateClearVideoBlob(opts,DURATION,p=>{
+    const bar=document.getElementById('cv-progress');if(bar)bar.style.width=Math.round(p*100)+'%';
+  }).then(({blob,mime})=>{
+    const status=document.getElementById('cv-status');if(status)status.textContent='完成！';
+    const url=URL.createObjectURL(blob);
+    const ext=mime.includes('mp4')?'mp4':'webm';
+    const host=document.getElementById('clear-video-canvas-host');
+    if(host){
+      const video=document.createElement('video');
+      video.src=url;video.controls=true;video.autoplay=true;video.loop=true;video.muted=true;video.playsInline=true;
+      video.style.width='100%';video.style.borderRadius='16px';video.style.display='block';
+      host.innerHTML='';host.appendChild(video);
+    }
+    const actions=document.getElementById('cv-actions');
+    if(actions){
+      actions.style.display='flex';
+      const dlBtn=document.createElement('a');
+      dlBtn.className='btn btn-gold btn-block';dlBtn.textContent='ダウンロード';
+      dlBtn.href=url;dlBtn.download='sparkle-clear.'+ext;
+      actions.appendChild(dlBtn);
+      if(navigator.share){
+        const shareBtn=document.createElement('button');
+        shareBtn.className='btn btn-primary btn-block';shareBtn.textContent='SNSでシェア';
+        shareBtn.onclick=async()=>{
+          try{
+            const file=new File([blob],'sparkle-clear.'+ext,{type:mime});
+            if(navigator.canShare&&!navigator.canShare({files:[file]})){window.open(url,'_blank');return}
+            await navigator.share({files:[file],title:'Sparkle',text:opts.title||'Sparkleでの学習記録'});
+          }catch(e){/* share cancelled */}
+        };
+        actions.appendChild(shareBtn);
+      }
+    }
+  }).catch(e=>{
+    const status=document.getElementById('cv-status');
+    if(status)status.textContent='動画の作成に失敗しました：'+(e&&e.message?e.message:'不明なエラー');
+  });
 }
 
 /* ========== DICTATION ========== */
