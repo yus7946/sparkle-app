@@ -1974,7 +1974,6 @@ function renderDaySessionComplete(){
   const mins=Math.max(1,Math.round((Date.now()-daySession.startedAt)/60000));
   const steps=daySession.tasks.length;
   daySession=null;
-  launchConfetti();
   el.innerHTML=`${sparkHeroHTML('win')}
     <div class="card result-card">
       <div class="result-score">今日のトレーニング完了！</div>
@@ -1983,6 +1982,8 @@ function renderDaySessionComplete(){
       <button class="btn btn-gold btn-block" style="margin-top:12px" onclick="go('home')">Home ${ICONS.arrowRight}</button>
     </div>`;
   anim('.result-card',{opacity:0,y:12},{opacity:1,y:0,duration:0.4,ease:'power2.out'});
+  // 明日への予告＋デイリーチェスト報酬（ツァイガルニク効果で翌日の復帰率を上げる）
+  setTimeout(()=>openDailyChest(),650);
 }
 /* ========== 連続正解コンボ ========== */
 let comboCount=0;
