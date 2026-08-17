@@ -1917,6 +1917,7 @@ function renderVocabStep(){
       <div id="vocab-back" style="display:none">
         <div class="vocab-ja">${esc(v.ja)}</div>
         <div class="vocab-ex">${esc(v.ex)}<div class="vocab-ex-ja">${esc(v.exja)}</div></div>
+        ${vocabTravelBridge()[v.id]?`<div class="vocab-bridge" style="margin-top:10px;text-align:left;background:rgba(31,181,133,.1);border:1px solid rgba(31,181,133,.3);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--text-secondary)">${ICONS.plane} この単語は<b>${esc(vocabTravelBridge()[v.id].label)}</b>でそのまま使えます：「${esc(vocabTravelBridge()[v.id].en)}」</div>`:''}
       </div>
       <div class="vocab-hint" id="vocab-hint">タップして意味を確認</div>
     </div>
@@ -2060,7 +2061,8 @@ function renderDaySessionComplete(){
       <div class="result-msg">お疲れさまでした。${steps}ステップ・約${mins}分・+${gainedXP}XP。<br>この毎日の積み重ねが、確実にスコアになります。また明日、同じ時間に会いましょう。</div>
       ${todayGrowthHTML()}
       <button class="btn btn-gold btn-block" style="margin-top:12px" onclick="go('home')">Home ${ICONS.arrowRight}</button>
-      <div style="display:flex;gap:8px;margin-top:8px">
+      ${loadTravel().date?`<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px">旅行の同行者にも今日の記録を送って、一緒に準備を進めよう</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:6px">
         <button class="btn btn-secondary" style="flex:1" id="ss-open-day">${ICONS.star} 画像でサッと共有</button>
         <button class="btn btn-secondary" style="flex:1" id="cv-open-day">${ICONS.play||'🎬'} クリア動画で振り返る</button>
       </div>
@@ -3802,7 +3804,17 @@ function maybeShowReminder(){
   if(h<20)return;
   if(PROG.lastReminderDate===t)return;
   PROG.lastReminderDate=t;commit();
-  try{new Notification('Sparkle',{body:'今日はまだ学習していません。5分だけ、どうですか？',tag:'sparkle-reminder'});}catch(e){}
+  try{new Notification('Sparkle',{body:reminderMessage(),tag:'sparkle-reminder'});}catch(e){}
+}
+function reminderMessage(){
+  // ストリーク訴求ではなく「旅行までのカウントダウン」を軸にする（市場調査で「終わりなき義務」より
+  // 「楽しみへの準備」の方が日本人学習者の継続率が高いという示唆を反映）
+  const tv=loadTravel();
+  if(tv.date){
+    const days=Math.ceil((new Date(tv.date)-new Date(todayStr()))/86400000);
+    if(days>0)return`${tv.destination||'旅行'}まであと${days}日。今日の5分が、現地での1つの会話になります。`;
+  }
+  return'今日はまだ学習していません。5分だけ、どうですか？';
 }
 function checkTimeBadges(){
   const h=new Date().getHours();
@@ -5204,7 +5216,7 @@ function weekXPChartHTML(){
       <div style="font-size:var(--text-xs);color:var(--text-muted)">${total} XP</div>
     </div>
     <div style="display:flex;gap:6px;align-items:flex-end">${bars}</div>
-    <button class="btn btn-secondary btn-block" style="margin-top:12px" id="wrapped-share-btn">${ICONS.star} 今週のWrappedをシェア</button>
+    <button class="btn btn-secondary btn-block" style="margin-top:12px" id="wrapped-share-btn">${ICONS.star} 今週のWrappedを旅行の同行者にシェア</button>
   </div>`;
 }
 function weeklyGoalHTML(){
@@ -5257,6 +5269,29 @@ function bindWeeklyGoalCard(){
   };
 }
 /* ========== 弱点分析＋パーソナル推薦 ========== */
+/* ========== TOEIC語彙 → 旅行フレーズの橋渡し（abceed/Speak不在の空白地帯） ==========
+   「TOEICの単語が旅行でそのまま使える」ことをキーワードマッチで自動検出。
+   320語を手動タグ付けするのは非現実的なため、WDW/シナリオの例文に同じ単語が
+   実際に登場するかを正規表現で判定するだけの軽量な仕組みにしている。 */
+let _vocabBridgeCache=null;
+function buildVocabTravelBridge(){
+  const pools=[];
+  WDW_CATS.forEach(c=>(WDW_PHRASES[c.id]||[]).forEach(p=>pools.push({en:p.en,label:'WDW: '+c.name,action:()=>openWDWCat(c.id)})));
+  Object.keys(SCENARIOS).forEach(scId=>SCENARIOS[scId].phrases.forEach(p=>pools.push({en:p.en,label:SCENARIOS[scId].title,action:()=>openDetail(scId)})));
+  const idx={};
+  TOEIC_VOCAB.forEach(v=>{
+    const w=(v.w||'').toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    if(!w)return;
+    const re=new RegExp('\\b'+w+'(s|es|ed|ing|d)?\\b','i');
+    const hit=pools.find(p=>re.test(p.en));
+    if(hit)idx[v.id]=hit;
+  });
+  return idx;
+}
+function vocabTravelBridge(){
+  if(!_vocabBridgeCache)_vocabBridgeCache=buildVocabTravelBridge();
+  return _vocabBridgeCache;
+}
 function buildCategoryIndex(){
   const idx={};
   Object.keys(SCENARIOS).forEach(scId=>{
