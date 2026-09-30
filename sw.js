@@ -1,11 +1,14 @@
 // Sparkle Service Worker — offline-first for the shell
-const CACHE = 'sparkle-v8';
+const CACHE = 'sparkle-v10';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './talk.js',
   './talk.css',
+  './growth.js',
+  './growth.css',
+  './backup.js',
   './sparkle_assets/icons/icon-192.png',
   './sparkle_assets/icons/icon-512.png',
   './sparkle_assets/icons/apple-touch-icon.png',
