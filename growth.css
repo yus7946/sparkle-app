@@ -279,3 +279,56 @@ body:not(.show-kana) .phrase-pron,body:not(.show-kana) .cheat-pron,body:not(.sho
 .hb-next{margin:12px 0 4px}
 .hb-stat-line{font-size:12.5px;color:var(--text-secondary);text-align:center;margin-bottom:8px}
 .hb-stat-line b{color:var(--text-primary)}
+
+/* ===== リスニング本番形式・シャドーイング（listening.js） ===== */
+.lx-banner{background:color-mix(in srgb,var(--sparkle) 8%,var(--surface-2));border:1px solid color-mix(in srgb,var(--sparkle) 25%,transparent);border-radius:14px;padding:12px 14px;margin:10px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.lx-banner>b{font-size:14px;display:flex;align-items:center;gap:6px;color:var(--text-primary)}
+.lx-banner>b svg{width:16px;height:16px;color:var(--sparkle)}
+.lx-banner small{flex-basis:100%;font-size:11.5px;line-height:1.55;color:var(--text-secondary)}
+.lx-banner .btn{flex-basis:100%}
+.lx-cnt{margin-left:auto;font-size:12px;font-weight:700;color:var(--sparkle)}
+.lx-cnt i{font-style:normal;font-size:18px;font-weight:800}
+.lx-cnt.over{color:var(--ember)}
+.lx-on{border-color:var(--sparkle)}
+.lx-eq{display:flex;align-items:flex-end;gap:3px;height:16px;margin-left:auto}
+.lx-eq i{width:4px;background:var(--sparkle);border-radius:2px;animation:lxEq .9s ease-in-out infinite}
+.lx-eq i:nth-child(2){animation-delay:.15s}.lx-eq i:nth-child(3){animation-delay:.3s}.lx-eq i:nth-child(4){animation-delay:.45s}
+@keyframes lxEq{0%,100%{height:4px}50%{height:16px}}
+@media (prefers-reduced-motion:reduce){.lx-eq i{animation:none;height:10px}}
+.lx-q{margin:14px 0}
+.lx-q-t{font-weight:700;font-size:14px;line-height:1.5;margin-bottom:6px;color:var(--text-primary)}
+.lx-c{text-align:left;font-size:13.5px;padding:10px 12px;min-height:44px}
+.lx-c b{color:var(--sparkle);margin-right:4px}
+.lx-c.lx-sel{border-color:var(--sparkle);background:color-mix(in srgb,var(--sparkle) 12%,var(--surface-2))}
+.lx-exp{font-size:12px;line-height:1.6;color:var(--text-secondary);background:var(--surface);border-radius:10px;padding:8px 10px;margin-top:4px}
+.lx-graphic{background:var(--surface-2);border:1px solid var(--border-strong);border-radius:12px;padding:10px 12px;margin:10px 0}
+.lx-graphic-t{font-weight:800;font-size:13px;text-align:center;margin-bottom:6px;color:var(--text-primary)}
+.lx-graphic table{width:100%;border-collapse:collapse;font-size:12.5px}
+.lx-graphic th,.lx-graphic td{border:1px solid var(--border);padding:5px 8px;text-align:center}
+.lx-graphic th{background:var(--surface);font-weight:700}
+.lx-script{padding:12px 14px;font-size:13px;line-height:1.7;color:var(--text-secondary)}
+.lx-script b{color:var(--sparkle);margin-right:2px}
+.lx-row{display:flex;gap:8px;margin-top:10px;align-items:stretch}
+.lx-row>.btn{flex:1;font-size:12.5px}
+.lx-mock-play{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--text-muted);margin:6px 0 10px}
+.lx-steps{display:flex;gap:4px;margin:6px 0 2px;overflow-x:auto}
+.lx-steps span{flex:1;white-space:nowrap;text-align:center;font-size:10.5px;font-weight:700;padding:6px 4px;border-radius:8px;background:var(--surface);color:var(--text-muted)}
+.lx-steps span.on{background:var(--sparkle);color:#fff}
+.lx-steps span.done{color:var(--enchanted)}
+.lx-sh-text{padding:8px;margin-top:10px}
+.lx-sh-line{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--border);padding:8px 6px;font:inherit;font-size:14px;line-height:1.6;color:var(--text-primary);cursor:pointer}
+.lx-sh-line:last-child{border-bottom:none}
+.lx-sh-line b{font-size:10px;color:var(--sparkle);margin-right:6px}
+.lx-blur .lx-sh-line,.lx-blur-t{filter:blur(5px);user-select:none}
+.lx-reps{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--text-muted)}
+.lx-reps i{width:22px;height:6px;border-radius:3px;background:var(--surface)}
+.lx-reps i.on{background:var(--enchanted)}
+.lx-sh-one{padding:16px;font-size:16px;line-height:1.8;margin-top:6px;position:relative;color:var(--text-primary)}
+.lx-w.ok{color:var(--enchanted);font-weight:700}
+.lx-w.ng{color:var(--ember);text-decoration:underline wavy;text-underline-offset:4px}
+.lx-sh-sc{position:absolute;top:8px;right:10px;font-size:13px;font-weight:800}
+.lx-sh-sc.ok{color:var(--enchanted)}.lx-sh-sc.mid{color:#d99a00}.lx-sh-sc.ng{color:var(--ember)}
+.lx-sh-heard{font-size:11.5px;color:var(--text-muted);margin-top:8px;line-height:1.5}
+.lx-self{display:flex;gap:6px;flex:2}
+.lx-self .btn{flex:1;font-size:16px}
+.lx-sh-banner{margin-top:10px}
