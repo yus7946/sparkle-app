@@ -210,7 +210,7 @@ function p6Setup(onDone){
   document.body.appendChild(ov);
   const val={goal:toeicTarget(),wd:s.wd||60,we:s.we||90,travel:s.travel===false?0:1};
   ov.querySelectorAll('.p6-seg').forEach(seg=>seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{val[seg.dataset.k]=+b.dataset.v;seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))}));
-  ov.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const d=new Date();d.setMonth(d.getMonth()+ +b.dataset.m);ov.querySelector('#p6-exam').value=d.toISOString().slice(0,10)});
+  ov.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const d=new Date();d.setMonth(d.getMonth()+ +b.dataset.m);ov.querySelector('#p6-exam').value=ymd(d)});
   ov.querySelector('#p6-cancel').onclick=()=>ov.remove();
   ov.querySelector('#p6-save').onclick=()=>{
     const ex=ov.querySelector('#p6-exam').value;

@@ -618,6 +618,8 @@ svg{display:block;flex-shrink:0}
 .ob-globe-wrap{position:relative;width:180px;height:180px;margin:0 auto}
 #ob-globe-fallback.ob-globe-wrap{position:absolute;inset:0;width:auto;height:auto;display:flex;align-items:center;justify-content:center;margin:0}
 #ob-globe-fallback .ob-globe-wrap-inner{width:180px;height:180px;position:relative}
+#ob-globe-fallback{bottom:30%}
+#ob-globe-fallback .ob-earth{width:min(340px,94vw,52vh);height:min(340px,94vw,52vh)}
 .ob-globe{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#4fa3f7 0%,#2b7fe0 40%,#0f2a4a 100%);position:relative;box-shadow:0 0 60px rgba(43,127,224,.4),inset -12px -12px 30px rgba(0,0,0,.4)}
 .ob-globe::before{content:'';position:absolute;top:10%;left:15%;width:22%;height:15%;background:rgba(255,230,200,.65);border-radius:40%;filter:blur(3px)}
 .ob-globe::after{content:'';position:absolute;top:45%;left:55%;width:26%;height:20%;background:rgba(122,138,94,.45);border-radius:50%;filter:blur(3px)}
@@ -2169,7 +2171,7 @@ function openDailyChest(){
   const m=document.createElement('div');m.className='modal-back';m.id='chest-modal';
   m.innerHTML=`<div class="modal" style="text-align:center">
     ${sparkHeroHTML('win')}
-    <div style="font-size:var(--text-xl);font-weight:800;margin:8px 0 4px">今日のプラン完了！</div>
+    <div style="font-size:var(--text-xl);font-weight:800;margin:8px 0 4px">今日の目標クリア！</div>
     <div style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:14px">宝箱を獲得しました</div>
     <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
       <div style="background:rgba(245,200,76,.14);border:1px solid rgba(245,200,76,.35);border-radius:12px;padding:10px 16px;font-weight:800;color:var(--gold)">+${bonus} XP</div>
@@ -3706,8 +3708,10 @@ function loadTravel(){try{return JSON.parse(localStorage.getItem(LS.travel))||{}
 function saveTravel(t){localStorage.setItem(LS.travel,JSON.stringify(t))}
 
 /* ========== DATE / SRS ========== */
-function todayStr(){return new Date().toISOString().slice(0,10)}
-function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+// 端末のローカル日付（UTCだと日本では朝9時まで前日扱いになるため）
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function todayStr(){return ymd(new Date())}
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return ymd(d)}
 /* ========== SRS (SM-2ベース分散学習アルゴリズム) ==========
    grade: 2=正解(自信あり) / 1=正解だが不安・惜しい / 0=不正解
    忘却曲線に沿ってEF(易しさ係数)を調整し、間隔を指数的に伸ばす。 */
@@ -5178,7 +5182,7 @@ function reductionCardHTML(){
 
 function weekXPData(){
   const out=[];const daily=PROG.xpDaily||{};
-  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().slice(0,10);out.push({key,day:['日','月','火','水','木','金','土'][d.getDay()],xp:daily[key]||0})}
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=ymd(d);out.push({key,day:['日','月','火','水','木','金','土'][d.getDay()],xp:daily[key]||0})}
   return out;
 }
 function heatmapHTML(){
@@ -5189,7 +5193,7 @@ function heatmapHTML(){
   // 今週の土曜まで埋めるオフセット
   const end=new Date(today);end.setDate(end.getDate()+(6-today.getDay()));
   const cells=[];let studyDays=0,maxXP=1;
-  for(let i=days-1;i>=0;i--){const d=new Date(end);d.setDate(d.getDate()-i);const key=d.toISOString().slice(0,10);const xp=daily[key]||0;if(xp>0)studyDays++;if(xp>maxXP)maxXP=xp;cells.push({key,xp,future:d>today})}
+  for(let i=days-1;i>=0;i--){const d=new Date(end);d.setDate(d.getDate()-i);const key=ymd(d);const xp=daily[key]||0;if(xp>0)studyDays++;if(xp>maxXP)maxXP=xp;cells.push({key,xp,future:d>today})}
   const level=xp=>xp<=0?0:xp<30?1:xp<80?2:xp<150?3:4;
   const cols=['rgba(255,255,255,.06)','rgba(245,200,76,.28)','rgba(245,200,76,.5)','rgba(245,200,76,.75)','var(--gold)'];
   // 列(週)ごとに縦7セル
@@ -7258,10 +7262,7 @@ function renderObSlide1(body){
     <button class="ob-skip" onclick="${skipFn}">スキップ</button>
     <div class="ob-photo-hero" id="ob-globe">
       <div class="ob-globe-wrap" id="ob-globe-fallback" style="display:flex">
-        <div class="ob-globe-wrap-inner">
-          <div class="ob-orbit"><div class="ob-plane">${ICONS.plane}</div></div>
-          <div class="ob-globe"></div>
-        </div>
+        <div class="ob-globe-wrap-inner ob-earth" id="ob-earth"></div>
       </div>
     </div>
     <div style="flex:1;min-height:6px"></div>
@@ -7274,6 +7275,7 @@ function renderObSlide1(body){
       ${OB_STATE.returning?'':obDotsHTML()}
       <button class="btn btn-gold ob-cta" id="ob-cta" style="width:100%;max-width:320px;margin-top:${OB_STATE.returning?'var(--space-lg)':'0'}" onclick="${ctaFn}">はじめる ${ICONS.arrowRight}</button>
     </div>`;
+  obMountEarth();
   if(window.gsap&&!PREF_REDUCED){
     const tl=gsap.timeline();
     tl.from('#ob-globe',{opacity:0,scale:1.06,duration:1.0,ease:'power2.out'})
@@ -7283,6 +7285,19 @@ function renderObSlide1(body){
     if(!OB_STATE.returning)tl.from('.ob-dots',{opacity:0,duration:0.3},'-=0.1');
     tl.from('#ob-cta',{y:18,opacity:0,duration:0.4});
   }
+}
+// 立体の地球（globe.js）。描けない端末では従来のCSSの地球に戻す
+function obMountEarth(){
+  const host=document.getElementById('ob-earth');if(!host)return;
+  // 起動直後は globe.js がまだ読み込まれていないので、読み込み完了を待つ
+  if(typeof sgMount!=='function'&&document.readyState==='loading'){document.addEventListener('DOMContentLoaded',obMountEarth,{once:true});return}
+  let ok=false;
+  try{
+    const next=typeof todaysCity==='function'?todaysCity().key:'';
+    const cities=CITY_ROTATION.map(c=>{const st=CITY_STORIES[c.key]||[];const done=st.length&&st.every(x=>storyDone(x.id));return{key:c.key,state:done?'done':c.key===next?'next':'todo'}});
+    ok=typeof sgMount==='function'&&!!sgMount(host,{cities});
+  }catch(e){ok=false}
+  if(!ok){host.classList.remove('ob-earth');host.innerHTML=`<div class="ob-orbit"><div class="ob-plane">${ICONS.plane}</div></div><div class="ob-globe"></div>`}
 }
 function renderObSlide2(body){
   const goals=[400,500,600,650,700,800];
@@ -7357,5 +7372,7 @@ if(new URLSearchParams(location.search).get('quiz')==='1'){
 <script src="toeic_core.js"></script>
 <script src="plan650.js"></script>
 <script src="fluent.js"></script>
+<script src="globe.js"></script>
+<script src="habit.js"></script>
 </body>
 </html>

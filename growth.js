@@ -18,7 +18,7 @@ function gwLog(k,extra){
   if(g.log.length>2000)g.log=g.log.slice(-2000);
   commit();gwAfterActivity();
 }
-function gwWeekStart(){const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return d.toISOString().slice(0,10)}
+function gwWeekStart(){const d=new Date();const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return ymd(d)}
 function gwDaysLeftInWeek(){return 7-((new Date().getDay()+6)%7)}
 
 /* ---------- トラベラーランク ---------- */
@@ -50,7 +50,7 @@ function gwSnapshot(){
 function gwPace(field){
   // 直近21日のスナップショットから1日あたりの伸びを出す（3日以上の幅が必要）
   const g=gw();const keys=Object.keys(g.snap).sort();if(keys.length<2)return null;
-  const now=keys[keys.length-1];const lim=new Date(Date.now()-21*864e5).toISOString().slice(0,10);
+  const now=keys[keys.length-1];const lim=ymd(new Date(Date.now()-21*864e5));
   const old=keys.find(k=>k>=lim&&k<now);if(!old)return null;
   const days=(new Date(now)-new Date(old))/864e5;if(days<3)return null;
   return (g.snap[now][field]-g.snap[old][field])/days;

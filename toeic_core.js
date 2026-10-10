@@ -336,3 +336,60 @@ const TOEIC_P2_MORE=[
 ];
 TOEIC_P2.push(...TOEIC_P2_MORE.map((x,i)=>({id:'p2m_'+String(i+1).padStart(2,'0'),q:x[0],choices:x[1],correct:x[2],exp:x[3]})));
 
+
+/* ========== Part 5 語彙問題の自動生成 ==========
+   単語帳の例文の該当語を空所にし、同じ品詞の3語をダミーにした4択（本番の語彙問題と同じ形）。
+   動詞・名詞は例文の活用形（-s / -ed / -ing / 複数形）に合わせてダミーも規則変化させる。
+   不規則変化の語・不可算名詞はダミーにしない。出題は「文法10問＋語彙5問」で混ぜる。 */
+const TOEIC_P5V=(function(){
+  const IRR=new Set('arise bear become begin bend bet bid bind bite blow break bring broadcast build burn burst buy cast catch choose cling come cost creep cut deal dig do draw drink drive eat fall feed feel fight find fit fly forbid forecast forget forgive freeze get give go grind grow hang have hear hide hit hold hurt keep know lay lead leap leave lend let lie light lose make mean meet mislead overcome oversee pay prove put quit read ride ring rise run say see seek sell send set sew shake shed shine shoot show shrink shut sing sink sit sleep slide speak spend spin split spread spring stand steal stick sting strike swear sweep swim swing take teach tear tell think throw undergo understand undertake upset wake wear weave weep win wind withdraw write'.split(' '));
+  const UNC=new Set('equipment information advice furniture luggage baggage feedback research merchandise machinery personnel staff stationery knowledge software access attendance compliance maintenance insurance transportation accommodation clothing produce traffic weather news progress work evidence assistance employment expertise funding parking seating shipping catering overtime paperwork training housing advertising marketing accounting packaging payroll cash fuel money'.split(' '));
+  const DBL=new Set('submit commit admit permit transfer refer prefer occur plan ship stop drop omit control regret equip emit compel excel expel'.split(' '));
+  const inf=(w,k)=>{
+    if(k==='')return w;
+    if(k==='s')return/(s|x|z|ch|sh)$/.test(w)?w+'es':/[^aeiou]y$/.test(w)?w.slice(0,-1)+'ies':w+'s';
+    const b=DBL.has(w)?w+w.slice(-1):w;
+    if(k==='ed')return/e$/.test(b)?b+'d':/[^aeiou]y$/.test(b)?b.slice(0,-1)+'ied':b+'ed';
+    if(k==='ing')return/ie$/.test(b)?b.slice(0,-2)+'ying':/[^e]e$/.test(b)?b.slice(0,-1)+'ing':b+'ing';
+  };
+  // ダミーに使っても綴りが崩れない語か（短母音＋子音で終わる語は二重子音の判定ができないので除外）
+  const safe=(w,k)=>k===''||k==='s'||DBL.has(w)||!/[^aeiou][aeiou][bdgklmnprt]$/.test(w);
+  const okWord=v=>v&&/^[a-z]+$/.test(v.w)&&['n','v','adj','adv'].includes(v.pos)&&v.ex;
+  const words=TOEIC_VOCAB.filter(okWord);
+  const byPos={};words.forEach(v=>(byPos[v.pos]=byPos[v.pos]||[]).push(v));
+  const seed=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return()=>{h=Math.imul(h^h>>>15,2246822507);h=Math.imul(h^h>>>13,3266489909);return((h^=h>>>16)>>>0)/4294967296}};
+  const out=[];const used=new Set();
+  words.forEach(v=>{
+    if(used.has(v.w))return;
+    const kinds=v.pos==='v'?(IRR.has(v.w)?['']:['','s','ed','ing']):v.pos==='n'?['',...(UNC.has(v.w)?[]:['s'])]:[''];
+    let hit=null,kind='';
+    for(const k of kinds){const f=inf(v.w,k);const m=v.ex.match(new RegExp('\\b'+f+'\\b','i'));if(m){hit=m;kind=k;break}}
+    if(!hit)return;
+    const rnd=seed(v.id);
+    const pool=byPos[v.pos].filter(d=>d.w!==v.w&&d.w.slice(0,4)!==v.w.slice(0,4)&&!(kind&&(IRR.has(d.w)||UNC.has(d.w)||!safe(d.w,kind)))&&!v.ex.toLowerCase().includes(d.w));
+    if(pool.length<3)return;
+    const ds=[];while(ds.length<3){const d=pool[Math.floor(rnd()*pool.length)];if(!ds.includes(d))ds.push(d)}
+    const cap=s=>hit.index===0?s[0].toUpperCase()+s.slice(1):s;
+    const opts=[v,...ds].map(x=>({x,t:cap(inf(x.w,kind))}));
+    for(let i=opts.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]]}
+    used.add(v.w);
+    out.push({id:'p5v_'+v.id,gen:true,stem:v.ex.slice(0,hit.index)+'____'+v.ex.slice(hit.index+hit[0].length),
+      choices:opts.map(o=>o.t),correct:opts.findIndex(o=>o.x===v),
+      exp:`語彙問題。正解は ${v.w}（${v.ja}）。他の選択肢：${ds.map(d=>d.w+'＝'+d.ja).join('／')}。訳：${v.exja||''}`});
+  });
+  return out;
+})();
+TOEIC_P5.push(...TOEIC_P5V);
+// Part 5 の出題：文法10問＋語彙5問（それぞれ未習得・復習期限の問題を優先）
+(function(){
+  const _otp=openTOEICPart;
+  openTOEICPart=function(part){
+    if(part!==5)return _otp.apply(this,arguments);
+    toeicPart=5;
+    const t=todayStr();
+    const pick=(arr,n)=>{const due=[],rest=[];arr.forEach(q=>{const r=PROG.phrases[q.id];if(!r||!r.correct||(r.nextReview&&r.nextReview<=t))due.push(q);else rest.push(q)});
+      return[...due.sort(()=>Math.random()-0.5),...rest.sort(()=>Math.random()-0.5)].slice(0,n)};
+    const items=[...pick(TOEIC_P5.filter(q=>!q.gen),10),...pick(TOEIC_P5V,5)].sort(()=>Math.random()-0.5);
+    return openTOEICDrill(items,5,'Part 5 · 短文穴埋め（文法＋語彙）');
+  };
+})();

@@ -305,7 +305,7 @@ function tkDueNotes(){const t=talkData(),d=todayStr();return t.notes.filter(n=>n
 /* ---------- 統計・レベル ---------- */
 function tkWeek(){
   const t=talkData();const days=[];
-  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10))}
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(ymd(d))}
   return days.map(d=>({d,sec:t.log.filter(l=>l.d===d).reduce((a,l)=>a+(l.sec||0),0),n:t.log.filter(l=>l.d===d).length}));
 }
 function tkLevel(){
