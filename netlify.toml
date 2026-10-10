@@ -1,0 +1,7 @@
+# 静的サイト（ルート直下）＋チーム機能のサーバー処理（Netlify Functions / Blobs の無料枠）
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
