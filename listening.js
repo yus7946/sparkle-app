@@ -327,7 +327,7 @@ function lxInstallP1(){
   answerP1=function(){document.querySelectorAll('#td-choices [data-tdi] span').forEach(s=>{if(s.dataset.t)s.textContent=s.dataset.t});return _a.apply(this,arguments)};
 }
 
-/* ---------- シャドーイング（4ステップ） ---------- */
+/* ---------- シャドーイング（5ステップ） ---------- */
 let lxSh=null;
 function lxSentences(script,narr){
   // Mr. / Ms. / p.m. などの略語のピリオドでは文を切らない
@@ -339,7 +339,9 @@ function lxShadowPick(){
   const log=PROG.lxShadow||{};const t=todayStr();
   const all=[...TOEIC_P3.map(s=>({s,part:3})),...TOEIC_P4.map(s=>({s,part:4}))];
   const seen=x=>x.s.questions.some(q=>PROG.phrases[q.id]&&PROG.phrases[q.id].views);
-  const sc=x=>(seen(x)?0:2)+(log[x.s.id]?(log[x.s.id].d===t?3:1):0)+Math.random();
+  // 前回のチェックが70%未満で2日以上たった素材は、もう一度やる価値が高いので優先
+  const ago=d=>(new Date(t+'T00:00')-new Date(d+'T00:00'))/864e5;
+  const sc=x=>{const l=log[x.s.id];return(seen(x)?0:2)+(l?(l.d===t?3:(l.last!=null&&l.last<70&&ago(l.d)>=2?-0.6:1)):0)+Math.random()};
   return all.sort((a,b)=>sc(a)-sc(b))[0];
 }
 function lxShadowToday(){
@@ -348,30 +350,65 @@ function lxShadowToday(){
 }
 function lxShadowOpen(src,opt){
   lxStop();
-  lxSh={src,opt:opt||{},sents:lxSentences(src.script,src.narr),step:1,i:0,scores:[],reps:0,peek:false,rate:1};
+  lxSh={src,opt:opt||{},sents:lxSentences(src.script,src.narr),step:1,i:0,scores:[],reps:0,peek:false,rate:1,loop:null,miss:[]};
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-review').classList.add('active');window.scrollTo(0,0);
   lxShRender();
 }
+// 5ステップ：聞く → 穴埋めディクテーション → 音読（リズム表示）→ シャドーイング（録音して聞き比べ）→ チェック
 const LX_SH_STEPS=[
   ['聞く','まず内容をつかむ。スクリプトは見ずに1回聞く。'],
-  ['音読','文字を見ながら、音声と同時に声に出す（パラレル・リーディング）。音のつながりと強弱をまねる。'],
-  ['シャドーイング','文字を隠して、音声の0.5秒あとを影のように追いかけて言う。完璧でなくてOK、止まらないことが大事。3回が目安。'],
+  ['穴埋め','聞こえた単語を空所に入れる（ディクテーション）。聞き取れない音が、伸びしろの場所。'],
+  ['音読','文字を見ながら音声と同時に声に出す。太字は強く長く、薄い字は弱く短く、‿ はつなげて読む。'],
+  ['シャドーイング','文字を隠して、音声の0.5秒あとを追いかけて言う。止まらないことが大事。録音すると聞き比べできる。'],
   ['チェック','1文ずつ「聞く→言う」。音声認識で言えた単語を確認する。']
 ];
-function lxShPlayAll(rate){const s=lxSh;lxSpeakLines(s.sents,{lang:s.src.lang,narr:s.src.narr,rate:0.95*(rate||s.rate)})}
+// 弱く読む機能語（日本人は全部の単語を同じ強さで読みがち＝カタカナ英語の原因）
+const LX_WEAK=new Set('a an the to of for and or but at in on from with by as is are was were be been am do does did have has had can could will would shall should must i you he she it we they me him her us them my your his its our their that than there some any so if just'.split(' '));
+const lxBare=w=>w.toLowerCase().replace(/[^a-z']/g,'');
+function lxRhythmHTML(t){
+  const ws=t.split(/\s+/).filter(Boolean);
+  return ws.map((w,i)=>{
+    const b=lxBare(w),weak=LX_WEAK.has(b)&&!/n't$/.test(b);
+    const nx=ws[i+1]?lxBare(ws[i+1]):'';
+    // 子音で終わる語＋母音で始まる語はつなげる（check it → チェキッ）
+    const link=nx&&/[bcdfgklmnprstvxz]$/.test(b)&&/^[aeiou]/.test(nx)&&!/[.,!?;:]$/.test(w);
+    return `<span class="${weak?'lx-weak':'lx-str'}">${esc(w)}</span>${link?'<i class="lx-link">‿</i>':' '}`;
+  }).join('');
+}
+// 穴埋め：各文の内容語から1つ（長めの語）を空所に
+function lxBlanks(sents){
+  return sents.map((x,i)=>{const ws=x.t.split(/\s+/);const c=ws.map((w,k)=>({k,w,b:lxBare(w)})).filter(o=>o.b.length>=4&&!LX_WEAK.has(o.b)&&/^[a-z]+$/.test(o.b)&&/^[a-z]/.test(o.w));// 人名・文頭の語は出さない
+    if(!c.length)return null;c.sort((a,b)=>b.b.length-a.b.length);const pick=c[(i*7)%Math.min(3,c.length)];return{k:pick.k,ans:pick.b}});
+}
+function lxShPlayAll(rate,onend){const s=lxSh;lxSpeakLines(s.sents,{lang:s.src.lang,narr:s.src.narr,rate:0.95*(rate||s.rate),onend})}
 function lxShRender(){
   const s=lxSh,el=document.getElementById('screen-review');if(!s)return;
   const step=LX_SH_STEPS[s.step-1];
   const bar=LX_SH_STEPS.map((x,i)=>`<span class="${i+1===s.step?'on':i+1<s.step?'done':''}">${i+1}. ${x[0]}</span>`).join('');
-  const text=(hide)=>`<div class="card lx-sh-text${hide?' lx-blur':''}">${s.sents.map((x,i)=>`<button class="lx-sh-line" data-l="${i}"><b>${x.sp==='N'?'':esc(x.sp.replace('2',' 2'))}</b>${esc(x.t)}</button>`).join('')}</div>`;
+  const line=(x,i,inner)=>`<div class="lx-sh-row${s.loop===i?' looping':''}"><button class="lx-sh-line" data-l="${i}"><b>${x.sp==='N'?'':esc(x.sp.replace('2',' 2'))}</b>${inner}</button><button class="lx-loop" data-loop="${i}" aria-label="この文をくり返す">↻</button></div>`;
+  const text=(rhythm)=>`<div class="card lx-sh-text">${s.sents.map((x,i)=>line(x,i,rhythm?lxRhythmHTML(x.t):esc(x.t))).join('')}</div>`;
   let body='';
   if(s.step===1)body=`<button class="btn btn-gold btn-block" id="lx-sh-play">${ICONS.play} 再生（${LX_ACCENT_JA[s.src.lang]||''}の発音）</button>`;
-  if(s.step===2)body=`<button class="btn btn-gold btn-block" id="lx-sh-play">${ICONS.play} 音声に合わせて音読（ゆっくり）</button>${text(false)}<div class="hb-note">文をタップするとその文だけ再生します。</div>`;
-  if(s.step===3)body=`<div class="lx-row"><button class="btn btn-gold" style="flex:2" id="lx-sh-play">${ICONS.play} 再生して追いかける</button><button class="btn btn-secondary" style="flex:1" id="lx-sh-rate">${s.rate}x</button></div>
+  if(s.step===2){
+    s.blanks=s.blanks||lxBlanks(s.sents);s.dict=s.dict||{};
+    body=`<div class="card lx-sh-text">${s.sents.map((x,i)=>{const bl=s.blanks[i];const ws=x.t.split(/\s+/);
+      const inner=ws.map((w,k)=>{if(!bl||k!==bl.k)return esc(w);const v=s.dict[i]||'',chk=s.dictChecked;const ok=chk&&lxBare(v)===bl.ans;
+        return `<input class="lx-gap${chk?(ok?' ok':' ng'):''}" data-gap="${i}" value="${esc(v)}" size="${Math.max(4,bl.ans.length)}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="空所${i+1}">${chk&&!ok?`<span class="lx-gap-ans">${esc(bl.ans)}</span>`:''}${w.replace(/^[A-Za-z']+/,'')?esc(w.replace(/^[A-Za-z']+/,'')):''}`}).join(' ');
+      return `<div class="lx-sh-row"><button class="lx-play-s" data-l="${i}" aria-label="この文を聞く">${ICONS.play}</button><div class="lx-dict-t">${inner}</div></div>`}).join('')}</div>
+      <div class="lx-row"><button class="btn btn-secondary" id="lx-sh-play">${ICONS.play} 全体を聞く</button><button class="btn btn-gold" id="lx-dict-check">${s.dictChecked?'もう一度':'答え合わせ'}</button></div>
+      ${s.dictChecked?`<div class="hb-note">${s.dictScore}/${s.blanks.filter(Boolean).length} 正解。聞き取れなかった単語は、次の「音読」で音のつながりを確認しよう。</div>`:'<div class="hb-note">▶で1文ずつ何度でも聞けます。スペルが分からなくても、聞こえた音で書いてOK。</div>'}`;
+  }
+  if(s.step===3)body=`<button class="btn btn-gold btn-block" id="lx-sh-play">${ICONS.play} 音声に合わせて音読（ゆっくり）</button>${text(true)}
+    <div class="lx-legend"><span class="lx-str">太字</span>＝強く長く　<span class="lx-weak">薄い字</span>＝弱く短く　<i class="lx-link">‿</i>＝つなげる　↻＝その文をくり返す</div>`;
+  if(s.step===4)body=`<div class="lx-row"><button class="btn btn-gold" style="flex:2" id="lx-sh-play">${ICONS.play} 再生して追いかける</button><button class="btn btn-secondary" style="flex:1" id="lx-sh-rate">${s.rate}x</button></div>
     <div class="lx-reps">${[1,2,3].map(n=>`<i class="${s.reps>=n?'on':''}"></i>`).join('')}<span>${s.reps}/3 回</span></div>
-    <button class="btn btn-secondary btn-block" id="lx-sh-peek" style="margin-top:8px">${s.peek?'スクリプトを隠す':'つまったらスクリプトをちら見'}</button>${s.peek?text(false):''}`;
-  if(s.step===4){
+    <div class="card lx-rec"><div class="gw-q-h"><span>🎙 録音して聞き比べ</span>${s.recInfo?`<span class="gw-q-meta">${s.recInfo}</span>`:''}</div>
+      <button class="btn ${s.recording?'btn-secondary':'btn-gold'} btn-block" id="lx-rec">${s.recording?'■ 録音を止める':'● 録音しながらシャドーイング'}</button>
+      ${s.recWave?`<div class="lx-wave" aria-label="あなたの声の波形">${s.recWave}</div><div class="lx-row"><button class="btn btn-secondary" id="lx-rec-me">${ICONS.play} 自分の声</button><button class="btn btn-secondary" id="lx-rec-model">${ICONS.play} お手本</button></div>${s.recTip?`<div class="hb-note">${s.recTip}</div>`:''}`:'<div class="hb-note">お手本が流れている間、あなたの声を録音します。録音後に波形と「止まった回数」が出ます。</div>'}
+    </div>
+    <button class="btn btn-secondary btn-block" id="lx-sh-peek" style="margin-top:8px">${s.peek?'スクリプトを隠す':'つまったらスクリプトをちら見'}</button>${s.peek?text(true):''}`;
+  if(s.step===5){
     const x=s.sents[s.i],sc=s.scores[s.i];
     body=`<div class="sec-sub">文 ${s.i+1} / ${s.sents.length}</div>
       <div class="card lx-sh-one">${sc&&sc.html?sc.html:`<span class="lx-blur-t">${esc(x.t)}</span>`}${sc!=null&&sc.v!=null?`<div class="lx-sh-sc ${sc.v>=80?'ok':sc.v>=50?'mid':'ng'}">${sc.v}%</div>`:''}<div class="lx-sh-heard" id="lx-sh-heard">${sc&&sc.heard?'聞き取り結果：'+esc(sc.heard):''}</div></div>
@@ -385,21 +422,68 @@ function lxShRender(){
     <div class="lx-steps">${bar}</div>
     <div class="lx-banner"><b>Step ${s.step}：${step[0]}</b><small>${step[1]}</small></div>
     ${body}
-    ${s.step<4?`<button class="btn btn-primary btn-block" id="lx-sh-next" style="margin-top:12px">次のステップへ ${ICONS.arrowRight}</button>`:''}
+    ${s.step<5?`<button class="btn btn-primary btn-block" id="lx-sh-next" style="margin-top:12px">${s.step===2&&!s.dictChecked?'スキップして次へ':'次のステップへ'} ${ICONS.arrowRight}</button>`:''}
     <div class="hb-note">イヤホンを使うと、自分の声と音声が混ざらず練習しやすくなります。</div>
   </div>`;
   const on=(id,f)=>{const b=document.getElementById(id);if(b)b.onclick=f};
-  on('lx-sh-back',()=>{lxStop();tkStopAll&&tkStopAll();lxSh=null;go('home')});
-  on('lx-sh-play',()=>{if(s.step===3){s.reps=Math.min(3,s.reps+1);lxShPlayAll();lxShRender()}else lxShPlayAll(s.step===2?0.85:1)});
+  on('lx-sh-back',()=>{lxStop();lxRecStop(true);tkStopAll&&tkStopAll();lxSh=null;go('home')});
+  on('lx-sh-play',()=>{s.loop=null;if(s.step===4){s.reps=Math.min(3,s.reps+1);lxShPlayAll();lxShRender()}else lxShPlayAll(s.step===3?0.85:1)});
   on('lx-sh-rate',()=>{s.rate=s.rate>=1.1?0.9:Math.round((s.rate+0.1)*10)/10;lxShRender()});
   on('lx-sh-peek',()=>{s.peek=!s.peek;lxShRender()});
-  on('lx-sh-next',()=>{lxStop();s.step++;s.i=0;lxShRender();window.scrollTo(0,0)});
-  el.querySelectorAll('.lx-sh-line').forEach(b=>b.onclick=()=>{const x=s.sents[+b.dataset.l];lxSpeakLines([x],{lang:s.src.lang,narr:s.src.narr,rate:0.85})});
+  on('lx-sh-next',()=>{lxStop();lxRecStop(true);s.loop=null;s.step++;s.i=0;lxShRender();window.scrollTo(0,0)});
+  el.querySelectorAll('.lx-sh-line,.lx-play-s').forEach(b=>b.onclick=()=>{s.loop=null;const x=s.sents[+b.dataset.l];lxSpeakLines([x],{lang:s.src.lang,narr:s.src.narr,rate:0.85})});
+  // 1文リピート（その文だけを止めるまでくり返す）
+  el.querySelectorAll('[data-loop]').forEach(b=>b.onclick=()=>{const i=+b.dataset.loop;if(s.loop===i){s.loop=null;lxStop();return lxShRender()}
+    s.loop=i;lxShRender();const go1=()=>{if(!lxSh||lxSh.loop!==i)return;lxSpeakLines([s.sents[i]],{lang:s.src.lang,narr:s.src.narr,rate:0.9*s.rate,onend:()=>setTimeout(go1,1200)})};go1()});
+  el.querySelectorAll('[data-gap]').forEach(inp=>inp.oninput=()=>{s.dict[+inp.dataset.gap]=inp.value});
+  on('lx-dict-check',()=>{if(s.dictChecked){s.dictChecked=false;s.dict={};return lxShRender()}
+    s.dictChecked=true;s.dictScore=s.blanks.filter((b,i)=>b&&lxBare(s.dict[i]||'')===b.ans).length;
+    s.blanks.forEach((b,i)=>{if(b&&lxBare(s.dict[i]||'')!==b.ans)lxMissAdd(b.ans)});sfx(s.dictScore===s.blanks.filter(Boolean).length?'correct':'tap');lxShRender()});
+  on('lx-rec',()=>s.recording?lxRecStop():lxRecStart());
+  on('lx-rec-me',()=>{if(s.recUrl){lxStop();new Audio(s.recUrl).play().catch(()=>{})}});
+  on('lx-rec-model',()=>lxShPlayAll());
   on('lx-sh-one',()=>lxSpeakLines([s.sents[s.i]],{lang:s.src.lang,narr:s.src.narr,rate:0.95*s.rate}));
   on('lx-sh-say',lxShSay);
   el.querySelectorAll('[data-self]').forEach(b=>b.onclick=()=>{s.scores[s.i]={v:+b.dataset.self,html:esc(s.sents[s.i].t)};lxShRender()});
   on('lx-sh-nexts',()=>{lxStop();if(s.i+1<s.sents.length){s.i++;lxShRender()}else lxShFinish()});
 }
+// 言えなかった・聞き取れなかった単語を集める（仕上げ画面と次回の素材選びに使う）
+function lxMissAdd(w){w=lxBare(w);if(!w||LX_WEAK.has(w))return;const m=PROG.lxMiss||(PROG.lxMiss={});m[w]=(m[w]||0)+1;const s=lxSh;if(s){s.miss=s.miss||[];if(!s.miss.includes(w))s.miss.push(w)}}
+
+/* ---------- 録音して聞き比べ ---------- */
+async function lxRecStart(){
+  const s=lxSh;if(!s)return;
+  if(!navigator.mediaDevices||!window.MediaRecorder)return showToast('この端末は録音に対応していません');
+  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){return showToast('マイクを使えませんでした（設定でマイクを許可してください）')}
+  const rec=new MediaRecorder(stream),chunks=[];
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  rec.onstop=async()=>{
+    stream.getTracks().forEach(t=>t.stop());
+    if(!lxSh||s._cancel)return;
+    const blob=new Blob(chunks,{type:rec.mimeType||'audio/webm'});
+    if(s.recUrl)URL.revokeObjectURL(s.recUrl);s.recUrl=URL.createObjectURL(blob);
+    const modelSec=(performance.now()-s._t0)/1000;
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();const buf=await ctx.decodeAudioData(await blob.arrayBuffer());ctx.close&&ctx.close();
+      const d=buf.getChannelData(0),N=72,step=Math.floor(d.length/N)||1,env=[];
+      for(let i=0;i<N;i++){let sum=0;for(let j=i*step;j<(i+1)*step&&j<d.length;j++)sum+=d[j]*d[j];env.push(Math.sqrt(sum/step))}
+      const mx=Math.max(...env,1e-4),th=mx*0.12;
+      // 止まった回数：声の途中で0.7秒以上の無音があった回数（最初と最後は除く）
+      const segSec=buf.duration/N,first=env.findIndex(v=>v>th),last=N-1-[...env].reverse().findIndex(v=>v>th);let gaps=0,run=0;
+      for(let i=first;i<=last;i++){if(env[i]<th)run++;else{if(run*segSec>=0.7)gaps++;run=0}}
+      s.recWave=env.map(v=>`<i style="height:${Math.max(4,Math.round(v/mx*100))}%"></i>`).join('');
+      s.recInfo=`${buf.duration.toFixed(1)}秒 · 止まった回数 ${gaps}回`;
+      s.recTip=gaps===0?'一度も止まらずに言えました！ 次は速さ 1.1x に挑戦してみよう。':gaps<=2?`途中で${gaps}回止まりました。止まった所の文を ↻ でくり返してから、もう一度。`:'止まる所が多めです。速さを 0.9x に下げて、まず止まらずに最後まで追いかけよう。';
+      if(gaps===0)sfx('correct');
+      s.recs=(s.recs||0)+1;void modelSec;
+    }catch(e){s.recWave='';s.recInfo='録音しました';s.recTip='波形を表示できない端末ですが、「自分の声」で聞き比べできます。'}
+    s.recording=false;lxShRender();
+  };
+  s._rec=rec;s._cancel=false;s.recording=true;s.reps=Math.min(3,s.reps+1);s._t0=performance.now();
+  rec.start();lxShRender();
+  lxShPlayAll(null,()=>setTimeout(()=>{if(s._rec===rec&&rec.state==='recording')rec.stop()},700));
+}
+function lxRecStop(cancel){const s=lxSh;if(!s||!s._rec)return;if(cancel)s._cancel=true;if(s._rec.state==='recording'){lxStop();s._rec.stop()}if(cancel)s.recording=false}
 function lxShSay(){
   const s=lxSh,x=s.sents[s.i];lxStop();
   const btn=document.getElementById('lx-sh-say');if(btn){btn.disabled=true;btn.textContent='🎤 聞いています…'}
@@ -409,6 +493,7 @@ function lxShSay(){
       if(!lxSh)return;
       if(!text){s.scores[s.i]={v:null,heard:'（声が聞き取れませんでした。もう一度どうぞ）'};return lxShRender()}
       const r=tkAlign(text,x.t);
+      r.words.forEach((w,k)=>{if(!r.marks[k])lxMissAdd(w)});
       s.scores[s.i]={v:r.score,heard:text,html:r.words.map((w,k)=>`<span class="lx-w ${r.marks[k]?'ok':'ng'}">${esc(w)}</span>`).join(' ')};
       sfx(r.score>=80?'correct':'tap');lxShRender();
     },
@@ -421,15 +506,18 @@ function lxShFinish(){
   log[s.src.id]={d:todayStr(),n:(prev?prev.n:0)+1,best:Math.max(prev&&prev.best||0,avg||0),last:avg};
   PROG.lxShadowDays=PROG.lxShadowDays||{};PROG.lxShadowDays[todayStr()]=(PROG.lxShadowDays[todayStr()]||0)+1;
   if(typeof gwLog==='function')gwLog('shadow',{s:avg});
+  const miss=(s.miss||[]).slice(0,12);if(s.recUrl)setTimeout(()=>URL.revokeObjectURL(s.recUrl),60000);
   commit();lxSh=null;
   const el=document.getElementById('screen-review');
   const total=Object.values(PROG.lxShadowDays).reduce((a,b)=>a+b,0);
   el.innerHTML=`${sparkHeroHTML(avg==null||avg>=70?'win':'cheer')}<div class="card result-card">
     <div class="result-score">${avg==null?'シャドーイング完了！':'発話スコア '+avg+'%'}</div>
     <div class="result-msg">${prev&&prev.last!=null&&avg!=null?`前回 ${prev.last}% → 今回 ${avg}%。`:''}同じ音声を何日かに分けて繰り返すと、聞こえる速さが上がります。これまで <b>${total}本</b> シャドーイングしました。</div>
+    ${miss.length?`<div class="lx-miss"><div class="p6-k">今日つまずいた単語</div>${miss.map(w=>`<button class="lx-miss-w" data-say="${esc(w)}">${esc(w)}</button>`).join('')}<div class="hb-note">タップで発音を確認。この素材は数日後にもう一度出てきます。</div></div>`:''}
     ${inDaySession()?sessionNavHTML():`<button class="btn btn-secondary btn-block" style="margin-top:12px" id="lx-sh-again">${ICONS.zap} 別の音声でもう1本</button><button class="btn btn-gold btn-block" style="margin-top:8px" onclick="go('home')">Home ${ICONS.arrowRight}</button>`}
   </div>`;
   const a=document.getElementById('lx-sh-again');if(a)a.onclick=lxShadowToday;
+  el.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>lxSpeakLines([{sp:'N',t:b.dataset.say}],{rate:0.8}));
   window.scrollTo(0,0);
 }
 
@@ -440,7 +528,7 @@ function lxInstall(){
   lxInstallMock();lxInstallP1();
   // 毎日のメニュー：シャドーイングを「今日の目標」に入れる。Part 3・4 は本番形式2セット
   if(typeof P6_TASKS!=='undefined'){
-    P6_TASKS.shadow={t:'シャドーイング 1本',sub:'解いた音声を4ステップで声に出す（耳と口を同時に鍛える）',m:7};
+    P6_TASKS.shadow={t:'シャドーイング 1本',sub:'解いた音声を5ステップで（穴埋め→音読→録音して聞き比べ）',m:9};
     P6_TASKS.p3={t:'Part 3 会話 2セット',sub:'本番形式：設問先読み→音声は1回だけ',m:7};
     P6_TASKS.p4={t:'Part 4 説明文 2セット',sub:'本番形式：設問先読み→図表問題も',m:7};
     P6_TASKS.mock={t:'模試 30問（20分）',sub:'リスニングは音声のみの本番形式',m:20};
@@ -454,7 +542,7 @@ function lxInstall(){
     _rp.apply(this,arguments);
     const n=Object.values(PROG.lxShadowDays||{}).reduce((a,b)=>a+b,0);
     const d=document.createElement('div');
-    d.innerHTML=`<button class="p6-banner lx-sh-banner" id="lx-sh-entry"><span class="p6-banner-ic">${ICONS.zap}</span><span class="p6-banner-b"><b>シャドーイング（リスニング＋発音）</b><small>解いた会話を4ステップで声に出す · これまで${n}本</small></span><span>${ICONS.arrowRight}</span></button>`;
+    d.innerHTML=`<button class="p6-banner lx-sh-banner" id="lx-sh-entry"><span class="p6-banner-ic">${ICONS.zap}</span><span class="p6-banner-b"><b>シャドーイング（リスニング＋発音）</b><small>穴埋め・リズム表示・録音で聞き比べ · これまで${n}本</small></span><span>${ICONS.arrowRight}</span></button>`;
     const node=d.firstElementChild;const p6b=body.querySelector('#p6-banner-toeic');
     if(p6b)p6b.after(node);else body.prepend(node);
     node.onclick=lxShadowToday;

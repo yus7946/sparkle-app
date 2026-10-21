@@ -537,3 +537,49 @@ body:not(.show-kana) .phrase-pron,body:not(.show-kana) .cheat-pron,body:not(.sho
 .tm-res-me{font-size:14px;margin-top:10px}
 .tm-res-me b{color:#ffd76a;font-size:18px}
 .spk-hatch .spk-evo-t{font-size:20px;line-height:1.35}
+
+/* ===== シャドーイング強化（穴埋め・リズム表示・1文リピート・録音） ===== */
+.lx-sh-row{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--border)}
+.lx-sh-row:last-child{border-bottom:none}
+.lx-sh-row .lx-sh-line{border-bottom:none;flex:1}
+.lx-sh-row.looping{background:color-mix(in srgb,var(--sparkle) 10%,transparent);border-radius:10px}
+.lx-loop{flex:0 0 40px;width:40px;height:40px;min-height:40px;padding:0;border:none;border-radius:10px;background:var(--surface);color:var(--sparkle);font-size:17px;font-weight:800;cursor:pointer}
+.looping .lx-loop{background:var(--sparkle);color:#fff}
+.lx-str{font-weight:800;color:var(--text-primary)}
+.lx-weak{font-weight:400;color:color-mix(in srgb,var(--text-primary) 45%,transparent);font-size:.92em}
+.lx-link{font-style:normal;color:var(--ember);font-weight:800;margin:0 -1px}
+.lx-legend{font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.7}
+.lx-play-s{flex:0 0 40px;width:40px;height:40px;min-height:40px;padding:0;border:none;border-radius:50%;background:color-mix(in srgb,var(--sparkle) 12%,transparent);color:var(--sparkle);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.lx-play-s svg{width:15px;height:15px}
+.lx-dict-t{flex:1;font-size:14px;line-height:2;padding:6px 4px;color:var(--text-primary)}
+.lx-gap{font:inherit;font-size:14px;font-weight:700;color:var(--sparkle);border:none;border-bottom:2px solid var(--sparkle);background:color-mix(in srgb,var(--sparkle) 7%,transparent);border-radius:4px 4px 0 0;padding:0 4px;min-width:3.5em;max-width:9em;text-align:center}
+.lx-gap:focus{outline:none;background:color-mix(in srgb,var(--sparkle) 14%,transparent)}
+.lx-gap.ok{color:var(--enchanted);border-color:var(--enchanted)}
+.lx-gap.ng{color:var(--ember);border-color:var(--ember);text-decoration:line-through}
+.lx-gap-ans{font-weight:800;color:var(--enchanted);margin-left:4px}
+.lx-rec{padding:12px 14px;margin-top:10px}
+.lx-wave{display:flex;align-items:center;gap:1px;height:56px;margin:10px 0 2px;background:var(--surface);border-radius:10px;padding:4px 6px}
+.lx-wave i{flex:1;background:linear-gradient(180deg,var(--sparkle-2),var(--sparkle));border-radius:2px;min-height:2px}
+.lx-miss{margin-top:12px;text-align:left}
+.lx-miss-w{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text-primary);border-radius:999px;padding:6px 12px;margin:0 6px 6px 0;cursor:pointer;min-height:36px}
+/* ===== Part 5 分野別の分析 ===== */
+.p5s{padding:14px}
+.p5s-weak{background:color-mix(in srgb,var(--ember) 8%,var(--surface-2));border:1px solid color-mix(in srgb,var(--ember) 25%,transparent);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.p5s-weak b{display:block;font-size:13px;color:var(--text-primary)}
+.p5s-weak small{display:block;font-size:11.5px;line-height:1.6;color:var(--text-secondary);margin:4px 0 8px}
+.p5s-row{display:flex;align-items:center;gap:8px;width:100%;font:inherit;background:none;border:none;border-bottom:1px solid var(--border);padding:8px 2px;cursor:pointer;text-align:left}
+.p5s-row:last-child{border-bottom:none}
+.p5s-t{width:92px;flex-shrink:0;font-size:12px;font-weight:700;color:var(--text-primary)}
+.p5s-bar{flex:1;height:8px;border-radius:4px;background:var(--surface);overflow:hidden}
+.p5s-bar i{display:block;height:100%;border-radius:4px;background:var(--sparkle)}
+.p5s-bar i.ok{background:var(--enchanted)}.p5s-bar i.mid{background:#e8a800}.p5s-bar i.ng{background:var(--ember)}
+.p5s-v{width:58px;text-align:right;font-size:12px;font-weight:800;color:var(--text-primary)}
+.p5s-v small{display:block;font-size:9.5px;font-weight:600;color:var(--text-muted)}
+.p5s-tag{font-size:11.5px;line-height:1.6;color:var(--text-secondary);background:color-mix(in srgb,var(--sparkle) 8%,transparent);border-radius:8px;padding:6px 8px;margin-bottom:6px}
+.p5s-tag b{color:var(--sparkle);margin-right:4px}
+/* ===== ショップ ===== */
+.spk-shop{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-top:12px}
+.spk-shop-ic{font-size:24px}
+.spk-shop-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.spk-shop-b b{font-size:13px;color:var(--text-primary)}
+.spk-shop-b small{font-size:11px;color:var(--text-muted);line-height:1.5}

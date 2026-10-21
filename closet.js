@@ -63,6 +63,8 @@ function openSparkRoom(){
       ${egg?'':`<div class="spk-nick-row"><input id="spk-nick" maxlength="10" value="${esc(s.nick||'')}" placeholder="${sp.name}" aria-label="ニックネーム"><button class="btn btn-secondary" id="spk-nick-save">名前を変える</button></div>`}
     </div>
     ${egg?'<div class="hb-note">たまごがかえったら着せかえできます。アイテムは今のうちに買っておけます（下はお試しモデル）。</div>':''}
+    <div class="card spk-shop"><span class="spk-shop-ic">🛡</span><span class="spk-shop-b"><b>ストリーク保護</b><small>学習できなかった日があっても、連続記録が1日分守られる · 所持 ${PROG.streakFreezes||0}/3</small></span>
+      <button class="btn ${spkCoins()>=150&&(PROG.streakFreezes||0)<3?'btn-gold':'btn-secondary'} spk-item-b" id="spk-freeze" style="width:auto;padding:0 12px" ${spkCoins()<150||(PROG.streakFreezes||0)>=3?'disabled':''}>${SPK_COIN_SVG}150</button></div>
     <div class="spk-tabs">${SPK_SLOTS.map(([k,l])=>`<button class="${k===spkRoomTab?'on':''}" data-tab="${k}">${l}</button>`).join('')}</div>
     <div class="spk-items">${items.map(it=>{const own=s.own.includes(it.id),on=s.wear[it.slot]===it.id,can=spkCoins()>=it.p;
       return`<div class="spk-item${on?' on':''}"><div class="spk-item-pv">${sparkSVG(mst,'hello',model,{...(egg?{}:s.wear),[it.slot]:it.id})}</div><div class="spk-item-n">${esc(it.name)}</div>
@@ -70,6 +72,8 @@ function openSparkRoom(){
     <details class="card spk-rules"><summary>${SPK_COIN_SVG} コインのため方</summary>${SPK_COIN_RULES.map(([t,n])=>`<div><span>${t}</span><b>+${n}</b></div>`).join('')}<div class="hb-note">コインは学習でだけ手に入ります。続けるほど、おしゃれの幅が広がります。</div></details>`;
   document.getElementById('spk-r-back').onclick=()=>go('home');
   el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{spkRoomTab=b.dataset.tab;openSparkRoom()});
+  const fz=document.getElementById('spk-freeze');
+  if(fz)fz.onclick=()=>{if(spkCoins()<150||(PROG.streakFreezes||0)>=3)return;s.coins-=150;PROG.streakFreezes=(PROG.streakFreezes||0)+1;commit();sfx('unlock');spkCoinPill();showToast('ストリーク保護を手に入れた！');openSparkRoom()};
   const sv=document.getElementById('spk-nick-save');
   if(sv)sv.onclick=()=>{const v=document.getElementById('spk-nick').value.trim().slice(0,10);s.nick=v||'';commit();showToast(v?`「${v}」になりました`:'名前を元に戻しました');openSparkRoom()};
   el.querySelectorAll('[data-it]').forEach(b=>b.onclick=()=>{
