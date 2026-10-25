@@ -1,7 +1,7 @@
 {
   "name": "Sparkle — English becomes your adventure",
   "short_name": "Sparkle",
-  "description": "通勤5分で、世界を旅する英語。TOEIC 650対応。",
+  "description": "日本人の英語のクセを3分で診断し、毎日5分で直す。TOEICと英会話を両方。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

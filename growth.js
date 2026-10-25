@@ -78,22 +78,21 @@ function gwPartAcc(part){
 function gwAllConvs(){const a=[];Object.keys(SCENARIOS).forEach(sid=>SCENARIOS[sid].conversations.forEach(c=>a.push({sid,id:c.id,title:c.titleJa})));return a}
 function gwTravel(){
   const t=typeof talkData==='function'?talkData():{best:{},gym:{}};
-  const wdw=wdwMastered()/Math.max(1,wdwTotalPhrases());
   const convs=gwAllConvs();
   const rp=convs.reduce((a,c)=>a+Math.min(100,t.best[c.id]||0),0)/(convs.length*100);
   const gyms=Object.values(t.gym||{});
   const gymAcc=gyms.length?gyms.reduce((a,s)=>a+((s.ln?s.lok/s.ln:0)+(s.sn?s.sok/s.sn:0))/((s.ln?1:0)+(s.sn?1:0)||1),0)/7:0;
   const sps=typeof TK_SPEECH!=='undefined'?TK_SPEECH.map(p=>t.best['sp_'+p.id]||0):[];
   const spk=Math.min(1,gymAcc*0.5+(sps.length?sps.filter(x=>x>=60).length/Math.min(6,sps.length):0)*0.5);
-  const pct=Math.round(100*(0.4*wdw+0.45*rp+0.15*spk));
+  const pct=Math.round(100*(0.75*rp+0.25*spk));
   const days=wdwDaysLeft();
-  const leftPh=wdwTotalPhrases()-wdwMastered();
+  const leftPh=0;
   const leftConv=convs.filter(c=>(t.best[c.id]||0)<75).length;
   let plan='';
   if(pct>=100)plan='準備万端！本番の旅行アシストも確認しておこう';
-  else if(days>0)plan=`出発までに100%：1日 ${Math.max(1,Math.ceil(leftPh/days))}表現＋ロールプレイ${leftConv?Math.max(1,Math.ceil(leftConv/Math.max(1,days/2)))+'本':'の復習'}`;
-  else plan='旅行中！困ったら Talk → 旅行アシスト';
-  return{pct,days,plan,parts:[['WDWフレーズ',wdw],['ロールプレイ（75点以上で合格）',rp],['発音・スピーチ',spk]],leftPh,leftConv};
+  else if(days>0)plan=`出発までに100%：ロールプレイを${leftConv?Math.max(1,Math.ceil(leftConv/Math.max(1,days/2)))+'本':'復習'}／週3回の発音ジム`;
+  else plan=`ロールプレイ75点以上：あと${leftConv}本。週3回、話す練習を続けよう`;
+  return{pct,days,plan,parts:[['ロールプレイ（75点以上で合格）',rp],['発音・スピーチ',spk]],leftPh,leftConv};
 }
 
 /* ---------- Can-doリスト ---------- */
@@ -210,11 +209,11 @@ function gwHomeHTML(){
       <div class="gw-bar"><i style="width:${tg.pct}%"></i></div>
       <div class="gw-goal-s">${tg.remain?'あと'+tg.remain+'点':'目標達成！'}</div>
     </button>
-    <button class="gw-goal" id="gw-g-travel" aria-label="旅行準備度の詳細">
-      <div class="gw-goal-h">${ICONS.plane}<span>旅行準備度</span></div>
+    <button class="gw-goal" id="gw-g-travel" aria-label="会話力の詳細">
+      <div class="gw-goal-h">${ICONS.mic||ICONS.plane}<span>会話力</span></div>
       <div class="gw-goal-v">${tr.pct}<small>%</small></div>
       <div class="gw-bar travel"><i style="width:${tr.pct}%"></i></div>
-      <div class="gw-goal-s">${tr.days>=0?'出発まで '+tr.days+'日':'旅行中'}</div>
+      <div class="gw-goal-s">${tr.days!=null&&tr.days>=0?'出発まで '+tr.days+'日':'ロールプレイ合格 あと'+tr.leftConv+'本'}</div>
     </button>
   </div>`;
   const quests=`<div class="card gw-quests">
@@ -232,7 +231,7 @@ function openGoals(focus){
   gwCheckCandos(true);
   const rk=gwRank(),tg=gwToeicGoal(),tr=gwTravel(),g=gw();
   const cds=gwCandos();
-  const groups=[['travel','旅行で困らない英会話',ICONS.plane],['toeic','TOEIC 650',ICONS.award],['wdw','WDW（ディズニー）',ICONS.star]];
+  const groups=[['travel','旅行で困らない英会話',ICONS.plane],['toeic','TOEIC 650',ICONS.award]];
   const parts=[[1,'P1'],[2,'P2'],[3,'P3'],[4,'P4'],[5,'P5'],[6,'P6'],[7,'P7']].map(([p,l])=>{const a=gwPartAcc(p);return{p,l,a}});
   const weakP=parts.filter(x=>x.a).sort((a,b)=>a.a.acc-b.a.acc)[0];
   const achieved=cds.filter(c=>g.cando[c.id]).length;
