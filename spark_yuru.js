@@ -60,6 +60,8 @@ function yuSVG(st,mood,sp,wear){
   if(st.n===1)return yuEgg(mood);
   sp=sp||spkSpecies()||SPK_SPECIES[0];
   const u='yu'+(++spkUid),[c1,c2,c3]=sp.c,n=st.n,gal=sp.fx==='galaxy';
+  // 性格（spark_persona.js）。仲間の Spark は sp.persona で渡される
+  const pz=sp.persona!==undefined?sp.persona:(typeof spkSpecies==='function'&&sp===spkSpecies()&&PROG.spk?PROG.spk.persona||null:null);
   const R=n===2?36:41,cy=n===2?96:90,shape=sp.shape;
   const fill=gal?yuMix(c2,'#ffffff',0.15):yuMix('#ffffff',c2,0.36),shade=gal?yuMix(c2,c3,0.45):yuMix('#ffffff',c2,0.62);
   const body=yuBody(shape,cy,R,sp.id+n),W=shape==='mochi'?R+8:R;
@@ -72,7 +74,19 @@ function yuSVG(st,mood,sp,wear){
   else if(mood==='cheer')face=`<g class="spk-eyes">${dot(68,0)}${dot(92,0)}</g><path d="M62 ${ey-9} Q67 ${ey-12} 72 ${ey-10}" stroke="${YU_INK}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M88 ${ey-10} Q93 ${ey-12} 98 ${ey-9}" stroke="${YU_INK}" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="80" cy="${ey+10}" rx="3" ry="3.6" fill="${YU_INK}"/>`;
   else if(mood==='study')face=`<g class="spk-eyes">${dot(68,1.5)}${dot(92,1.5)}</g><g fill="none" stroke="${YU_INK}" stroke-width="1.6"><circle cx="68" cy="${ey+1}" r="8"/><circle cx="92" cy="${ey+1}" r="8"/><path d="M76 ${ey} Q80 ${ey-2} 84 ${ey}"/></g><path d="M77 ${ey+11} Q80 ${ey+13} 83 ${ey+11}" stroke="${YU_INK}" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M${80+W-12} ${ht+14} q4 7 0 10 q-4 -3 0 -10z" fill="#9fd8ff" ${yuOL(1.2)}/>`;
   else face=`<g class="spk-eyes">${dot(68,0)}${dot(92,0)}</g><path d="M76.5 ${ey+9} Q80 ${ey+12.5} 83.5 ${ey+9}" stroke="${YU_INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
-  const blush=[58,102].map(x=>`<ellipse cx="${x}" cy="${ey+7}" rx="6" ry="3.4" fill="#ff9fb3" opacity=".55"/><path d="M${x-3} ${ey+9} l2 -4 M${x} ${ey+9} l2 -4 M${x+3} ${ey+9} l2 -4" stroke="#ff7f9a" stroke-width="1" stroke-linecap="round" opacity=".7"/>`).join('');
+  // 性格ごとのふだんの顔（気分が hello のとき）とちょっとした飾り
+  let extra='';const wFace=wear===undefined?(PROG.spk&&PROG.spk.wear&&PROG.spk.wear.face):(wear&&wear.face);
+  if(pz&&mood==='hello'){
+    const smile=`<path d="M76.5 ${ey+9} Q80 ${ey+12.5} 83.5 ${ey+9}" stroke="${YU_INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+    if(pz==='genki')face=`<g class="spk-eyes">${[68,92].map(x=>`<ellipse cx="${x}" cy="${ey}" rx="3.9" ry="5" fill="${YU_INK}"/><circle cx="${x-1.3}" cy="${ey-1.8}" r="1.6" fill="#fff"/><circle cx="${x+1.4}" cy="${ey+1.8}" r=".8" fill="#fff"/>`).join('')}</g><path d="M75.5 ${ey+8} Q80 ${ey+15} 84.5 ${ey+8} Z" fill="${YU_INK}"/>`;
+    if(pz==='nonbiri'){face=`<g class="spk-eyes">${[68,92].map(x=>`<path d="M${x-4} ${ey} Q${x} ${ey+3} ${x+4} ${ey}" stroke="${YU_INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`).join('')}</g>${smile}`;
+      extra=`<g class="yu-zz"><text x="${80+W+2}" y="${ht+10}" font-size="11" font-weight="700" fill="${YU_OL}">z</text><text x="${80+W+9}" y="${ht+1}" font-size="14" font-weight="700" fill="${YU_OL}">Z</text></g>`}
+    if(pz==='ganbari')face=`<g class="spk-eyes">${dot(68,0)}${dot(92,0)}</g><path d="M62 ${ey-8} L72 ${ey-7}" stroke="${YU_INK}" stroke-width="2.6" stroke-linecap="round"/><path d="M98 ${ey-8} L88 ${ey-7}" stroke="${YU_INK}" stroke-width="2.6" stroke-linecap="round"/>${smile}`;
+    if(pz==='shy')face=`<g class="spk-eyes">${dot(68,1.6)}${dot(92,1.6)}</g><path d="M75.5 ${ey+10} q1.5 -2 3 0 q1.5 2 3 0 q1.5 -2 3 0" stroke="${YU_INK}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+    if(pz==='monoshiri')face=`<g class="spk-eyes">${dot(68,0)}${dot(92,0)}</g>${wFace?'':`<g fill="#fff" fill-opacity=".25" stroke="${YU_INK}" stroke-width="1.6"><circle cx="68" cy="${ey}" r="7.5"/><circle cx="92" cy="${ey}" r="7.5"/><path d="M75.5 ${ey-1} Q80 ${ey-3} 84.5 ${ey-1}" fill="none"/></g>`}${smile}`;
+    if(pz==='tsun')face=`<g class="spk-eyes">${dot(70.5,0)}${dot(94.5,0)}<path d="M63 ${ey-4} L73 ${ey-4}" stroke="${YU_INK}" stroke-width="1.8" stroke-linecap="round"/><path d="M87 ${ey-4} L97 ${ey-4}" stroke="${YU_INK}" stroke-width="1.8" stroke-linecap="round"/></g><path d="M76.5 ${ey+11} L80 ${ey+9} L83.5 ${ey+11}" stroke="${YU_INK}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  const blush=[58,102].map(x=>`<ellipse cx="${x}" cy="${ey+7}" rx="6" ry="3.4" fill="#ff9fb3" opacity="${pz==='shy'||pz==='tsun'?'.9':'.55'}"/><path d="M${x-3} ${ey+9} l2 -4 M${x} ${ey+9} l2 -4 M${x+3} ${ey+9} l2 -4" stroke="#ff7f9a" stroke-width="1" stroke-linecap="round" opacity=".7"/>`).join('');
   // 頭の飾り（種類ごと、進化で大きく）
   const s=n>=4?1.3:n>=3?1.1:0.9,y0=ht+2;
   const ACC={
@@ -103,13 +117,13 @@ function yuSVG(st,mood,sp,wear){
   const g={ht,ey,cy,W,R,n,u};
   const wearL=typeof spkWearSVG==='function'?`<g class="spk-wear">${spkWearSVG(g,wear===undefined?spk().wear:wear)}</g>`:'';
   const tw=mood==='win'?`<path d="M${80+W+6} ${ht+6} l2 -6 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2z" fill="#ffd34d" ${yuOL(1.2)}/>`:mood==='cheer'?`<path d="M${80+W+8} ${ht} l3 14" ${yuOL(3)}/><circle cx="${80+W+12.5}" cy="${ht+20}" r="1.8" fill="${YU_OL}"/>`:'';
-  return`<svg class="spk spk-yuru spk-m-${mood} spk-s${n} spk-${sp.id}" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  return`<svg class="spk spk-yuru spk-m-${mood} spk-s${n} spk-${sp.id}${pz?" spk-p-"+pz:""}" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs><clipPath id="${u}c"><path d="${body}"/></clipPath><radialGradient id="${u}a"><stop offset=".45" stop-color="${n>=6?'#ffe08a':c2}" stop-opacity=".38"/><stop offset="1" stop-color="${n>=6?'#ffe08a':c2}" stop-opacity="0"/></radialGradient></defs>
     ${n>=5?`<circle class="spk-aura" cx="80" cy="${cy}" r="${R+26}" fill="url(#${u}a)"/>`:''}${orbit}
     <ellipse class="spk-shadow" cx="80" cy="150" rx="${W*0.7}" ry="4.5" fill="${YU_OL}" opacity=".14"/>
     <g class="spk-float"><g class="spk-squash">${wings}${fins}${ears}${halo}${acc}${feet}
       <path d="${body}" fill="${fill}"/>${inside}<path d="${body}" fill="none" ${yuOL(2.8)}/>
-      ${blush}<g class="spk-face">${face}</g>${arms}${wearL}${tw}</g></g>
+      <g class="yu-blush">${blush}</g><g class="spk-face">${face}</g>${arms}${wearL}${tw}${extra}</g></g>
     ${spkTw(Math.min(4,n),sp.acc==='blossom'?['#ffc2d8','#ffd56b']:['#ffd56b','#ffffff'])}</svg>`;
 }
 

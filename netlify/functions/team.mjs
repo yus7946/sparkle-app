@@ -6,6 +6,7 @@
 // 各メンバーは端末で作った秘密の key を持ち、他人が自分の記録を書き換えられないようにする
 import { getStore } from '@netlify/blobs';
 
+const PERSONAS = ['genki', 'nonbiri', 'ganbari', 'shy', 'monoshiri', 'tsun'];
 const SPECIES = ['sky', 'leaf', 'flame', 'aqua', 'moon', 'sakura', 'bolt', 'prism', 'cosmo'];
 const ITEMS = { head: ['ribbon', 'straw', 'beret', 'phones', 'crown', 'gradcap'], face: ['starcheek', 'roundglasses', 'sunglasses'], neck: ['bowtie', 'scarf', 'lei', 'medal'] };
 const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -26,7 +27,7 @@ function cleanMember(m) {
   if (m.w && typeof m.w === 'object') for (const k of Object.keys(ITEMS)) if (ITEMS[k].includes(m.w[k])) w[k] = m.w[k];
   const days = {};
   if (m.days && typeof m.days === 'object') Object.keys(m.days).filter(ymdOk).sort().slice(-21).forEach(d => { days[d] = num(m.days[d], 0, 1440); });
-  return { id, key, n: txt(m.n, 12) || 'なかま', s: SPECIES.includes(m.s) ? m.s : '', g: num(m.g, 1, 6), w, e: num(m.e, 0, 990), k: num(m.k, 0, 9999), days };
+  return { id, key, n: txt(m.n, 12) || 'なかま', s: SPECIES.includes(m.s) ? m.s : '', p: PERSONAS.includes(m.p) ? m.p : '', g: num(m.g, 1, 6), w, e: num(m.e, 0, 990), k: num(m.k, 0, 9999), days };
 }
 const pub = (t, me) => ({
   code: t.code, name: t.name, created: t.created,

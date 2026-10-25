@@ -657,3 +657,46 @@ body:not(.show-kana) .phrase-pron,body:not(.show-kana) .cheat-pron,body:not(.sho
 .spk-style button.on{background:var(--surface-2);color:var(--text-primary);box-shadow:var(--shadow-sm)}
 .spk-yuru .spk-squash{animation-duration:2.6s}
 .spk-yuru .spk-float{animation-duration:2.6s}
+
+/* ===== Spark の性格：しぐさ（spark_persona.js） ===== */
+.yu-zz{animation:yuZz 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes yuZz{0%{opacity:0;transform:translateY(4px)}30%,70%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
+.spk-p-genki.spk-m-hello .spk-float{animation:pzHop 1.3s cubic-bezier(.3,.7,.4,1) infinite}
+@keyframes pzHop{0%,100%{transform:translateY(0)}40%{transform:translateY(-11px)}}
+.spk-p-genki.spk-m-hello .spk-squash{animation:pzHopSq 1.3s ease-in-out infinite}
+@keyframes pzHopSq{0%,100%{transform:scale(1.06,.93)}12%{transform:scale(1,1)}40%{transform:scale(.96,1.05)}80%{transform:scale(1,1)}}
+.spk-p-nonbiri.spk-m-hello .spk-float{animation:pzSway 4.6s ease-in-out infinite}
+@keyframes pzSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) translateY(-2px)}}
+.spk-p-ganbari.spk-m-hello .spk-float{animation:pzPump 2.2s ease-in-out infinite}
+@keyframes pzPump{0%,55%,100%{transform:translateY(0) scale(1)}65%{transform:translateY(3px) scale(1.05,.92)}78%{transform:translateY(-12px) scale(.96,1.05)}90%{transform:translateY(0) scale(1.03,.97)}}
+.spk-p-shy.spk-m-hello .spk-float{animation:pzShy 3.4s ease-in-out infinite}
+@keyframes pzShy{0%,100%{transform:translate(0,0) rotate(0)}10%{transform:translate(-1px,0) rotate(-2deg)}12%{transform:translate(1px,0)}14%{transform:translate(-1px,0)}16%{transform:translate(0,0)}55%,75%{transform:rotate(4deg) translateY(1px)}}
+.spk-p-shy .yu-blush,.spk-p-tsun .yu-blush{animation:pzBlush 2.4s ease-in-out infinite}
+@keyframes pzBlush{0%,100%{opacity:.8}50%{opacity:1}}
+.spk-p-monoshiri.spk-m-hello .spk-float{animation:pzTilt 3.8s ease-in-out infinite}
+@keyframes pzTilt{0%,100%{transform:rotate(0)}25%,50%{transform:rotate(9deg)}60%{transform:rotate(0) translateY(2px)}66%{transform:translateY(0)}}
+.spk-p-tsun.spk-m-hello .spk-float{animation:pzPui 4.2s ease-in-out infinite}
+@keyframes pzPui{0%,100%{transform:rotate(0)}35%,72%{transform:rotate(-8deg) translateX(-3px)}}
+/* タップしたときのしぐさ */
+.spk.spk-poke.spk-p-genki .spk-float{animation:pzSpin .8s cubic-bezier(.3,.7,.4,1)!important}
+@keyframes pzSpin{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-24px) rotate(180deg)}100%{transform:translateY(0) rotate(360deg)}}
+.spk.spk-poke.spk-p-nonbiri .spk-float{animation:pzWob 1s ease-in-out!important}
+@keyframes pzWob{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}50%{transform:rotate(8deg)}75%{transform:rotate(-5deg)}}
+.spk.spk-poke.spk-p-ganbari .spk-float{animation:pzBig .7s cubic-bezier(.3,.7,.4,1)!important}
+@keyframes pzBig{0%{transform:translateY(0) scale(1.08,.9)}45%{transform:translateY(-30px) scale(.94,1.08)}100%{transform:translateY(0) scale(1)}}
+.spk.spk-poke.spk-p-shy .spk-float{animation:pzHide .8s ease-in-out!important}
+@keyframes pzHide{0%,100%{transform:scale(1) translateX(0)}20%{transform:scale(.88) translateX(-3px)}30%{transform:scale(.88) translateX(3px)}40%{transform:scale(.88) translateX(-3px)}60%{transform:scale(.9)}}
+.spk.spk-poke.spk-p-monoshiri .spk-float{animation:pzNod .8s ease-in-out!important}
+@keyframes pzNod{0%,100%{transform:translateY(0)}25%,65%{transform:translateY(4px) rotate(3deg)}45%{transform:translateY(0)}}
+.spk.spk-poke.spk-p-tsun .spk-float{animation:pzTurn .8s ease-in-out!important}
+@keyframes pzTurn{0%,100%{transform:scaleX(1)}35%,70%{transform:scaleX(-1) rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.spk-p-genki .spk-float,.spk-p-nonbiri .spk-float,.spk-p-ganbari .spk-float,.spk-p-shy .spk-float,.spk-p-monoshiri .spk-float,.spk-p-tsun .spk-float,.yu-zz{animation:none!important}}
+/* 性格の表示 */
+.spk-pz{margin:6px 0 12px;background:rgba(255,255,255,.1);border-radius:12px;padding:10px 12px;text-align:left}
+.spk-pz b{display:block;color:#ffd76a;font-size:14px}
+.spk-pz span{display:block;font-size:11.5px;color:rgba(244,248,253,.75);margin-top:2px}
+.spk-pz i{display:block;font-style:normal;font-size:13px;color:#fff;margin-top:6px;line-height:1.5}
+.spk-pz-card{padding:12px 14px;margin-top:10px}
+.spk-pz-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.spk-pz-h b{font-size:14px;color:var(--text-primary)}
+.spk-pz-h span{font-size:12px;font-weight:700;color:var(--ember)}
