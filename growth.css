@@ -650,3 +650,10 @@ body:not(.show-kana) .phrase-pron,body:not(.show-kana) .cheat-pron,body:not(.sho
 .pl-entry-b b{color:#fff;font-size:14px}
 .pl-entry-b small{color:rgba(244,248,253,.78)!important}
 .card.pl-entry,.card.pl-hero{background:linear-gradient(135deg,#0f2a4a,#1b4f8f)!important;color:#f4f8fd;border:none}
+
+/* ===== Spark ゆるかわ絵柄（spark_yuru.js） ===== */
+.spk-style{display:inline-flex;gap:4px;margin-top:10px;background:var(--surface);border-radius:999px;padding:3px}
+.spk-style button{font:inherit;font-size:12px;font-weight:700;border:none;background:none;color:var(--text-secondary);border-radius:999px;padding:6px 14px;min-height:34px;cursor:pointer}
+.spk-style button.on{background:var(--surface-2);color:var(--text-primary);box-shadow:var(--shadow-sm)}
+.spk-yuru .spk-squash{animation-duration:2.6s}
+.spk-yuru .spk-float{animation-duration:2.6s}
