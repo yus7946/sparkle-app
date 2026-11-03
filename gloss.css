@@ -1,0 +1,154 @@
+/* ========== SPARKLE GLOSS — ツヤ感レイヤー ==========
+   既存のスタイルの上に重ねる仕上げ。色は :root のトークンを使い、背景を上書きせず
+   「ハイライト・影・光沢・動き」だけを足す（各画面の個別デザインを壊さないため）。
+   ・背景：ゆっくり動くオーロラ
+   ・カード：ガラスの縁のハイライト＋上面のツヤ（::after を背面に置き、文字にはかけない）
+   ・ボタン：上半分の光沢＋数秒ごとに走るシャイン
+   ・ナビ：浮いたガラスのタブバー
+   ・画面の切り替え：ふわっと表示
+   すべての CSS の最後に読み込む。 */
+
+:root{
+  --gl-hi:rgba(255,255,255,.95);
+  --gl-edge:rgba(255,255,255,.85);
+  --gl-sheen:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0) 46%);
+  --gl-shadow:0 1px 1px rgba(20,48,96,.04),0 10px 28px -14px rgba(26,86,168,.30);
+  --gl-shadow-lift:0 2px 2px rgba(20,48,96,.05),0 18px 40px -16px rgba(26,86,168,.38);
+  --gl-aura-1:rgba(79,163,247,.30);
+  --gl-aura-2:rgba(255,215,106,.22);
+  --gl-aura-3:rgba(140,120,255,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --gl-hi:rgba(255,255,255,.16);
+    --gl-edge:rgba(255,255,255,.10);
+    --gl-sheen:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 46%);
+    --gl-shadow:0 1px 1px rgba(0,0,0,.2),0 12px 30px -14px rgba(0,0,0,.6);
+    --gl-shadow-lift:0 2px 2px rgba(0,0,0,.25),0 20px 44px -16px rgba(0,0,0,.7);
+    --gl-aura-1:rgba(79,163,247,.20);
+    --gl-aura-2:rgba(255,215,106,.08);
+    --gl-aura-3:rgba(140,120,255,.12);
+  }
+}
+
+/* ---------- 背景：ゆっくり動くオーロラ ---------- */
+body::before{
+  content:'';position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(32% 26% at 22% 18%,var(--gl-aura-1),transparent 70%),
+    radial-gradient(28% 22% at 82% 12%,var(--gl-aura-2),transparent 70%),
+    radial-gradient(34% 30% at 70% 78%,var(--gl-aura-3),transparent 70%),
+    radial-gradient(30% 26% at 18% 86%,var(--gl-aura-1),transparent 70%);
+  filter:blur(18px);
+  animation:glAurora 28s ease-in-out infinite alternate;
+}
+@keyframes glAurora{
+  0%{transform:translate3d(0,0,0) rotate(0deg)}
+  50%{transform:translate3d(3%,-2%,0) rotate(4deg)}
+  100%{transform:translate3d(-3%,2%,0) rotate(-3deg)}
+}
+
+/* ---------- ガラスの面（カード類） ---------- */
+.card,.tk-act,.tk-wide,.tk-mode,.gw-goal,.tk-set,.focus-card{
+  border-color:var(--gl-edge);
+  box-shadow:inset 0 1px 0 var(--gl-hi),var(--gl-shadow);
+  isolation:isolate;
+}
+.card:not(.sc-card):not(.stamped):not(.done)::after,.tk-act::after,.tk-wide::after,.tk-mode::after,.gw-goal::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:var(--gl-sheen);
+}
+.tk-act,.tk-wide,.tk-mode,.gw-goal{position:relative}
+.card:hover,.tk-wide:hover,.tk-mode:hover,.gw-goal:hover{box-shadow:inset 0 1px 0 var(--gl-hi),var(--gl-shadow-lift)}
+@media (hover:hover){
+  button.card:hover,.tk-wide:hover,.tk-mode:hover,.gw-goal:hover{transform:translateY(-1px)}
+}
+.card:active,.tk-wide:active,.tk-mode:active,.gw-goal:active{transform:translateY(0) scale(.985)}
+.tk-mode-ic,.tk-wide .tk-mode-ic{box-shadow:inset 0 1px 0 var(--gl-hi),0 4px 10px -6px rgba(26,86,168,.45)}
+
+/* 今日のカード：斜めの光の帯 */
+.focus-card::after{
+  content:'';position:absolute;top:-60%;left:-40%;width:60%;height:220%;pointer-events:none;z-index:0;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);
+  transform:rotate(12deg);animation:glBand 9s var(--ease-in-out) infinite;
+}
+@keyframes glBand{0%,70%{left:-60%}100%{left:130%}}
+
+/* ---------- ボタン：光沢とシャイン ---------- */
+.btn{position:relative;overflow:hidden;isolation:isolate}
+.btn-primary,.btn-gold{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 6px rgba(10,40,100,.18),0 10px 22px -10px color-mix(in srgb,var(--sparkle) 75%,transparent);
+  text-shadow:0 1px 0 rgba(10,40,100,.18);
+}
+.btn-primary::before,.btn-gold::before{
+  content:'';position:absolute;left:8%;right:8%;top:2px;height:46%;border-radius:999px;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));
+}
+.btn-primary::after,.btn-gold::after{
+  content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;pointer-events:none;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:skewX(-18deg);animation:glSheen 5s ease-in-out infinite;
+}
+@keyframes glSheen{0%,72%{left:-60%}100%{left:130%}}
+.btn-secondary{box-shadow:inset 0 1px 0 var(--gl-hi),var(--gl-shadow);border-color:var(--gl-edge)}
+.btn:disabled::after{display:none}
+
+/* 選択肢・丸いアイコンボタン */
+.choice-btn{box-shadow:inset 0 1px 0 var(--gl-hi),var(--gl-shadow)}
+.icon-btn{box-shadow:inset 0 1px 0 var(--gl-hi),var(--gl-shadow);border-color:var(--gl-edge)}
+
+/* マイク：つやのある球 */
+.tk-mic{
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.85),rgba(255,255,255,0) 32%),linear-gradient(145deg,var(--sparkle-2),var(--sparkle) 70%,var(--gold));
+  box-shadow:inset 0 -6px 14px rgba(10,40,100,.25),inset 0 2px 0 rgba(255,255,255,.5),0 14px 30px -10px color-mix(in srgb,var(--sparkle) 80%,transparent);
+  position:relative;
+}
+.tk-mic::after{content:'';position:absolute;inset:-8px;border-radius:inherit;border:2px solid color-mix(in srgb,var(--sparkle) 40%,transparent);opacity:0;pointer-events:none}
+.tk-mic.mic-active::after{animation:glRipple 1.3s ease-out infinite}
+@keyframes glRipple{0%{opacity:.9;transform:scale(.9)}100%{opacity:0;transform:scale(1.35)}}
+
+/* ---------- 進捗バー：ガラス管 ---------- */
+.gw-bar,.q-prog,.rv-prog{box-shadow:inset 0 1px 2px rgba(20,48,96,.12)}
+.gw-bar i,.q-prog-fill,.rv-prog-fill{
+  position:relative;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55);
+}
+.gw-bar i::after,.q-prog-fill::after,.rv-prog-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:translateX(-100%);animation:glBar 2.8s ease-in-out infinite;
+}
+@keyframes glBar{0%,40%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ---------- ヘッダー・ナビ ---------- */
+.hdr{background:linear-gradient(180deg,color-mix(in srgb,var(--night) 82%,transparent),color-mix(in srgb,var(--night) 62%,transparent));border-bottom-color:var(--gl-edge);box-shadow:0 8px 24px -20px rgba(26,86,168,.5)}
+.hdr-pill{background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.35));border-color:var(--gl-edge);box-shadow:inset 0 1px 0 var(--gl-hi),0 4px 12px -8px rgba(26,86,168,.4)}
+@media (prefers-color-scheme: dark){.hdr-pill{background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.04))}}
+
+body{padding-bottom:calc(96px + var(--safe-b))}
+.nav{
+  left:12px;right:12px;bottom:calc(10px + var(--safe-b));padding-bottom:0;
+  max-width:536px;margin:0 auto;border-radius:26px;
+  border:1px solid var(--gl-edge);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--night) 78%,transparent),color-mix(in srgb,var(--night) 92%,transparent));
+  backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);
+  box-shadow:inset 0 1px 0 var(--gl-hi),0 18px 40px -16px rgba(20,48,96,.45);
+}
+.nav-btn{isolation:isolate;padding:9px 4px 10px}
+.nav-btn.on::after{
+  top:5px;bottom:5px;left:10%;right:10%;height:auto;border-radius:18px;z-index:-1;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--sparkle) 16%,transparent),color-mix(in srgb,var(--sparkle) 6%,transparent));
+  box-shadow:inset 0 1px 0 var(--gl-hi);
+}
+.nav-btn.on svg{color:var(--sparkle);filter:drop-shadow(0 3px 6px color-mix(in srgb,var(--sparkle) 50%,transparent))}
+
+/* ---------- 画面の切り替え ---------- */
+.screen.active{animation:glScreen .45s var(--ease-out)}
+@keyframes glScreen{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* 見出しの数字をそろえる */
+.tk-stat-v,.gw-goal-v,.result-score{font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion: reduce){
+  body::before,.focus-card::after,.btn-primary::after,.btn-gold::after,.gw-bar i::after,.q-prog-fill::after,.rv-prog-fill::after,.screen.active,.tk-mic.mic-active::after{animation:none!important}
+}

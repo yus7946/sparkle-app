@@ -216,3 +216,13 @@
 .sj-stats .tk-stat-v{font-size:var(--text-lg)}
 .sj-sum-row{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid var(--border);font-size:var(--text-sm)}
 .sj-sum-row b{color:var(--text-primary)}
+.sj-chips b{font-size:var(--text-xs);color:var(--text-muted);font-weight:700;align-self:center}
+.sj-start{display:inline-flex;align-items:center;gap:8px;margin:8px auto 0;padding:7px 12px;border-radius:12px;background:color-mix(in srgb,var(--sparkle) 8%,var(--surface));border:1px dashed var(--border-strong);font-size:var(--text-sm);font-weight:600;color:var(--text-primary)}
+.sj-start span{font-size:10px;font-weight:800;color:var(--sparkle);letter-spacing:.06em}
+.sj-rep{margin-top:12px}
+.sj-rep.mic-active{border-color:var(--sparkle);color:var(--sparkle)}
+.sj-rep-r{margin:6px 0 0}
+.sj-rep-r small{color:var(--text-muted)}
+.sj-guide-card{padding:14px 16px;margin-bottom:var(--space-md)}
+.sj-guide-card>b{font-size:var(--text-sm);color:var(--text-primary)}
+.sj-guide-card ol{margin:8px 0 12px;padding-left:20px;font-size:var(--text-xs);line-height:1.7;color:var(--text-secondary)}

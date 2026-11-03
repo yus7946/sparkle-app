@@ -5,33 +5,35 @@
    3. カタカナ発音  … 母音を足す・強勢がない → 音節と強勢を見て言い、音声認識に通じるか確かめる
    ・入口：英語ジム / Talk タブ。毎週木曜は「英会話ロールプレイ」の枠が「話すジム 3分」になる（メニュー量は増やさない）
    ・3秒ルールの結果は英語ジムの「瞬発力」にも記録する
+   ・英語が苦手な人向けに「やさしい」レベルが既定（目標8秒・訳と書き出しのヒント・ゆっくり再生）。
+     わからない時は「お手本を聞いて、まねして言う」に切り替えられる（まねした一致率を表示）
    talk.js / jp.js / plan650.js の後に読み込む。 */
 'use strict';
 
-// [質問, 訳, お手本（つなぎ言葉＋答え＋1文）]
+// [質問, 訳, お手本（つなぎ言葉＋答え＋1文）, 書き出しのヒント]
 const SJ_QUICK=[
-  ["What did you do last weekend?","先週末は何をした？","Well, I mostly stayed home and relaxed. I watched a movie on Sunday."],
-  ["What kind of food do you like?","どんな食べ物が好き？","Hmm, I really like ramen. There's a great place near my office."],
-  ["Where would you like to travel next?","次はどこに旅行したい？","Good question. I'd love to go to Hawaii. I just want to relax on the beach."],
-  ["How was your day?","今日はどうだった？","It was pretty busy, actually. I had three meetings in the morning."],
-  ["Do you prefer cats or dogs?","猫派？犬派？","Let me think. I'd say dogs. They're always happy to see you."],
-  ["What do you do for fun?","休みの日は何してる？","I like going to cafés. I usually read there on weekends."],
-  ["Why are you learning English?","なぜ英語を勉強してるの？","Well, I want to travel without worrying. I also need it for work."],
-  ["What's your hometown like?","地元はどんなところ？","It's a quiet town by the sea. It's famous for its hot springs."],
-  ["What time do you usually get up?","普段は何時に起きる？","Usually around seven. But on weekends I sleep in."],
-  ["Have you been anywhere interesting recently?","最近どこか面白い所に行った？","Actually, yes. I went to a new aquarium last month. It was amazing."],
-  ["What's something you're good at?","得意なことは？","Hmm, I'm pretty good at cooking. I make curry almost every week."],
-  ["What would you do with a free day?","丸1日自由ならどうする？","I'd probably go hiking. I love being outside."],
-  ["Can you recommend a place to eat in Japan?","日本でおすすめのお店は？","Sure. You should try conveyor belt sushi. It's cheap and fun."],
-  ["What's the weather like today?","今日の天気はどう？","It's pretty warm today. It's a little cloudy, though."],
-  ["What did you have for breakfast?","朝ごはんは何を食べた？","Just toast and coffee. I didn't have much time this morning."],
-  ["What kind of music do you listen to?","どんな音楽を聴く？","Mostly J-pop. But lately I've been into jazz."],
-  ["Is this your first time here?","ここは初めて？","Yes, it is! I've always wanted to come here."],
-  ["How long are you staying?","どのくらい滞在するの？","About a week. I'm here on vacation."],
-  ["What should I see in Tokyo?","東京では何を見るべき？","Hmm, I'd say Asakusa. It has a really traditional feel."],
-  ["How did you get here today?","今日はどうやって来た？","I took the train. It only took about twenty minutes."],
-  ["What are you doing this weekend?","今週末の予定は？","Nothing special, actually. Maybe I'll go shopping with a friend."],
-  ["What's your favorite season?","好きな季節は？","I'd say autumn. The weather is nice and the food is great."]
+  ["What did you do last weekend?","先週末は何をした？","Well, I mostly stayed home and relaxed. I watched a movie on Sunday.","Last weekend, I …"],
+  ["What kind of food do you like?","どんな食べ物が好き？","Hmm, I really like ramen. There's a great place near my office.","I like … (ramen / sushi)"],
+  ["Where would you like to travel next?","次はどこに旅行したい？","Good question. I'd love to go to Hawaii. I just want to relax on the beach.","I'd like to go to …"],
+  ["How was your day?","今日はどうだった？","It was pretty busy, actually. I had three meetings in the morning.","It was … (good / busy)"],
+  ["Do you prefer cats or dogs?","猫派？犬派？","Let me think. I'd say dogs. They're always happy to see you.","I like … better."],
+  ["What do you do for fun?","休みの日は何してる？","I like going to cafés. I usually read there on weekends.","I like …ing. (reading / cooking)"],
+  ["Why are you learning English?","なぜ英語を勉強してるの？","Well, I want to travel without worrying. I also need it for work.","Because I want to …"],
+  ["What's your hometown like?","地元はどんなところ？","It's a quiet town by the sea. It's famous for its hot springs.","It's a … town. (quiet / big)"],
+  ["What time do you usually get up?","普段は何時に起きる？","Usually around seven. But on weekends I sleep in.","I usually get up at …"],
+  ["Have you been anywhere interesting recently?","最近どこか面白い所に行った？","Actually, yes. I went to a new aquarium last month. It was amazing.","Yes, I went to …"],
+  ["What's something you're good at?","得意なことは？","Hmm, I'm pretty good at cooking. I make curry almost every week.","I'm good at …ing."],
+  ["What would you do with a free day?","丸1日自由ならどうする？","I'd probably go hiking. I love being outside.","I'd … (go shopping / sleep)"],
+  ["Can you recommend a place to eat in Japan?","日本でおすすめのお店は？","Sure. You should try conveyor belt sushi. It's cheap and fun.","You should try …"],
+  ["What's the weather like today?","今日の天気はどう？","It's pretty warm today. It's a little cloudy, though.","It's … today. (sunny / rainy)"],
+  ["What did you have for breakfast?","朝ごはんは何を食べた？","Just toast and coffee. I didn't have much time this morning.","I had …"],
+  ["What kind of music do you listen to?","どんな音楽を聴く？","Mostly J-pop. But lately I've been into jazz.","I listen to …"],
+  ["Is this your first time here?","ここは初めて？","Yes, it is! I've always wanted to come here.","Yes, it is. / No, I came here before."],
+  ["How long are you staying?","どのくらい滞在するの？","About a week. I'm here on vacation.","About … (a week / three days)"],
+  ["What should I see in Tokyo?","東京では何を見るべき？","Hmm, I'd say Asakusa. It has a really traditional feel.","You should see …"],
+  ["How did you get here today?","今日はどうやって来た？","I took the train. It only took about twenty minutes.","I came by … (train / bus)"],
+  ["What are you doing this weekend?","今週末の予定は？","Nothing special, actually. Maybe I'll go shopping with a friend.","I'm going to …"],
+  ["What's your favorite season?","好きな季節は？","I'd say autumn. The weather is nice and the food is great.","I like … (spring / autumn)"]
 ];
 const SJ_FILLER=/\b(well|hmm+|let me (think|see)|good question|i'?d say|actually|honestly|to be honest|i guess|you know what|how can i put it|that'?s a (good|great|tough) question)\b/i;
 const SJ_FILLER_CHIPS=['Well, …','Hmm, let me think.','Good question.',"I'd say …",'Actually, …'];
@@ -112,10 +114,20 @@ const SJ_KATA=[
 
 /* ---------- 記録 ---------- */
 function sj(){const s=PROG.sj||(PROG.sj={});s.q=s.q||[];s.w=s.w||{};s.hist=s.hist||[];return s}
+// レベル：sec＝話し出すまでの目標秒数、rate＝質問の速さ、hint＝訳・書き出し・使えそうな単語を最初から出す
+const SJ_LV={
+  easy:{name:'やさしい',sec:8,rate:0.8,hint:true,ja:'目標 8秒・訳とヒントつき・ゆっくり'},
+  normal:{name:'ふつう',sec:5,rate:0.92,hint:false,ja:'目標 5秒・ヒントはタップで'},
+  hard:{name:'本番',sec:3,rate:1,hint:false,ja:'目標 3秒・ナチュラルな速さ'}
+};
+const sjLvKey=()=>SJ_LV[sj().lv]?sj().lv:'easy';
+const sjLv=()=>SJ_LV[sjLvKey()];
 // 単語・お題ごとの [回数, できた回数]
 function sjMark(id,ok){const w=sj().w,r=w[id]||(w[id]=[0,0]);r[0]++;if(ok)r[1]++}
 function sjRate(prefix){let n=0,ok=0;Object.entries(sj().w).forEach(([k,v])=>{if(k.startsWith(prefix)){n+=v[0];ok+=v[1]}});return n?ok/n:null}
 function sjAvgLat(){const q=sj().q.slice(-10);return q.length?q.reduce((a,x)=>a+x.lat,0)/q.length:null}
+// bag / bags のような重複をまとめる
+const sjUniq=a=>a.filter((k,i)=>a.findIndex(x=>tkStem(x)===tkStem(k))===i);
 const sjShuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
 // まだできていない物を優先して選ぶ
 function sjPick(list,key,n){
@@ -130,19 +142,38 @@ function sjDedupe(t){let s=String(t||'').trim();for(let n=6;n>=2;n--){const re=n
 // 語句がそのまま（連続して）言えたか
 function sjHas(text,w){const j=a=>' '+tkTokens(a).map(tkStem).join(' ')+' ';return j(text).includes(j(w))}
 function sjSay(text,onend){
-  if(typeof lxSpeakLines==='function')return lxSpeakLines([{sp:'W',t:text}],{rate:talkData().rate||0.92,onend});
-  speak(text,talkData().rate||0.92);if(onend)setTimeout(onend,600+text.split(/\s+/).length*380);
+  const rate=sjLv().rate;
+  if(typeof lxSpeakLines==='function')return lxSpeakLines([{sp:'W',t:text}],{rate,onend});
+  speak(text,rate);if(onend)setTimeout(onend,600+text.split(/\s+/).length*400/rate);
+}
+// お手本をまねして言う（できなかった時の逃げ道。言えた体験を作る）
+function sjRepeatHTML(model){return TK_SR?`<button class="btn btn-secondary btn-block sj-rep" data-rep="${esc(model)}">${ICONS.mic} お手本をまねして言ってみる</button><div class="tk-live sj-rep-r"></div>`:''}
+function sjBindRepeat(root){
+  root.querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>{
+    if(tkRec){tkRec.stop();return}
+    const model=b.dataset.rep,out=b.nextElementSibling;
+    if('speechSynthesis'in window)speechSynthesis.cancel();
+    b.classList.add('mic-active');b.innerHTML=`${ICONS.mic} 聞いています…（言い終わったらタップ）`;out.textContent='';
+    tkListen({lang:'en-US',maxMs:10000,onInterim:t=>{out.textContent=t},
+      onDone:(txt,meta)=>{b.classList.remove('mic-active');b.innerHTML=`${ICONS.mic} もう一度まねする`;
+        if(!txt){out.textContent=meta.error?tkSrErrorMsg(meta.error):'聞き取れませんでした。ゆっくりでOK、もう一度どうぞ。';return}
+        const sc=tkAlign(txt,model).score;
+        out.innerHTML=`${sc>=80?'<b class="tk-ok">ばっちり！</b>':sc>=50?'<b class="tk-mid">いい感じ！</b>':'<b class="tk-ng">あと少し。</b>'} お手本と ${sc}% 一致<br><small>${esc(txt)}</small>`;
+        if(sc>=70&&sjS&&!b.dataset.got){b.dataset.got=1;sjS.rep=(sjS.rep||0)+1}
+        sfx(sc>=70?'correct':'tap')},
+      onError:c=>{b.classList.remove('mic-active');out.textContent=tkSrErrorMsg(c)}});
+  });
 }
 
 /* ---------- 問題を作る ---------- */
 function sjItems(kind,n){
-  if(kind==='quick')return sjPick(SJ_QUICK,x=>'q_'+x[0],n).map(x=>({kind,id:'q_'+x[0],q:x[0],ja:x[1],model:x[2]}));
+  if(kind==='quick')return sjPick(SJ_QUICK,x=>'q_'+x[0],n).map(x=>({kind,id:'q_'+x[0],q:x[0],ja:x[1],model:x[2],start:x[3]}));
   if(kind==='para')return sjPick(SJ_PARA,x=>'p_'+x[1],n).map(x=>({kind,id:'p_'+x[1],ja:x[0],en:x[1],cat:x[2],keys:x[3],model:x[4]}));
   if(kind==='kata')return sjPick(SJ_KATA,x=>'k_'+x[0],n).map(x=>({kind,id:'k_'+x[0],w:x[0],kana:x[1],stress:x[2],guide:x[3],tip:x[4]}));
   return[];
 }
 const SJ_KIND={
-  quick:{ic:'⏱',name:'3秒ルール',ja:'黙って考えず、つなぎ言葉で3秒以内に話し出す。答えは＋1文で広げる'},
+  quick:{ic:'⏱',name:'3秒ルール',ja:'黙って考えず、つなぎ言葉ですぐ話し出す。答えは＋1文で広げる'},
   para:{ic:'🔁',name:'言い換え',ja:'単語を知らなくても止まらない。「〜に使うもの」と説明して切り抜ける'},
   kata:{ic:'🗣',name:'カタカナ発音リセット',ja:'母音を足さない・強く言う場所を守る。音声認識に通じるか確かめる'}
 };
@@ -179,21 +210,24 @@ function sjBindNext(q,ok,retry){
 
 /* ---------- 1. 3秒ルール ---------- */
 function sjQuick(q){
-  const el=tkScreen(),hasSR=!!TK_SR;
+  const el=tkScreen(),hasSR=!!TK_SR,lv=sjLv(),goal=lv.sec;
+  const hint=`<div class="tk-row-s">${esc(q.ja)}</div><div class="sj-start"><span>書き出し</span>${esc(q.start||'')}</div>`;
   el.innerHTML=sjHead()+`<div class="tk-act sj-act">
-    <div class="tk-goal-l">質問が終わったら、3秒以内に話し出す</div>
+    <div class="tk-goal-l">質問が終わったら、${goal}秒以内に話し出す（${lv.name}）</div>
     <div class="sj-question" id="sj-qt">${esc(q.q)}</div>
-    <button class="tk-link" id="sj-ja">訳を見る</button>
+    ${lv.hint?hint:'<button class="tk-link" id="sj-ja">訳とヒントを見る</button>'}
     <div class="sj-clock" id="sj-clock" aria-live="polite">—</div>
     <div class="tk-mic-wrap" id="sj-micw"><button class="btn btn-gold" id="sj-start">${ICONS.play} 質問を聞く</button></div>
-    <div class="tk-live tk-live-lg" id="sj-live">完璧な文はいりません。まず声を出すのが英語の会話のマナー。</div>
-    <div class="sj-chips" aria-label="つなぎ言葉">${SJ_FILLER_CHIPS.map(c=>`<span>${esc(c)}</span>`).join('')}</div>
+    <div class="tk-live tk-live-lg" id="sj-live">${lv.hint?'単語だけでもOK。まず声を出してみよう。':'完璧な文はいりません。まず声を出すのが英語の会話のマナー。'}</div>
+    <div class="sj-chips" aria-label="つなぎ言葉"><b>迷ったら：</b>${SJ_FILLER_CHIPS.map(c=>`<span>${esc(c)}</span>`).join('')}</div>
+    <div class="tk-subacts" id="sj-sub"><button class="tk-link" id="sj-give">わからない（お手本を聞く）</button></div>
     <div id="sj-fb"></div></div>`;
-  document.getElementById('sj-ja').onclick=e=>{e.target.outerHTML=`<div class="tk-row-s">${esc(q.ja)}</div>`};
+  const ja=document.getElementById('sj-ja');if(ja)ja.onclick=()=>{ja.outerHTML=hint};
+  document.getElementById('sj-give').onclick=()=>{tkStopAll();clearInterval(sjQuick._t);sjQuickGiveUp(q)};
   const clock=document.getElementById('sj-clock'),live=document.getElementById('sj-live'),micw=document.getElementById('sj-micw');
   let t0=0,lat=null,silence=null,stopped=false;
-  const tick=()=>{if(lat==null&&t0){const v=(performance.now()-t0)/1000;clock.textContent=v.toFixed(1)+'秒';clock.classList.toggle('over',v>3)}};
-  const gotVoice=()=>{if(lat!=null||!t0)return;lat=(performance.now()-t0)/1000;clearInterval(sjQuick._t);clock.textContent=lat.toFixed(1)+'秒';clock.classList.toggle('over',lat>3);clock.classList.add('done')};
+  const tick=()=>{if(lat==null&&t0){const v=(performance.now()-t0)/1000;clock.textContent=v.toFixed(1)+'秒';clock.classList.toggle('over',v>goal)}};
+  const gotVoice=()=>{if(lat!=null||!t0)return;lat=(performance.now()-t0)/1000;clearInterval(sjQuick._t);clock.textContent=lat.toFixed(1)+'秒';clock.classList.toggle('over',lat>goal);clock.classList.add('done')};
   const listen=()=>{
     micw.innerHTML=hasSR?`${tkMicHTML('sj-mic','話し終わったらタップ')}`:`<button class="btn btn-gold" id="sj-tap">話し始めたらタップ</button>`;
     if(!hasSR){document.getElementById('sj-tap').onclick=()=>{gotVoice();sjQuickSelf(q,lat)};return}
@@ -219,49 +253,66 @@ function sjQuick(q){
   document.getElementById('sj-start').onclick=ask;
 }
 function sjQuickResult(q,text,lat){
-  const words=tkTokens(text).length,filler=SJ_FILLER.test(text),fast=lat<=3,more=words>=8,ok=fast&&words>=5;
+  const lv=sjLv(),words=tkTokens(text).length,filler=SJ_FILLER.test(text),fast=lat<=lv.sec,more=words>=8,ok=fast&&words>=(lv.hint?3:5);
   sj().q.push({d:todayStr(),lat:Math.round(lat*10)/10,w:words});if(sj().q.length>200)sj().q.shift();
   if(typeof jpLog==='function')jpLog('speak',ok);
   const advice=!fast?'黙って考えるより、まず <b>Well,</b> / <b>Hmm, let me think.</b> で声を出そう。英語では、考えながら話すのがふつうです。'
+    :words<(lv.hint?3:5)?'声が出せました！ 次は書き出しのヒントを使って、<b>I like … のように文にしてみよう</b>。'
     :words<5?'Yes / No や単語だけで終わると会話が止まります。<b>理由か具体例を1文足す</b>（because … / I usually …）と続きます。'
     :!more?'いいテンポ！ あと1文足せると、相手が質問を返しやすくなります。':'すばらしい！ すぐ話し出して、ちゃんと広げられています。';
-  document.getElementById('sj-micw').innerHTML='';document.getElementById('sj-live').textContent='';
-  document.getElementById('sj-fb').innerHTML=`<div class="sj-metrics">
-      <div class="sj-m ${fast?'ok':'ng'}"><b>${lat.toFixed(1)}<small>秒</small></b><span>話し出すまで<br>目標 3秒</span></div>
+  document.getElementById('sj-micw').innerHTML='';document.getElementById('sj-live').textContent='';document.getElementById('sj-sub').remove();
+  document.getElementById('sj-fb').innerHTML=`<div class="tk-tipbox">あなた：${esc(text)}</div><div class="sj-metrics">
+      <div class="sj-m ${fast?'ok':'ng'}"><b>${lat.toFixed(1)}<small>秒</small></b><span>話し出すまで<br>目標 ${lv.sec}秒</span></div>
       <div class="sj-m ${more?'ok':words>=5?'mid':'ng'}"><b>${words}<small>語</small></b><span>${more?'＋1文できた':'一言で<br>終わりがち'}</span></div>
       <div class="sj-m ${filler?'ok':''}"><b>${filler?'✓':'—'}</b><span>つなぎ言葉</span></div></div>
     <div class="tk-tipbox">${advice}</div>
-    <div class="sj-model"><span class="tk-goal-l">お手本</span><b>${esc(q.model)}</b>${tkSayBtn(q.model,0.9)}</div>
-    ${sjNextBtns()}`;
-  tkBindSay(document.getElementById('sj-fb'));
+    <div class="sj-model"><span class="tk-goal-l">お手本</span><b>${esc(q.model)}</b>${tkSayBtn(q.model,0.85)}</div>
+    ${ok?'':sjRepeatHTML(q.model)}${sjNextBtns()}`;
+  const fb=document.getElementById('sj-fb');tkBindSay(fb);sjBindRepeat(fb);
   sjBindNext(q,ok,()=>sjRender());
+}
+// わからない：お手本を聞いて、まねして言う
+function sjQuickGiveUp(q){
+  ['sj-micw','sj-sub'].forEach(id=>{const x=document.getElementById(id);if(x)x.remove()});
+  document.getElementById('sj-live').textContent='';document.getElementById('sj-clock').textContent='';
+  const fb=document.getElementById('sj-fb');
+  fb.innerHTML=`<div class="tk-tipbox">大丈夫。まずはお手本を聞いて、そのまままねしてみよう。まねするだけでも口が英語に慣れます。</div>
+    <div class="sj-model"><span class="tk-goal-l">お手本</span><b>${esc(q.model)}</b>${tkSayBtn(q.model,0.8)}</div>
+    ${sjLv().hint?'':`<div class="tk-row-s" style="margin-top:6px">${esc(q.ja)}</div>`}
+    ${sjRepeatHTML(q.model)}${sjNextBtns()}`;
+  tkBindSay(fb);sjBindRepeat(fb);sjBindNext(q,false,()=>sjRender());
+  speak(q.model,0.8);
 }
 // 音声認識がない端末：自分で判定
 function sjQuickSelf(q,lat){
+  const goal=sjLv().sec;
   document.getElementById('sj-micw').innerHTML='';
   const fb=document.getElementById('sj-fb');
-  fb.innerHTML=`<div class="sj-metrics"><div class="sj-m ${lat<=3?'ok':'ng'}"><b>${lat.toFixed(1)}<small>秒</small></b><span>話し出すまで<br>目標 3秒</span></div></div>
+  fb.innerHTML=`<div class="sj-metrics"><div class="sj-m ${lat<=goal?'ok':'ng'}"><b>${lat.toFixed(1)}<small>秒</small></b><span>話し出すまで<br>目標 ${goal}秒</span></div></div>
     <div class="sj-model"><span class="tk-goal-l">お手本</span><b>${esc(q.model)}</b>${tkSayBtn(q.model,0.9)}</div>
     <div class="tk-fb-btns"><button class="btn btn-secondary" id="sj-s0">一言で終わった</button><button class="btn btn-gold" id="sj-s1">＋1文まで言えた</button></div>`;
   tkBindSay(fb);
-  const fin=more=>{const ok=lat<=3&&more;sj().q.push({d:todayStr(),lat:Math.round(lat*10)/10,w:more?8:2});if(typeof jpLog==='function')jpLog('speak',ok);
+  const fin=more=>{const ok=lat<=goal&&more;sj().q.push({d:todayStr(),lat:Math.round(lat*10)/10,w:more?8:2});if(typeof jpLog==='function')jpLog('speak',ok);
     sjMark(q.id,ok);sjS.res.push({kind:q.kind,ok});commit();sfx(ok?'correct':'wrong');sjS.i++;sjRender()};
   document.getElementById('sj-s0').onclick=()=>fin(false);document.getElementById('sj-s1').onclick=()=>fin(true);
 }
 
 /* ---------- 2. 言い換え ---------- */
 function sjPara(q){
-  const el=tkScreen();
+  const el=tkScreen(),lv=sjLv();
+  const words=`<div class="sj-chips"><b>使えそうな単語：</b>${sjUniq(q.keys).slice(0,5).map(k=>`<span>${esc(k)}</span>`).join('')}</div>`;
   el.innerHTML=sjHead()+`<div class="tk-act sj-act">
     <div class="tk-goal-l">英語の単語を知らなくてOK。説明して伝えよう</div>
     <div class="sj-ja">${esc(q.ja)}</div><div class="tk-row-s">${SJ_CAT_JA[q.cat]}を説明する型</div>
     <div class="sj-frames">${SJ_FRAMES[q.cat].map(f=>`<span>${esc(f)}</span>`).join('')}</div>
+    ${lv.hint?words:'<button class="tk-link" id="sj-words">ヒント：使えそうな単語</button>'}
     <div class="tk-mic-wrap" id="sj-micw">${TK_SR?tkMicHTML('sj-mic','話す'):''}</div>
     <div class="tk-live tk-live-lg" id="sj-live">${TK_SR?'マイクを押して、15秒以内で説明しよう':''}</div>
     <div id="sj-type" ${TK_SR?'hidden':''}><textarea class="ic-input" id="sj-ta" rows="2" placeholder="It's a thing you use to …"></textarea><button class="btn btn-gold btn-block" id="sj-send">これで伝える</button></div>
-    ${TK_SR?'<div class="tk-subacts"><button class="tk-link" id="sj-totype">⌨ タイプで答える</button><button class="tk-link" id="sj-give">降参して答えを見る</button></div>':'<div class="tk-subacts"><button class="tk-link" id="sj-give">降参して答えを見る</button></div>'}
+    <div class="tk-subacts">${TK_SR?'<button class="tk-link" id="sj-totype">⌨ タイプで答える</button>':''}<button class="tk-link" id="sj-give">わからない（答えを見る）</button></div>
     <div id="sj-fb"></div></div>`;
-  const live=document.getElementById('sj-live');
+  const live=document.getElementById('sj-live'),wb=document.getElementById('sj-words');
+  if(wb)wb.onclick=()=>{wb.outerHTML=words};
   document.getElementById('sj-give').onclick=()=>{tkStopAll();sjParaResult(q,'',true)};
   const tt=document.getElementById('sj-totype');if(tt)tt.onclick=()=>{tkStopAll();document.getElementById('sj-type').hidden=false;document.getElementById('sj-ta').focus()};
   document.getElementById('sj-send').onclick=()=>{const v=document.getElementById('sj-ta').value.trim();if(v)sjParaResult(q,v)};
@@ -280,11 +331,11 @@ function sjPara(q){
 }
 function sjParaResult(q,text,gaveUp){
   const toks=tkTokens(text),words=toks.length;
-  const hits=q.keys.filter(k=>toks.some(t=>t===k||tkStem(t)===tkStem(k)));
+  const hits=sjUniq(q.keys).filter(k=>toks.some(t=>t===k||tkStem(t)===tkStem(k)));
   const knew=text&&q.en.split(' / ').some(e=>sjHas(text,e));
   const frame=SJ_FRAME_RE.test(text);
-  const ok=!gaveUp&&(knew||(hits.length>=1&&words>=4));
-  const msg=gaveUp?'次は型の1つ目だけでも言ってみよう。<b>It\'s a thing …</b> と言い始めれば、相手が単語を推測してくれます。'
+  const ok=!gaveUp&&(knew||(hits.length>=1&&words>=(sjLv().hint?3:4)));
+  const msg=gaveUp?'大丈夫。下の説明のお手本を聞いて、まねして言ってみよう。<b>It\'s a thing …</b> と言い始めるだけで、相手が単語を推測してくれます。'
     :knew?'単語そのものを知っていました！ 知らない単語に出会ったときも、この「説明する型」で止まらずに話せます。'
     :ok?'伝わります！ ピッタリの単語が出なくても、説明すれば相手が <b>Oh, '+esc(q.en.split(' / ')[0])+'?</b> と教えてくれます。教わった単語をくり返せばOK。'
     :hits.length?'もう少し！ 「何に使う／どこで／どんなとき」を1つ足して、文にしてみよう。'
@@ -299,9 +350,9 @@ function sjParaResult(q,text,gaveUp){
       <div class="sj-m ${words>=6?'ok':words>=4?'mid':'ng'}"><b>${words}<small>語</small></b><span>長さ</span></div></div>`}
     <div class="tk-tipbox">${msg}</div>
     <div class="sj-model"><span class="tk-goal-l">英語では</span><b>${esc(q.en)}</b>${tkSayBtn(q.en.split(' / ')[0],0.85)}</div>
-    <div class="sj-model"><span class="tk-goal-l">説明のお手本</span><b>${esc(q.model)}</b>${tkSayBtn(q.model,0.9)}</div>
-    ${sjNextBtns()}`;
-  tkBindSay(document.getElementById('sj-fb'));
+    <div class="sj-model"><span class="tk-goal-l">説明のお手本</span><b>${esc(q.model)}</b>${tkSayBtn(q.model,0.85)}</div>
+    ${ok?'':sjRepeatHTML(q.model)}${sjNextBtns()}`;
+  const fb=document.getElementById('sj-fb');tkBindSay(fb);sjBindRepeat(fb);
   sjBindNext(q,ok,()=>sjRender());
 }
 
@@ -344,7 +395,7 @@ function sjKataResult(q,r){
   const top=sjHas(r.top,q.w),any=r.alts.some(a=>sjHas(a,q.w)),ok=top||any;
   fb.innerHTML=`${top?`<b class="tk-ok">通じた！</b> 「${esc(q.w)}」と認識されました。`
       :any?`<b class="tk-mid">惜しい！</b> 候補には入りましたが1番ではありませんでした（認識：${esc(r.top)}）。`
-      :`<b class="tk-ng">「${esc(r.top)}」と認識されました。</b>`}
+      :`<b class="tk-ng">「${esc(r.top)}」と認識されました。</b><div class="tk-row-s">ゆっくりでOK。「▶ ゆっくり」を聞いて、太字の所だけ強く言ってみよう。</div>`}
     <div class="tk-tipbox">${esc(q.tip)}</div>${sjNextBtns()}`;
   sjBindNext(q,ok,()=>sjRender());
 }
@@ -360,14 +411,19 @@ function sjFinish(){
   if(n&&typeof spkCoin==='function')spkCoin(10,'話すジム');
   if(pct>=80&&n)launchConfetti();
   const by=Object.keys(SJ_KIND).map(k=>{const r=s.res.filter(x=>x.kind===k);return r.length?`<div class="sj-sum-row"><span>${SJ_KIND[k].ic} ${SJ_KIND[k].name}</span><b>${r.filter(x=>x.ok).length}/${r.length}</b></div>`:''}).join('');
-  const lat=sjAvgLat();
+  const lat=sjAvgLat(),qr=s.res.filter(x=>x.kind==='quick');
+  // 3秒ルールを全部クリアしたら、次のレベルをすすめる
+  const up=qr.length>=2&&qr.every(x=>x.ok)?{easy:'normal',normal:'hard'}[sjLvKey()]:null;
   const el=tkScreen();
   el.innerHTML=tkBack(esc(s.title))+`<div class="tk-act tk-sum"><div class="tk-sum-top">${tkRing(pct,104)}<div><div class="tk-fb-label">${ok}/${n} ${pct>=80?'Great!':pct>=50?'Good!':'Keep going!'}</div><div class="tk-fb-meta">${Math.max(1,Math.round(sec/60))}分 話す練習</div></div></div>
-    ${by}${lat!=null?`<div class="tk-tipbox">直近の「話し出すまで」の平均：<b>${lat.toFixed(1)}秒</b>（目標 3秒以内）</div>`:''}
+    ${by}${s.rep?`<div class="sj-sum-row"><span>🎤 お手本をまねして言えた</span><b>${s.rep}回</b></div>`:''}
+    ${lat!=null?`<div class="tk-tipbox">直近の「話し出すまで」の平均：<b>${lat.toFixed(1)}秒</b>（いまの目標 ${sjLv().sec}秒 → 最終目標 3秒）</div>`:''}
+    ${up?`<button class="btn btn-secondary btn-block" id="sj-up" style="margin-top:10px">次は「${SJ_LV[up].name}」に挑戦する（${SJ_LV[up].ja}）</button>`:''}
     <div class="tk-tipbox">日本人が英語で黙るのは、知識より「間違えたくない」気持ちから。つなぎ言葉・説明・リズムは、使うほど口が覚えます。</div>
     ${inDaySession()?sessionNavHTML():`<div class="tk-fb-btns"><button class="btn btn-secondary" id="sj-hub">話すジムへ</button><button class="btn btn-gold" id="sj-home">Home ${ICONS.arrowRight}</button></div>`}</div>`;
   tkBindBack(sjHubOpen);
   const hb=document.getElementById('sj-hub');if(hb){hb.onclick=sjHubOpen;document.getElementById('sj-home').onclick=()=>go('home')}
+  const ub=document.getElementById('sj-up');if(ub)ub.onclick=()=>{sj().lv=up;commit();showToast('レベルを「'+SJ_LV[up].name+'」にしました');ub.remove()};
   window.scrollTo(0,0);
 }
 
@@ -377,13 +433,22 @@ function sjHubOpen(){
   tkStopAll();const el=tkScreen();
   const lat=sjAvgLat(),kr=sjRate('k_'),pr=sjRate('p_');
   const stat=(v,l)=>`<div class="tk-stat"><div class="tk-stat-v">${v}</div><div class="tk-stat-l">${l}</div></div>`;
-  el.innerHTML=tkBack('話すジム')+`<p class="tk-note">日本人が英語で話せない原因は、知識不足より<b>「黙る」「止まる」「カタカナで言う」</b>の3つのクセ。1回3分、声に出して直します。</p>
+  const guide=sj().intro?'':`<div class="card sj-guide-card"><b>はじめての方へ</b><ol>
+      <li>マイクのボタンを押して、英語で話します（最初だけマイクの許可を聞かれます）</li>
+      <li>間違えても大丈夫。わからない時は「わからない」→ お手本をまねすればOK</li>
+      <li>毎日「今日の3分セット」だけで十分。英語が苦手なら「やさしい」のままで</li></ol>
+      <button class="btn btn-gold btn-block" id="sj-intro">わかった、3分セットをはじめる ${ICONS.arrowRight}</button></div>`;
+  el.innerHTML=tkBack('話すジム')+`<p class="tk-note">日本人が英語で話せない原因は、知識不足より<b>「黙る」「止まる」「カタカナで言う」</b>の3つのクセ。1回3分、声に出して直します。</p>${guide}
     <div class="tk-stats sj-stats">${stat(lat==null?'—':lat.toFixed(1)+'<small>秒</small>','話し出すまで')}${stat(pr==null?'—':Math.round(pr*100)+'<small>%</small>','言い換え成功')}${stat(kr==null?'—':Math.round(kr*100)+'<small>%</small>','カタカナ発音が通じた')}</div>
-    <button class="btn btn-gold btn-block" id="sj-daily" style="margin:12px 0">今日の3分セット（5問）${ICONS.arrowRight}</button>
+    ${guide?'<div style="height:12px"></div>':`<button class="btn btn-gold btn-block" id="sj-daily" style="margin:12px 0">今日の3分セット（5問）${ICONS.arrowRight}</button>`}
     ${Object.entries(SJ_KIND).map(([k,v])=>`<button class="tk-wide" data-sj="${k}"><span class="tk-mode-ic sj-ic">${v.ic}</span><span><span class="tk-mode-t">${v.name}</span><span class="tk-mode-d">${v.ja}</span></span><span class="tk-row-go">${ICONS.arrowRight}</span></button>`).join('')}
+    <div class="sec-title">${ICONS.user} レベル</div>
+    <div class="tk-set"><div class="tk-set-row"><span>${esc(sjLv().ja)}</span><div class="tk-seg" id="sj-lv">${Object.entries(SJ_LV).map(([k,v])=>`<button data-v="${k}" class="${sjLvKey()===k?'on':''}">${v.name}</button>`).join('')}</div></div></div>
     ${TK_SR?'':`<div class="tk-warn">このブラウザは音声認識に未対応のため、タイプ入力・自己判定で練習できます（Chrome / Safari 推奨）。</div>`}`;
   tkBindBack(renderTalkHub);
-  document.getElementById('sj-daily').onclick=sjDaily;
+  const db=document.getElementById('sj-daily');if(db)db.onclick=sjDaily;
+  const ib=document.getElementById('sj-intro');if(ib)ib.onclick=()=>{sj().intro=1;commit();sjDaily()};
+  el.querySelectorAll('#sj-lv button').forEach(b=>b.onclick=()=>{sj().lv=b.dataset.v;commit();sfx('tap');sjHubOpen()});
   el.querySelectorAll('[data-sj]').forEach(b=>b.onclick=()=>{const k=b.dataset.sj;sjRun(sjItems(k,k==='kata'?8:5),SJ_KIND[k].name)});
   window.scrollTo(0,0);
 }
@@ -404,7 +469,14 @@ function sjInstall(){
   if(typeof jpHubOpen==='function'){const _jh=jpHubOpen;jpHubOpen=function(){const r=_jh.apply(this,arguments);const el=document.getElementById('screen-review'),sh=el&&el.querySelector('#jp-shadow');
     if(sh&&!el.querySelector('#sj-jp')){sh.insertAdjacentHTML('beforebegin',`<div class="sec-title" id="sj-jp">🗣 話すジム（黙らない・止まらない・通じる）</div>`+Object.entries(SJ_KIND).map(([k,v])=>`<button class="card jp-row" data-sjk="${k}"><span class="jp-row-b"><b>${v.ic} ${v.name}</b><small>${v.ja}</small></span><span class="jp-row-v">${ICONS.arrowRight}</span></button>`).join(''));
       el.querySelectorAll('[data-sjk]').forEach(b=>b.onclick=()=>{const k=b.dataset.sjk;sjRun(sjItems(k,k==='kata'?8:5),SJ_KIND[k].name)})}return r}}
+  // ホーム：英語ジムの下に「今日の話すジム」
+  if(typeof renderHome==='function'){const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);const home=document.getElementById('screen-home');
+    const after=home&&(home.querySelector('#jp-home')||home.querySelector('.focus-card'));
+    if(after&&!home.querySelector('#sj-home-card')){const done=sj().hist.some(h=>h.d===todayStr());
+      after.insertAdjacentHTML('afterend',`<button class="card jp-home" id="sj-home-card"><span class="jp-home-ic">🗣</span><span class="jp-home-b"><b>${done?'✓ 今日の話すジム クリア':'今日の話すジム 3分'}</b><small>${done?'もう1セットやるとさらに口が慣れます':'声に出して5問。間違えてOK、わからなければまねすればOK'}</small></span><span>${ICONS.arrowRight}</span></button>`);
+      document.getElementById('sj-home-card').onclick=()=>sj().intro?sjDaily():sjHubOpen()}
+    return r}}
   // Plus 比較表：話すジムは無料
   if(typeof PLAN_ROWS!=='undefined'&&!PLAN_ROWS.some(r=>r[0].startsWith('話すジム')))PLAN_ROWS.splice(2,0,['話すジム（3秒ルール・言い換え・カタカナ発音）','○','○']);
 }
-if(typeof go==='function')sjInstall();
+if(typeof go==='function'){sjInstall();if(typeof curTab!=='undefined'&&curTab==='home'&&document.getElementById('screen-home').classList.contains('active'))renderHome()}
