@@ -6,6 +6,7 @@
    ・一言だけなら「もう少し教えて」と1回だけ聞き返す
    ・答えに日本人に多いミス（冠詞・三単現・時制など）があれば、Spark が正しい言い方で返す（リキャスト）
    ・終わったら通話レポート：通話時間・話した語数・話し出すまでの秒数・言い直し（表現ノートに保存）
+   ・「アメリカ生活」タブ：Spark が大家さん・銀行員・医師などの役になり、住む・暮らすための会話を練習する
    判定は端末の音声認識と talk.js の添削ルールだけ（$0・ブラウザ内完結）。
    talk.js / speakjp.js の後に読み込む。 */
 'use strict';
@@ -43,6 +44,52 @@ const CALL_TOPICS=[
     ["Do you do that too?","あなたもするの？","Yes, I usually … / No, but …",['yes','no','usually','every','year','family','friends','sometimes','go','but']],
     ["That sounds fun! What's your favorite season in Japan?","楽しそう！ 日本でいちばん好きな季節は？","I like … because …",['spring','summer','fall','autumn','winter','because','like','favorite','weather','food']]]}
 ];
+// アメリカ生活：Spark が相手役になる。role＝役、bye＝最後のひとこと
+const CALL_US=[
+  {id:'apt',ic:'🏠',ja:'アパートの内見',sub:'入居時期・家賃・契約日を話す',role:'大家さん',bye:["Great! I'll get the lease ready. See you on signing day!","よし、契約書を用意しておくね。契約の日に会いましょう！"],turns:[
+    ["Hi, thanks for coming to see the apartment. Are you looking to move in soon?","内見に来てくれてありがとう。すぐに入居したいのかな？","Yes, I'd like to move in by …",['yes','move','next','month','soon','week','by','want','like','april','may']],
+    ["How many people will be living here?","ここには何人で住む予定？","Just me. / Two people, me and my …",['just','me','one','two','people','wife','husband','family','alone','myself','partner']],
+    ["The rent is eighteen hundred dollars a month, and the deposit is one month's rent. Do you have any questions?","家賃は月1,800ドル、敷金は1か月分です。何か質問はある？","Are utilities included?",['utilities','included','include','parking','pet','pets','laundry','internet','lease','water','how']],
+    ["Sure. So when would you like to sign the lease?","わかりました。では、いつ契約しますか？","Could I sign it this Friday?",['sign','friday','monday','week','tomorrow','next','could','can','lease','today']]]},
+  {id:'bank',ic:'🏦',ja:'銀行口座を開く',sub:'口座開設・本人確認・カード',role:'銀行員',bye:["You're all set. Welcome to the bank, and have a great day!","手続き完了です。ようこそ。良い一日を！"],turns:[
+    ["Good morning! How can I help you today?","おはようございます。本日はどうされましたか？","I'd like to open a checking account.",['open','account','checking','savings','bank','like','want']],
+    ["Sure. Can I see your ID and proof of address?","かしこまりました。身分証と住所の証明を見せていただけますか？","Here's my passport and my lease.",['passport','here','id','lease','license','address','bill','card']],
+    ["Thank you. Would you like a debit card with the account?","ありがとうございます。口座にデビットカードもおつけしますか？","Yes, please. How long does it take to arrive?",['yes','please','debit','card','how','long','arrive','need','no']],
+    ["Is there anything else I can help you with?","ほかに何かお手伝いできることはありますか？","No, that's all. Thank you.",['no','that','all','thank','thanks','actually','also','online']]]},
+  {id:'doctor',ic:'🩺',ja:'病院で症状を伝える',sub:'いつから・どんな症状か',role:'お医者さん',bye:["Take care, and get some rest. Feel better soon!","お大事に。ゆっくり休んでくださいね。"],turns:[
+    ["Hi, I'm Dr. Smith. What brings you in today?","こんにちは、スミスです。今日はどうされましたか？","I've had a sore throat for three days.",['sore','throat','fever','headache','cough','days','since','pain','hurt','stomach','sick','feel']],
+    ["I see. Do you have a fever or any other symptoms?","なるほど。熱やほかの症状はありますか？","I had a slight fever last night.",['fever','yes','no','night','cough','tired','runny','nose','little','slight','chills']],
+    ["Are you taking any medication right now?","今、何か薬を飲んでいますか？","No, I'm not. / I'm taking …",['no','not','taking','medicine','medication','pill','allergic','allergy','nothing']],
+    ["OK. I'll prescribe something for you. Do you have any questions?","わかりました。薬を出しますね。何か質問はありますか？","How often should I take it?",['how','often','take','day','times','food','side','effects','when','long','question']]]},
+  {id:'phone',ic:'📞',ja:'電話でレストラン予約',sub:'人数・時間・名前を伝える',role:'お店の人',bye:["You're all set. We'll see you then!","ご予約承りました。お待ちしております！"],turns:[
+    ["Thank you for calling Bella Cucina. How can I help you?","ベラ・クチーナです。ご用件をどうぞ。","I'd like to make a reservation for …",['reservation','reserve','table','book','like','tonight','friday','saturday']],
+    ["Of course. For how many people, and what time?","かしこまりました。何名様で、何時にしますか？","For four people at seven o'clock.",['people','two','three','four','five','six','seven','eight','clock','pm','at','for']],
+    ["Can I get a name and phone number for the reservation?","ご予約のお名前と電話番号をお願いします。","My name is … and my number is …",['name','number','phone','is','my']],
+    ["Got it. Any special requests?","承知しました。何かご要望はありますか？","Could we have a table by the window?",['window','outside','birthday','allergy','quiet','high','chair','no','that']]]},
+  {id:'work',ic:'💼',ja:'職場の雑談',sub:'週末・予定・ランチの誘い',role:'同僚',bye:["Awesome. See you at lunch then!","いいね。じゃあランチで！"],turns:[
+    ["Hey! How was your weekend?","やあ！ 週末はどうだった？","It was great! I went to …",['great','good','went','weekend','relaxed','busy','fun','family','friends','nothing']],
+    ["Nice! Do you have any plans for the holidays?","いいね！ 休みの予定はある？","I'm going to … / Not yet. Maybe …",['going','plan','plans','yet','maybe','visit','travel','family','home','japan','stay']],
+    ["By the way, how are you settling in here? Is everything going OK?","ところで、こっちの生活には慣れた？ 順調？","Pretty well, thanks. I'm still getting used to …",['well','good','thanks','getting','used','still','everything','ok','fine','learning','weather','food']],
+    ["Let me know if you need anything. Want to grab lunch sometime?","何かあったら言ってね。今度ランチでもどう？","Sure, I'd love to. How about …?",['sure','love','yes','how','about','tomorrow','lunch','sounds','good','great']]]},
+  {id:'return',ic:'🛍',ja:'返品・カスタマーサービス',sub:'理由を伝えて返金してもらう',role:'店員',bye:["All done. Thanks for shopping with us!","手続き完了です。ご利用ありがとうございました！"],turns:[
+    ["Hi, how can I help you?","いらっしゃいませ。どうされましたか？","I'd like to return this. It doesn't work.",['return','refund','exchange','broken','doesn','work','wrong','size','bought']],
+    ["I'm sorry about that. Do you have the receipt?","申し訳ありません。レシートはお持ちですか？","Yes, here it is. I bought it last week.",['yes','receipt','here','bought','last','week','no','lost','card']],
+    ["Would you like a refund or an exchange?","返金と交換、どちらにしますか？","A refund, please.",['refund','exchange','please','money','back','new','another']],
+    ["OK, that's done. Is there anything else?","完了しました。ほかに何かありますか？","No, that's it. Thank you for your help.",['no','that','thank','thanks','help','all']]]},
+  {id:'dmv',ic:'🚗',ja:'DMV（運転免許）',sub:'免許の手続きで要件を伝える',role:'窓口の職員',bye:["Good luck on your test!","試験、がんばってね！"],turns:[
+    ["Next! What are you here for today?","次の方！ 今日はどんなご用件ですか？","I'd like to get a driver's license.",['license','driver','driving','test','get','apply','transfer','renew','id']],
+    ["Do you have your passport and proof of residence?","パスポートと住所の証明はありますか？","Yes, here's my passport and a utility bill.",['yes','passport','here','bill','lease','proof','address','bank','statement']],
+    ["Have you ever had a driver's license before?","これまでに運転免許を持っていたことはありますか？","Yes, I have a Japanese license.",['yes','japanese','japan','license','international','no','before','have','years']],
+    ["OK, you'll need to take the written test. Are you ready?","では筆記試験を受けてもらいます。準備はいいですか？","Yes, I'm ready. / Can I take it in Japanese?",['yes','ready','japanese','language','can','now','wait','take']]]},
+  {id:'neighbor',ic:'🏡',ja:'ご近所さんにあいさつ',sub:'引っ越しのあいさつと自己紹介',role:'お隣さん',bye:["It was so nice to meet you. See you around!","会えてうれしかった。またね！"],turns:[
+    ["Oh, hi! Are you the new neighbor? I'm Linda.","あら、こんにちは！ 新しく越してきた方？ リンダです。","Yes! Nice to meet you. I'm … I just moved in.",['yes','nice','meet','moved','just','new','name','from']],
+    ["Welcome to the neighborhood! Where are you from?","ようこそ！ どこから来たの？","I'm from Japan. I moved here for work.",['japan','from','tokyo','osaka','moved','work','school','family']],
+    ["How do you like it here so far?","ここの暮らしはどう？","I like it a lot. It's quiet and …",['like','love','quiet','nice','people','friendly','big','different','so','far']],
+    ["If you need anything, just knock on my door!","何かあったら、いつでもドアをノックしてね！","Thank you so much. That's very kind of you.",['thank','thanks','kind','you','too','same','appreciate','nice']]]}
+];
+CALL_US.forEach(t=>t.us=true);
+const CALL_ALL=CALL_TOPICS.concat(CALL_US);
+const CALL_REACT_US=["Got it.","Okay, sounds good.","Alright, thank you.","Perfect.","I see. Thanks."];
 const CALL_REACT=["Oh, really? That sounds great!","Wow, I didn't know that!","Nice! That's really helpful.","Interesting! Thanks for telling me.","That sounds amazing!","Oh, cool! I like that."];
 const CALL_MORE=["Oh, nice! Could you tell me a little more?","いいね！ もう少しくわしく教えて？"];
 const CALL_AGAIN=["Sorry, I didn't catch that. Could you say it again?","ごめん、聞き取れなかった。もう一度言ってくれる？"];
@@ -53,16 +100,18 @@ function callRate(){return typeof sjLv==='function'?sjLv().rate:(talkData().rate
 
 /* ---------- 話題を選ぶ ---------- */
 function callPick(){
-  tkStopAll();const el=tkScreen(),c=callData();
+  tkStopAll();const el=tkScreen(),c=callData(),us=c.tab==='us',list=us?CALL_US:CALL_TOPICS;
   el.innerHTML=tkBack('Spark と英語通話')+`
     <div class="call-hero"><div class="call-hero-av">${sparkSVG(null,'hello')}</div>
-      <div class="call-hero-b"><span class="call-hero-k">VIDEO CALL · 日本人特化</span><b>日本のことを、英語で話そう</b>
-      <small>日本に来る予定の友だち（Spark）から電話がきます。聞かれて詰まりがちな「日本の説明」を、通話で練習。黙ってもヒントが出るので大丈夫。</small></div></div>
-    <div class="call-grid">${CALL_TOPICS.map(t=>{const b=c.best[t.id];return`<button class="call-topic" data-ct="${t.id}"><span class="call-topic-ic">${t.ic}</span><b>${t.ja}</b><small>${t.sub}</small><span class="call-topic-m">${b!=null?`<i class="tk-best ${b>=80?'hi':b>=60?'mid':'lo'}">${b}</i>`:'4ターン · 約3分'}</span></button>`}).join('')}</div>
+      <div class="call-hero-b"><span class="call-hero-k">VIDEO CALL · 日本人特化</span><b>${us?'アメリカで、困らずに暮らす':'日本のことを、英語で話そう'}</b>
+      <small>${us?'Spark が大家さん・銀行員・お医者さんなどの役になります。住む・働く・病院に行く…生活の場面を、本番の前に通話で練習。':'日本に来る予定の友だち（Spark）から電話がきます。聞かれて詰まりがちな「日本の説明」を、通話で練習。黙ってもヒントが出るので大丈夫。'}</small></div></div>
+    <div class="tk-seg call-tabs" role="tablist"><button data-tab="jp" class="${us?'':'on'}">🇯🇵 日本を紹介</button><button data-tab="us" class="${us?'on':''}">🇺🇸 アメリカ生活</button></div>
+    <div class="call-grid">${list.map(t=>{const b=c.best[t.id];return`<button class="call-topic" data-ct="${t.id}"><span class="call-topic-ic">${t.ic}</span><b>${t.ja}</b><small>${t.role?'相手：'+t.role+' · ':''}${t.sub}</small><span class="call-topic-m">${b!=null?`<i class="tk-best ${b>=80?'hi':b>=60?'mid':'lo'}">${b}</i>`:'4ターン · 約3分'}</span></button>`}).join('')}</div>
     ${c.hist.length?`<div class="tk-note" style="margin-top:12px">これまでの通話：${c.hist.length}回 · 合計 ${Math.round(c.hist.reduce((a,x)=>a+x.sec,0)/60)}分</div>`:''}
     ${TK_SR?'':`<div class="tk-warn">このブラウザは音声認識に未対応です。Chrome / Safari で開くと通話できます。</div>`}`;
   tkBindBack(renderTalkHub);
   el.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>callRing(b.dataset.ct));
+  el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{c.tab=b.dataset.tab;commit();sfx('tap');callPick()});
   window.scrollTo(0,0);
 }
 
@@ -76,10 +125,10 @@ function callClose(){
 }
 // 着信画面
 function callRing(id){
-  const t=CALL_TOPICS.find(x=>x.id===id);if(!t)return;
+  const t=CALL_ALL.find(x=>x.id===id);if(!t)return;
   const o=callOv();
   o.innerHTML=`<div class="call-bg"></div><div class="call-ring">
-    <div class="call-top"><span class="call-k">着信中…</span><b>${esc(typeof spkNick==='function'?spkNick():'Spark')}</b><small>話題：${t.ic} ${esc(t.ja)}</small></div>
+    <div class="call-top"><span class="call-k">着信中…</span><b>${esc(typeof spkNick==='function'?spkNick():'Spark')}</b><small>${t.role?esc(t.role)+'役 · ':'話題：'}${t.ic} ${esc(t.ja)}</small></div>
     <div class="call-av ringing">${sparkSVG(null,'hello')}</div>
     <div class="call-ring-tip">英語が苦手でも大丈夫。黙ったらヒントが出ます。<br>下の <b>💡</b> でいつでも訳と書き出しを見られます。</div>
     <div class="call-ring-btns"><button class="call-btn end" id="cl-no" aria-label="拒否"><svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 010-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 00-2.67-1.85.996.996 0 01-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg></button>
@@ -92,7 +141,7 @@ function callStart(t){
   CL={t,i:0,t0:Date.now(),turns:[],ja:!!(typeof sjLv==='function'&&sjLv().hint),more:false,again:0,cur:null};
   const o=callOv();
   o.innerHTML=`<div class="call-bg"></div><div class="call-live">
-    <div class="call-top"><span class="call-k" id="cl-time">00:00</span><b>${esc(typeof spkNick==='function'?spkNick():'Spark')}</b><small>${t.ic} ${esc(t.ja)} · <span id="cl-n">1</span>/${t.turns.length}</small></div>
+    <div class="call-top"><span class="call-k" id="cl-time">00:00</span><b>${esc(typeof spkNick==='function'?spkNick():'Spark')}</b><small>${t.role?esc(t.role)+'役 · ':''}${t.ic} ${esc(t.ja)} · <span id="cl-n">1</span>/${t.turns.length}</small></div>
     <div class="call-av" id="cl-av">${sparkSVG(null,'hello')}</div>
     <div class="call-cap" id="cl-cap" aria-live="polite"></div>
     <div class="call-hint" id="cl-hint" hidden></div>
@@ -178,9 +227,9 @@ function callAnswer(txt){
   if(typeof jpLog==='function')jpLog('speak',cur.lat<=(typeof sjLv==='function'?sjLv().sec:5)&&words>=3);
   const lines=[];
   if(recast)lines.push(["Got it! You can also say:","わかった！ こう言うともっと自然だよ：",''],[chk.fixed,bad[0].ja,'recast']);
-  else lines.push([CALL_REACT[Math.floor(Math.random()*CALL_REACT.length)],rel?'':'（伝わったよ）']);
+  else {const RE=CL.t.us?CALL_REACT_US:CALL_REACT;lines.push([RE[Math.floor(Math.random()*RE.length)],rel?'':'（伝わったよ）'])}
   CL.i++;
-  if(CL.i>=CL.t.turns.length){lines.push(CALL_BYE);return callSay(lines,()=>setTimeout(()=>callFinish(false),600))}
+  if(CL.i>=CL.t.turns.length){lines.push(CL.t.bye||CALL_BYE);return callSay(lines,()=>setTimeout(()=>callFinish(false),600))}
   const n=CL.t.turns[CL.i];lines.push([n[0],n[1]]);
   document.getElementById('cl-hint').hidden=true;
   CL.more=false;CL.again=0;CL.cur={q:n[0],said:'',lat:null};

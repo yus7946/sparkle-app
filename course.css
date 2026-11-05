@@ -81,3 +81,14 @@
 .co-set[open] summary{border-bottom:1px solid var(--border)}
 .co-set .tk-set{border:none;background:none;box-shadow:none;padding:4px 0}
 .co-set .tk-set::after{display:none}
+
+/* プライバシーポリシー・利用規約（legal.js） */
+.lg-tabs{display:flex;margin:0 0 12px}
+.lg-tabs button{flex:1;font-size:12px;padding:8px 6px}
+.lg-body{font-size:13px;line-height:1.85;color:var(--text-secondary)}
+.lg-body h3{font-size:14px;color:var(--text-primary);margin:16px 0 4px}
+.lg-body h3:first-child{margin-top:0}
+.lg-body p{margin:0 0 8px}
+.lg-date{font-size:11px;color:var(--text-muted);text-align:right;margin-top:12px!important}
+.lg-links{display:flex;justify-content:center;align-items:center;gap:8px;margin:18px 0 8px;font-size:11px;color:var(--text-muted)}
+.lg-links button{background:none;border:none;min-height:36px;font:inherit;font-size:11px;color:var(--text-muted);text-decoration:underline;cursor:pointer}

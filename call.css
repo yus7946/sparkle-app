@@ -108,3 +108,5 @@ body.call-open .nav{display:none}
 .call-log small{display:block;font-size:11px;color:var(--text-muted);margin-bottom:3px}
 .call-log div{font-size:var(--text-sm);line-height:1.55}
 @media (prefers-reduced-motion: reduce){.call-av,.call-av svg,.call-av::after,.call-btn.ok,.call-entry::after,.call-entry-av i,.call-bg::before,.call-bg::after{animation:none!important}}
+.call-tabs{display:flex;margin:0 0 12px}
+.call-tabs button{flex:1;font-size:12px;padding:8px 6px}
