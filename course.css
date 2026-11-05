@@ -102,3 +102,38 @@
 .pp-slot:not(.stamped) .pp-title{opacity:.8}
 /* Profile の見出しの間隔 */
 #co-set-title{margin-top:22px}
+
+/* 迷わない仕組み */
+/* 今日のレッスンが終わるまで「ほかの練習」は閉じておく */
+.co-more{margin-top:18px}
+.co-more>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:12px 14px;border-radius:16px;
+  background:var(--surface-2);border:1px solid var(--border);box-shadow:inset 0 1px 0 var(--gl-hi,#fff)}
+.co-more>summary::-webkit-details-marker{display:none}
+.co-more>summary span{font-size:var(--text-sm);font-weight:800;color:var(--text-primary)}
+.co-more>summary small{font-size:11px;color:var(--text-muted)}
+.co-more>summary::after{content:'';width:8px;height:8px;border-right:2px solid var(--text-muted);border-bottom:2px solid var(--text-muted);transform:rotate(45deg);margin-left:auto;align-self:center}
+.co-more[open]>summary::after{transform:rotate(-135deg)}
+.co-more[open]>summary{margin-bottom:10px}
+.co-more .gw-quests{margin-top:12px}
+/* 完了後：明日のレッスンの予告 */
+.co-tmr{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 12px}
+.co-tmr small{width:100%;text-align:center;font-size:10.5px;font-weight:800;color:var(--text-muted);letter-spacing:.04em}
+.co-tmr span{font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary)}
+/* どのタブでも出る「次にやること」 */
+.co-nextbar{position:fixed;left:14px;right:14px;bottom:calc(84px + var(--safe-b));z-index:58;max-width:532px;margin:0 auto;
+  display:flex;align-items:center;gap:10px;padding:9px 10px 9px 9px;border-radius:20px;border:1px solid rgba(255,255,255,.35);font:inherit;text-align:left;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,var(--sparkle-2),var(--sparkle) 55%,var(--c-deeper));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 14px 30px -12px color-mix(in srgb,var(--sparkle) 80%,transparent);animation:glScreen .4s var(--ease-out)}
+.co-nextbar::before{content:'';position:absolute;left:0;right:0;top:0;height:50%;border-radius:20px 20px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0));pointer-events:none}
+.co-nb-ring{width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#fff calc(var(--p)*1%),rgba(255,255,255,.25) 0)}
+.co-nb-ring span{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;background:var(--c-deeper)}
+.co-nb-b{flex:1;min-width:0;display:flex;flex-direction:column}
+.co-nb-b small{font-size:10px;opacity:.85;font-weight:700}
+.co-nb-b b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.co-nb-go{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:800;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.95);color:var(--c-deeper);flex-shrink:0}
+.co-nb-go svg{width:14px;height:14px}
+body.call-open .co-nextbar{display:none}
+/* バーと中身が重ならないよう、下に余白 */
+body:has(.co-nextbar){padding-bottom:calc(150px + var(--safe-b))}
+/* オープニングの地球を少し大きく */
+#ob-globe-fallback .ob-earth{width:min(390px,100vw,56vh);height:min(390px,100vw,56vh)}

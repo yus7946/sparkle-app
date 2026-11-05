@@ -59,8 +59,8 @@ function coNow(){
 }
 function coHasMistakes(){return typeof mistakeItems==='function'&&mistakeItems().length>0}
 // 今日のレッスン（3ステップ）
-function coLessonActions(){
-  const{wk,ph}=coNow(),dow=new Date().getDay();
+function coLessonActions(date){
+  const{wk,ph}=coNow(),dow=(date||new Date()).getDay();
   let main=wk[1];
   if(main==='mistake'&&!coHasMistakes())main='p5';
   if(dow===6){const every=typeof P6_MOCK_EVERY!=='undefined'?P6_MOCK_EVERY[ph]:21;main=typeof p6LastMockDays==='function'&&p6LastMockDays()>=every?'mock':'weak'}
@@ -104,7 +104,9 @@ function coCardHTML(){
     <div class="co-steps-h">今日のレッスン <small>${done}/${t.length} · 約${mins}分</small></div>
     <ol class="co-steps">${t.map((x,i)=>`<li><button class="co-step${x.done?' done':''}${x===next?' next':''}" data-co="${i}"><span class="co-num">${x.done?'✓':i+1}</span><span class="co-step-b"><b>${esc(x.title)}</b><small>${esc(x.sub)}</small></span><span class="co-min">${x.mins}分</span></button></li>`).join('')}</ol>
     ${next?`<button class="btn btn-gold btn-block" id="co-start">${done?'続きから：'+esc(next.title):'今日のレッスンを始める'} ${ICONS.arrowRight}</button><div class="co-note">忙しい日は ① だけでもOK。続けることがいちばん大事。</div>`
-      :`<div class="co-clear">🎉 今日のレッスン完了！ また明日。</div><button class="btn btn-secondary btn-block" id="co-more">余力があれば：復習する ${ICONS.arrowRight}</button>`}
+      :`<div class="co-clear">今日のレッスン完了！ おつかれさま。</div>
+        <div class="co-tmr"><small>明日のレッスン</small>${coLessonActions(new Date(Date.now()+864e5)).map((a,i)=>`<span>${i+1}. ${esc((CO_LABEL[a]||[a])[0])}</span>`).join('')}</div>
+        <button class="btn btn-secondary btn-block" id="co-more">余力があれば：Spark と通話（3分） ${ICONS.arrowRight}</button>`}
     <button class="co-link co-all" id="co-all">カリキュラム全体を見る ${ICONS.arrowRight}</button>
   </div>`;
 }
@@ -116,7 +118,7 @@ function coStartFrom(i){
 function coBindCard(root){
   const s=root.querySelector('#co-start');if(s)s.onclick=()=>coStartFrom(0);
   root.querySelectorAll('[data-co]').forEach(b=>b.onclick=()=>{const i=+b.dataset.co,t=coTasks()[i];if(t.done){markPlanTaskDone(t.id);planTaskAction(t.action)}else coStartFrom(i)});
-  const m=root.querySelector('#co-more');if(m)m.onclick=()=>totalDue()>0?openReview():openVocab();
+  const m=root.querySelector('#co-more');if(m)m.onclick=()=>typeof callPick==='function'?callPick():openVocab();
   const a=root.querySelector('#co-all');if(a)a.onclick=coOpen;
   const e=root.querySelector('#co-setexam');if(e)e.onclick=()=>p6Setup(()=>go('home'));
 }
@@ -162,12 +164,27 @@ function coTidyHome(){
     const items=CO_FREE.filter(([id])=>document.getElementById(id));
     const jpDone=typeof jp==='function'&&jp().diag.length;
     const box=document.createElement('div');box.id='co-free';
-    box.innerHTML=`<div class="sec-title">自由に練習</div><div class="co-free">${items.map(([id,ic,l])=>`<button class="co-chip" data-free="${id}"><span>${ic}</span>${id==='jp-home'&&!jpDone?'英語のクセ診断':l}</button>`).join('')}</div>`;
+    // 今日のレッスンが終わるまでは閉じておく（迷わないように、やることを1つに見せる）
+    const lessonDone=coTasks().every(x=>x.done);
+    box.innerHTML=`<details class="co-more"${lessonDone?' open':''}><summary><span>${lessonDone?'自由に練習':'ほかの練習'}</span><small>${lessonDone?'好きなものをどうぞ':'今日のレッスンのあとに'}</small></summary>
+      <div class="co-free">${items.map(([id,ic,l])=>`<button class="co-chip" data-free="${id}"><span>${ic}</span>${id==='jp-home'&&!jpDone?'英語のクセ診断':l}</button>`).join('')}</div><div id="co-more-q"></div></details>`;
     const goals=home.querySelector('.gw-goals');
     if(goals)goals.insertAdjacentElement('afterend',box);else home.appendChild(box);
     box.querySelectorAll('[data-free]').forEach(b=>b.onclick=()=>{const o=document.getElementById(b.dataset.free);if(o)o.click()});
-    const q=home.querySelector('.gw-quests');if(q)box.insertAdjacentElement('afterend',q);
+    const q=home.querySelector('.gw-quests');if(q)box.querySelector('#co-more-q').appendChild(q);
   }
+}
+/* ---------- どの画面でも「次にやること」 ---------- */
+// メインのタブ（Talk・TOEIC・Passport・Profile）を開いているとき、今日のレッスンの次のステップを下に出す
+function coNextBar(){
+  let b=document.getElementById('co-nextbar');
+  const t=coTasks(),next=t.find(x=>!x.done),act=document.querySelector('.screen.active');
+  const onHub=act&&(act.id==='screen-toeic'||act.id==='screen-passport'||act.id==='screen-profile'||(act.id==='screen-talk'&&act.querySelector('.tk-hero')));
+  if(!next||!onHub||inDaySession()){if(b)b.remove();return}
+  if(!b){b=document.createElement('button');b.id='co-nextbar';b.className='co-nextbar';document.body.appendChild(b);
+    b.onclick=()=>coStartFrom(coTasks().findIndex(x=>!x.done))}
+  const done=t.filter(x=>x.done).length;
+  b.innerHTML=`<span class="co-nb-ring" style="--p:${Math.round(done/t.length*100)}"><span>${done}/${t.length}</span></span><span class="co-nb-b"><small>今日のレッスン</small><b>次：${esc(next.title)}</b></span><span class="co-nb-go">続ける ${ICONS.arrowRight}</span>`;
 }
 /* ---------- Talk タブの整理 ---------- */
 // 英語ジム・話すジムの帯はタイルに、ロールプレイは場面タブで1つずつ、設定は折りたたむ
@@ -216,6 +233,17 @@ function coInstall(){
   // ボーナスラウンドは使わない（レッスンは3ステップで完結）
   if(typeof hbSplit==='function')hbSplit=function(){const all=coTasks(),core=all;return{all,core,bonus:[],bonusLeft:[],coreDone:core.every(t=>t.done)}};
   const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{coTidyHome()}catch(e){}return r};
+  // 宝箱の「明日の予告」は、街の物語ではなく明日のレッスンにそろえる
+  if(typeof openDailyChest==='function'){const _oc=openDailyChest;openDailyChest=function(){const r=_oc.apply(this,arguments);
+    const m=document.getElementById('chest-modal'),lab=m&&[...m.querySelectorAll('div')].find(d=>d.textContent==='明日の予告');
+    if(lab&&lab.nextElementSibling){const n=coNow(),list=coLessonActions(new Date(Date.now()+864e5)).map(a=>(CO_LABEL[a]||[a])[0]).join(' → ');
+      lab.nextElementSibling.textContent=`Week ${n.w+1}「${n.wk[2]}」のつづき：${list}。連続 ${getStreak()+1} 日目を一緒に迎えよう。`}
+    return r}}
+  // 「次にやること」バー：タブの移動・Talk の画面切り替えのたびに出し直す
+  const _go=go;go=function(){const r=_go.apply(this,arguments);try{coNextBar()}catch(e){}return r};
+  if(typeof tkScreen==='function'){const _ts=tkScreen;tkScreen=function(){const r=_ts.apply(this,arguments);queueMicrotask(()=>{try{coNextBar()}catch(e){}});return r}}
+  if(typeof renderTalkHub==='function'){const _th2=renderTalkHub;renderTalkHub=function(){const r=_th2.apply(this,arguments);try{coNextBar()}catch(e){}return r}}
+  document.addEventListener('click',()=>setTimeout(()=>{try{coNextBar()}catch(e){}},60),true);
   if(typeof curTab!=='undefined'&&curTab==='home'&&document.getElementById('screen-home').classList.contains('active'))renderHome();
 }
 if(typeof go==='function')coInstall();
