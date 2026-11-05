@@ -149,6 +149,9 @@ body{padding-bottom:calc(96px + var(--safe-b))}
 /* 見出しの数字をそろえる */
 .tk-stat-v,.gw-goal-v,.result-score{font-variant-numeric:tabular-nums}
 
+/* オープニング：写真用だった暗い重ね（multiply）が立体地球をくすませるので外す */
+#ob-globe::after{display:none}
+
 @media (prefers-reduced-motion: reduce){
   body::before,.focus-card::after,.btn-primary::after,.btn-gold::after,.gw-bar i::after,.q-prog-fill::after,.rv-prog-fill::after,.screen.active,.tk-mic.mic-active::after{animation:none!important}
 }
