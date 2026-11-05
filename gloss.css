@@ -11,9 +11,10 @@
 :root{
   --gl-hi:rgba(255,255,255,.95);
   --gl-edge:rgba(255,255,255,.85);
-  --gl-sheen:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0) 46%);
-  --gl-shadow:0 1px 1px rgba(20,48,96,.04),0 10px 28px -14px rgba(26,86,168,.30);
-  --gl-shadow-lift:0 2px 2px rgba(20,48,96,.05),0 18px 40px -16px rgba(26,86,168,.38);
+  --gl-sheen:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 52%),linear-gradient(125deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 30%);
+  --gl-low:rgba(255,255,255,.55);
+  --gl-shadow:0 1px 1px rgba(20,48,96,.05),0 12px 30px -14px color-mix(in srgb,var(--sparkle) 42%,transparent);
+  --gl-shadow-lift:0 2px 2px rgba(20,48,96,.06),0 20px 44px -16px color-mix(in srgb,var(--sparkle) 50%,transparent);
   --gl-aura-1:rgba(79,163,247,.30);
   --gl-aura-2:rgba(255,215,106,.22);
   --gl-aura-3:rgba(140,120,255,.14);
@@ -22,7 +23,8 @@
   :root{
     --gl-hi:rgba(255,255,255,.16);
     --gl-edge:rgba(255,255,255,.10);
-    --gl-sheen:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 46%);
+    --gl-sheen:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03) 34%,rgba(255,255,255,0) 52%),linear-gradient(125deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 30%);
+    --gl-low:rgba(255,255,255,.05);
     --gl-shadow:0 1px 1px rgba(0,0,0,.2),0 12px 30px -14px rgba(0,0,0,.6);
     --gl-shadow-lift:0 2px 2px rgba(0,0,0,.25),0 20px 44px -16px rgba(0,0,0,.7);
     --gl-aura-1:rgba(79,163,247,.20);
@@ -51,7 +53,7 @@ body::before{
 /* ---------- ガラスの面（カード類） ---------- */
 .card,.tk-act,.tk-wide,.tk-mode,.gw-goal,.tk-set,.focus-card{
   border-color:var(--gl-edge);
-  box-shadow:inset 0 1px 0 var(--gl-hi),var(--gl-shadow);
+  box-shadow:inset 0 1px 0 var(--gl-hi),inset 0 -1px 0 var(--gl-low),var(--gl-shadow);
   isolation:isolate;
 }
 .card:not(.sc-card):not(.stamped):not(.done)::after,.tk-act::after,.tk-wide::after,.tk-mode::after,.gw-goal::after{
@@ -59,7 +61,7 @@ body::before{
   background:var(--gl-sheen);
 }
 .tk-act,.tk-wide,.tk-mode,.gw-goal{position:relative}
-.card:hover,.tk-wide:hover,.tk-mode:hover,.gw-goal:hover{box-shadow:inset 0 1px 0 var(--gl-hi),var(--gl-shadow-lift)}
+.card:hover,.tk-wide:hover,.tk-mode:hover,.gw-goal:hover{box-shadow:inset 0 1px 0 var(--gl-hi),inset 0 -1px 0 var(--gl-low),var(--gl-shadow-lift)}
 @media (hover:hover){
   button.card:hover,.tk-wide:hover,.tk-mode:hover,.gw-goal:hover{transform:translateY(-1px)}
 }
@@ -77,12 +79,12 @@ body::before{
 /* ---------- ボタン：光沢とシャイン ---------- */
 .btn{position:relative;overflow:hidden;isolation:isolate}
 .btn-primary,.btn-gold{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 6px rgba(10,40,100,.18),0 10px 22px -10px color-mix(in srgb,var(--sparkle) 75%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -3px 8px rgba(10,40,100,.22),0 10px 22px -10px color-mix(in srgb,var(--sparkle) 75%,transparent);
   text-shadow:0 1px 0 rgba(10,40,100,.18);
 }
 .btn-primary::before,.btn-gold::before{
   content:'';position:absolute;left:8%;right:8%;top:2px;height:46%;border-radius:999px;z-index:-1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(255,255,255,.36),rgba(255,255,255,0));
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.08));
 }
 .btn-primary::after,.btn-gold::after{
   content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;pointer-events:none;
@@ -154,4 +156,19 @@ body{padding-bottom:calc(96px + var(--safe-b))}
 
 @media (prefers-reduced-motion: reduce){
   body::before,.focus-card::after,.btn-primary::after,.btn-gold::after,.gw-bar i::after,.q-prog-fill::after,.rv-prog-fill::after,.screen.active,.tk-mic.mic-active::after{animation:none!important}
+}
+
+/* ---------- 線のアイコン（icons.js が絵文字から置き換えたもの） ---------- */
+.ei{display:inline-flex;align-items:center;justify-content:center;width:1.15em;height:1.15em;vertical-align:-.2em;flex-shrink:0}
+.ei svg{width:100%;height:100%;display:block}
+.call-topic-ic .ei,.co-chip>span .ei{width:26px;height:26px;color:var(--sparkle)}
+.call-topic-ic{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:14px;margin-bottom:6px;filter:none;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--sparkle) 16%,#fff),color-mix(in srgb,var(--sparkle) 6%,#fff));box-shadow:inset 0 1px 0 #fff,0 6px 14px -8px color-mix(in srgb,var(--sparkle) 70%,transparent)}
+.co-chip>span{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--sparkle) 16%,#fff),color-mix(in srgb,var(--sparkle) 6%,#fff));box-shadow:inset 0 1px 0 #fff}
+.co-chip>span .ei{width:21px;height:21px}
+.sj-ic .ei,.tk-mode-ic .ei{width:22px;height:22px;color:var(--sparkle)}
+.call-c span .ei{width:20px;height:20px}
+@media (prefers-color-scheme: dark){
+  .call-topic-ic,.co-chip>span{background:linear-gradient(180deg,color-mix(in srgb,var(--sparkle) 26%,transparent),color-mix(in srgb,var(--sparkle) 10%,transparent));box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
 }

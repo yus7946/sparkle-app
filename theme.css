@@ -1,0 +1,73 @@
+/* ========== SPARKLE THEMES — 落ち着いた5色＋ライト／ダーク ==========
+   theme.js が <html data-theme="…"> を付け、旧スタイルにある青の直書き（#2b7fe0 など）を
+   下の --c-* に置き換える。テーマを変えると、どの画面も同じ色になる。
+   ダーク／ライトの手動切り替えは、theme.js が (prefers-color-scheme: dark) の条件を書き換えて行う。
+   すべての CSS の最後に読み込む。 */
+
+/* 空（そら）＝既定。旧デザインの青をそのまま変数にしたもの */
+:root{
+  --c-primary:#2b7fe0;--c-primary-2:#4fa3f7;--c-deep:#1a56a8;--c-deeper:#123d80;--c-ink-deep:#0f2a4a;--c-night-deep:#081a38;
+  --c-tint-1:#dbeaff;--c-tint-2:#e3efff;--c-tint-3:#b9d6ff;
+}
+
+/* セージ：くすみグリーン */
+:root[data-theme="sage"]{
+  --c-primary:#4f8a76;--c-primary-2:#7fb3a0;--c-deep:#2f5e4f;--c-deeper:#24483d;--c-ink-deep:#16302a;--c-night-deep:#0c1d19;
+  --c-tint-1:#dcebe4;--c-tint-2:#e6f1ec;--c-tint-3:#b9d6ca;
+  --sparkle:#4f8a76;--sparkle-2:#7fb3a0;--stardust:#6f9486;--gold:#2f5e4f;--border-active:#4f8a76;
+  --night:#f4f8f6;--deep:#e5eee9;--surface:#eaf2ee;--surface-hover:#f1f7f4;--ink:#1d2b27;
+}
+/* ラベンダー */
+:root[data-theme="lavender"]{
+  --c-primary:#7466b8;--c-primary-2:#9d92d6;--c-deep:#4a3f8a;--c-deeper:#3a2f6e;--c-ink-deep:#221c45;--c-night-deep:#14102c;
+  --c-tint-1:#e6e2f7;--c-tint-2:#efecfa;--c-tint-3:#cbc4ee;
+  --sparkle:#7466b8;--sparkle-2:#9d92d6;--stardust:#8a84b8;--gold:#4a3f8a;--border-active:#7466b8;
+  --night:#f7f6fc;--deep:#ebe8f6;--surface:#f0eef9;--surface-hover:#f5f3fc;--ink:#221f36;
+}
+/* ミッドナイト：落ち着いたネイビー */
+:root[data-theme="navy"]{
+  --c-primary:#3b5b8c;--c-primary-2:#6b88b8;--c-deep:#233a5e;--c-deeper:#1a2a45;--c-ink-deep:#111c30;--c-night-deep:#0a1120;
+  --c-tint-1:#dfe5ef;--c-tint-2:#e9edf4;--c-tint-3:#c2cde0;
+  --sparkle:#3b5b8c;--sparkle-2:#6b88b8;--stardust:#6d7f99;--gold:#233a5e;--border-active:#3b5b8c;
+  --night:#f5f7fa;--deep:#e7ebf2;--surface:#edf0f5;--surface-hover:#f3f5f9;--ink:#172238;
+}
+/* ローズ：くすみピンク */
+:root[data-theme="rose"]{
+  --c-primary:#b06a7c;--c-primary-2:#d29aa8;--c-deep:#7d4352;--c-deeper:#5c2f3c;--c-ink-deep:#3a1d26;--c-night-deep:#221117;
+  --c-tint-1:#f4e2e7;--c-tint-2:#f8ecef;--c-tint-3:#e8c3cd;
+  --sparkle:#b06a7c;--sparkle-2:#d29aa8;--stardust:#a8848d;--gold:#7d4352;--border-active:#b06a7c;
+  --night:#fcf7f8;--deep:#f4e8eb;--surface:#f7eef0;--surface-hover:#fbf3f5;--ink:#2c1d22;
+}
+/* ライトの文字と線はテーマの墨色から作る */
+:root[data-theme="sage"],:root[data-theme="lavender"],:root[data-theme="navy"],:root[data-theme="rose"]{
+  --text-primary:var(--ink);--text-secondary:color-mix(in srgb,var(--ink) 70%,transparent);--text-muted:color-mix(in srgb,var(--ink) 50%,transparent);
+  --border:color-mix(in srgb,var(--ink) 12%,transparent);--border-strong:color-mix(in srgb,var(--ink) 22%,transparent);
+}
+
+@media (prefers-color-scheme: dark){
+  :root[data-theme="sage"]{--night:#0f1714;--deep:#1b2a24;--sparkle:#7fbfa8;--sparkle-2:#a6d6c4;--stardust:#8fb3a6;--gold:#e8d39a;--border-active:#7fbfa8}
+  :root[data-theme="lavender"]{--night:#14121f;--deep:#221f33;--sparkle:#a59af0;--sparkle-2:#c4bcf7;--stardust:#a7a1d1;--gold:#f0d9a0;--border-active:#a59af0}
+  :root[data-theme="navy"]{--night:#0b1220;--deep:#18233a;--sparkle:#7f9fd6;--sparkle-2:#a9c0e8;--stardust:#8fa3c2;--gold:#e6cf94;--border-active:#7f9fd6}
+  :root[data-theme="rose"]{--night:#1a1214;--deep:#2b1e22;--sparkle:#e3a1b1;--sparkle-2:#f0c2cd;--stardust:#c3a2aa;--gold:#f0d6a0;--border-active:#e3a1b1}
+  :root[data-theme="sage"],:root[data-theme="lavender"],:root[data-theme="navy"],:root[data-theme="rose"]{
+    --surface:rgba(238,242,244,.05);--surface-hover:rgba(238,242,244,.11);
+    --text-primary:#eef2f4;--text-secondary:rgba(238,242,244,.72);--text-muted:rgba(238,242,244,.5);
+    --border:rgba(238,242,244,.12);--border-strong:rgba(238,242,244,.2);
+  }
+}
+
+/* ---------- テーマとカラーの画面 ---------- */
+.th-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.th-sw{position:relative;display:flex;align-items:center;gap:10px;padding:12px;border-radius:18px;font:inherit;text-align:left;cursor:pointer;color:var(--text-primary);
+  background:var(--surface-2);border:1.5px solid var(--border);box-shadow:inset 0 1px 0 var(--gl-hi,#fff),var(--gl-shadow,var(--shadow-sm))}
+.th-sw.on{border-color:var(--sparkle);box-shadow:inset 0 1px 0 var(--gl-hi,#fff),0 0 0 3px color-mix(in srgb,var(--sparkle) 18%,transparent)}
+.th-dot{width:40px;height:40px;flex-shrink:0;border-radius:50%;box-shadow:inset 0 -4px 8px rgba(0,0,0,.18),inset 0 2px 0 rgba(255,255,255,.5),0 6px 14px -6px rgba(0,0,0,.35)}
+.th-sw b{display:block;font-size:13px}
+.th-sw small{display:block;font-size:10.5px;color:var(--text-muted);line-height:1.4}
+.th-check{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;display:none;place-items:center;background:var(--sparkle);color:#fff}
+.th-check svg{width:12px;height:12px}
+.th-sw.on .th-check{display:grid}
+.th-modes{display:flex;width:100%}
+.th-modes button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;padding:9px 6px}
+.th-modes svg{width:15px;height:15px}
+.th-preview{margin-top:14px}
