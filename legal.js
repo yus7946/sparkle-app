@@ -1,10 +1,10 @@
 /* ========== プライバシーポリシーと利用規約 ==========
    公開に必要な表示。実際のデータの流れ（端末内保存・ブラウザの音声認識・チーム機能・Plus 事前登録の件数）に合わせて書く。
-   運営者名と連絡先は LEGAL に入れる（空のあいだは「準備中」と表示）。
+   運営者名と連絡先は LEGAL に入れる（決まるまでは「未定」）。
    Profile の一番下に入口を置く。 */
 'use strict';
 
-const LEGAL={owner:'',contact:'',updated:'2026年11月5日'};
+const LEGAL={owner:'未定',contact:'未定',updated:'2026年11月5日'};
 
 function legalOpen(tab){
   const el=document.getElementById('screen-review');

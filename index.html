@@ -3421,7 +3421,8 @@ function passportHTML(){
   const stamped=CITY_ROTATION.reduce((n,c)=>n+(CITY_STORIES[c.key]||[]).filter(s=>storyDone(s.id)).length,0);
   const pct=Math.round(stamped/total*100);
   let inner=`<div class="sec-title" style="margin-top:var(--space-lg)">${ICONS.globe} City Passport <span style="color:var(--text-muted);font-size:var(--text-sm);font-weight:400;margin-left:6px">${stamped} / ${total} stamps</span></div>
-    <div class="prog" style="margin-bottom:var(--space-md)"><div class="prog-fill" style="width:${pct}%"></div></div>`;
+    <div class="prog" style="margin-bottom:10px"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <p class="pp-intro">世界の街を旅する会話ストーリー。好きな場面をタップして話してみよう。クリアするとスタンプが押されます。</p>`;
   CITY_ROTATION.forEach(city=>{
     const stories=CITY_STORIES[city.key]||[];
     inner+=`<div class="passport" data-passport="${city.key}">
@@ -3432,8 +3433,8 @@ function passportHTML(){
       <div class="passport-stories">${stories.map(st=>{
         const done=storyDone(st.id);
         return `<div class="pp-slot${done?' stamped':''}" data-story-open="${city.key}:${st.id}" role="button" tabindex="0" aria-label="${st.title}">
-          ${done?'':'<div class="pp-lock">'+ICONS.lock+'</div>'}
-          <div class="pp-title">${done?esc(st.title):'???'}</div>
+          ${done?'':'<div class="pp-lock pp-play">'+ICONS.play+'</div>'}
+          <div class="pp-title">${esc(st.title)}</div>
         </div>`;
       }).join('')}</div>
     </div>`;
@@ -5637,11 +5638,8 @@ function buildNav(){
   // Passport タブは WDW準備 / City Passport をまとめたもの。前回見ていた方を開く
   document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>{const t=b.dataset.tab;go(t==='passport'&&PROG.travelSeg!=='passport'?'wdw':t)});
 }
-function travelSegHTML(active){
-  return `<div class="tk-assist-tabs travel-seg" role="tablist" style="margin-top:4px">
-    <button class="${active==='passport'?'on':''}" role="tab" aria-selected="${active==='passport'}" onclick="PROG.travelSeg='passport';commit();go('passport')">City Passport</button>
-  </div>`;
-}
+// WDW を外して City Passport だけになったため、切り替えタブは出さない
+function travelSegHTML(active){return ''}
 function go(tab){
   if(daySession&&daySession.active)daySession.active=false; // タブ移動で1本道セッションを中断扱いに
   if(audioPlayer){audioPlayer=null;if('speechSynthesis'in window)speechSynthesis.cancel()} // 聞き流しを停止
@@ -7118,7 +7116,7 @@ function renderObSlide2(body){
       <div class="ob-kicker">Set your goal</div>
       <div class="tagline">TOEICの目標を<br><span style="color:var(--gold)">教えて</span></div>
       <div class="ob-sub">目標があると、学習内容が最適化されます。<br>あとで変更できます。</div>
-      <div class="ob-target" id="ob-goals">${goals.map(g=>`<button class="${g===OB_STATE.toeicGoal?'on':''}" data-goal="${g}">${g}<div class="ob-target-sub">${g<500?'入門':g<650?'基礎':g<750?'中級':'上級'}</div></button>`).join('')}</div>
+      <div class="ob-target" id="ob-goals">${goals.map(g=>`<button class="${g===OB_STATE.toeicGoal?'on':''}" data-goal="${g}">${g}<div class="ob-target-sub">${{400:'入門',500:'初級',600:'初中級',650:'中級',700:'中上級',800:'上級'}[g]||''}</div></button>`).join('')}</div>
       ${obDotsHTML()}
       <button class="btn btn-gold ob-cta" style="min-width:220px" onclick="obNext()">次へ ${ICONS.arrowRight}</button>
     </div>`;
@@ -7131,15 +7129,16 @@ function renderObSlide3(body){
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:var(--space-xl);text-align:center">
       <div class="ob-kicker">Your goal</div>
       <div class="tagline">英語で、<br><span style="color:var(--gold)">何をしたい？</span></div>
-      <div class="ob-sub">目的に合わせて、毎日のメニューを組み立てます（いくつでも）。</div>
-      <div class="ob-goals" id="ob-goals">${[['toeic','TOEICのスコア'],['work','仕事で話す'],['travel','海外旅行'],['daily','日常会話・趣味']].map(([k,l])=>`<button type="button" class="ob-goal${(PROG.jpGoals||['toeic']).includes(k)?' on':''}" data-g="${k}" onclick="this.classList.toggle('on')">${l}</button>`).join('')}</div>
-      <div class="ob-field"><label>（任意）旅行の予定があれば行き先</label><input id="ob-dest" type="text" placeholder="例：シアトル" value="${esc(OB_STATE.dest)}"></div>
-      <div class="ob-field"><label>（任意）出発日</label><input id="ob-date" type="date" value="${OB_STATE.date}"></div>
+      <div class="ob-sub">選んだ目的に合わせて、おすすめの練習を出します（いくつでも・あとで変更できます）。</div>
+      <div class="ob-goals" id="ob-goals">${[['toeic','TOEICのスコア'],['live','海外で暮らす・留学'],['work','仕事で話す'],['travel','海外旅行'],['daily','日常会話・趣味']].map(([k,l])=>`<button type="button" class="ob-goal${(PROG.jpGoals||['toeic']).includes(k)?' on':''}" data-g="${k}" onclick="this.classList.toggle('on');obTripVis()">${l}</button>`).join('')}</div>
+      <div id="ob-trip"${(PROG.jpGoals||[]).includes('travel')?'':' hidden'}><div class="ob-field"><label>（任意）旅行の予定があれば行き先</label><input id="ob-dest" type="text" placeholder="例：シアトル" value="${esc(OB_STATE.dest)}"></div>
+      <div class="ob-field"><label>（任意）出発日</label><input id="ob-date" type="date" value="${OB_STATE.date}"></div></div>
       ${obDotsHTML()}
       <button class="btn btn-gold btn-block ob-cta" style="max-width:320px" onclick="finishOnboarding()">Sparkleを始める ${ICONS.arrowRight}</button>
     </div>`;
   anim('.ob-field',{opacity:0,y:12},{opacity:1,y:0,duration:0.4,stagger:0.08});
 }
+function obTripVis(){const t=document.getElementById('ob-trip'),on=document.querySelector('#ob-goals .ob-goal.on[data-g="travel"]');if(t)t.hidden=!on}
 function obNext(){sfx('tap');OB_STATE.page=Math.min(3,OB_STATE.page+1);renderObPage()}
 function finishOnboarding(){
   const dEl=document.getElementById('ob-dest'),tEl=document.getElementById('ob-date');

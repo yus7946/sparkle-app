@@ -100,7 +100,7 @@ function callRate(){return typeof sjLv==='function'?sjLv().rate:(talkData().rate
 
 /* ---------- 話題を選ぶ ---------- */
 function callPick(){
-  tkStopAll();const el=tkScreen(),c=callData(),us=c.tab==='us',list=us?CALL_US:CALL_TOPICS;
+  tkStopAll();const el=tkScreen(),c=callData(),us=(c.tab||((PROG.jpGoals||[]).includes('live')?'us':'jp'))==='us',list=us?CALL_US:CALL_TOPICS;
   el.innerHTML=tkBack('Spark と英語通話')+`
     <div class="call-hero"><div class="call-hero-av">${sparkSVG(null,'hello')}</div>
       <div class="call-hero-b"><span class="call-hero-k">VIDEO CALL · 日本人特化</span><b>${us?'アメリカで、困らずに暮らす':'日本のことを、英語で話そう'}</b>

@@ -82,7 +82,7 @@ body::before{
 }
 .btn-primary::before,.btn-gold::before{
   content:'';position:absolute;left:8%;right:8%;top:2px;height:46%;border-radius:999px;z-index:-1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));
+  background:linear-gradient(180deg,rgba(255,255,255,.36),rgba(255,255,255,0));
 }
 .btn-primary::after,.btn-gold::after{
   content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;pointer-events:none;

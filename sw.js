@@ -1,5 +1,5 @@
 // Sparkle Service Worker — offline-first for the shell
-const CACHE = 'sparkle-v26';
+const CACHE = 'sparkle-v27';
 const ASSETS = [
   './',
   './index.html',

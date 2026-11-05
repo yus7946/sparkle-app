@@ -198,8 +198,20 @@ function coTidyTalk(){
   const set=el.querySelector('.tk-set'),h=set&&set.previousElementSibling;
   if(set){const d=document.createElement('details');d.className='co-set';d.innerHTML='<summary>⚙ 設定（ヒント・訳・相手の話す速さ）</summary>';set.insertAdjacentElement('beforebegin',d);d.appendChild(set);if(h&&h.classList.contains('sec-title'))h.remove()}
 }
+/* ---------- Profile の並び ---------- */
+// キャラと記録 → Sparkのへや → 設定とデータ → Plus の順にする（以前は Plus と設定が先頭にあった）
+function coTidyProfile(){
+  const scr=document.getElementById('screen-profile');if(!scr)return;
+  const title=[...scr.children].find(c=>c.classList.contains('sec-title')&&!c.id);
+  const order=[title,scr.querySelector(':scope>.spark-hero'),scr.querySelector(':scope>.dtabs'),document.getElementById('profile-tab-body'),document.getElementById('spk-room-entry')];
+  let st=document.getElementById('co-set-title');
+  if(!st){st=document.createElement('div');st.className='sec-title';st.id='co-set-title';st.textContent='設定とデータ'}
+  order.push(st,document.getElementById('bk-entry'),...scr.querySelectorAll(':scope>.bk-entry:not(#bk-entry)'),document.getElementById('pl-entry'),document.getElementById('lg-links'));
+  order.filter(Boolean).forEach(n=>scr.appendChild(n));
+}
 function coInstall(){
   planTasksForToday=function(){return coTasks()};
+  if(typeof renderProfile==='function'){const _rp=renderProfile;renderProfile=function(){const r=_rp.apply(this,arguments);queueMicrotask(()=>{try{coTidyProfile()}catch(e){}});return r}}
   if(typeof renderTalkHub==='function'){const _th=renderTalkHub;renderTalkHub=function(){const r=_th.apply(this,arguments);try{coTidyTalk()}catch(e){}return r}}
   // ボーナスラウンドは使わない（レッスンは3ステップで完結）
   if(typeof hbSplit==='function')hbSplit=function(){const all=coTasks(),core=all;return{all,core,bonus:[],bonusLeft:[],coreDone:core.every(t=>t.done)}};

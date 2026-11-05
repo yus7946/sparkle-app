@@ -92,3 +92,13 @@
 .lg-date{font-size:11px;color:var(--text-muted);text-align:right;margin-top:12px!important}
 .lg-links{display:flex;justify-content:center;align-items:center;gap:8px;margin:18px 0 8px;font-size:11px;color:var(--text-muted)}
 .lg-links button{background:none;border:none;min-height:36px;font:inherit;font-size:11px;color:var(--text-muted);text-decoration:underline;cursor:pointer}
+
+/* 公開前の仕上げ */
+/* Spark のひとことは画面の上に出す（下だと「始める」ボタンに重なっていた） */
+.spk-coach{bottom:auto!important;top:calc(64px + env(safe-area-inset-top,0px))}
+/* Passport：未クリアの場面も遊べることがわかるように */
+.pp-intro{font-size:12px;line-height:1.7;color:var(--text-secondary);margin:0 2px 14px}
+.pp-slot:not(.stamped) .pp-play{color:#ffd76a;opacity:.9}
+.pp-slot:not(.stamped) .pp-title{opacity:.8}
+/* Profile の見出しの間隔 */
+#co-set-title{margin-top:22px}
