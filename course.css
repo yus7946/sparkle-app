@@ -68,3 +68,16 @@
 .co-row-b small{font-size:11px;color:var(--text-muted);line-height:1.45}
 .co-row-d{font-size:10.5px;font-weight:700;color:var(--text-muted);flex-shrink:0}
 .co-row-d i{font-style:normal;color:#fff;background:var(--sparkle);padding:3px 8px;border-radius:999px}
+
+/* Talk タブの整理 */
+.co-talk .tk-hero #jp-talk,.co-talk #sj-talk{display:none!important}
+.co-talk .tk-modes{margin-bottom:12px}
+.co-talk .tk-mode-ic{font-size:18px}
+.co-scenes{margin:0 0 10px}
+.co-talk .tk-group[hidden]{display:none}
+.co-set{margin-top:18px;border-radius:16px;background:var(--surface-2);border:1px solid var(--border);padding:4px 12px}
+.co-set summary{cursor:pointer;list-style:none;padding:10px 0;font-size:var(--text-sm);font-weight:700;color:var(--text-secondary)}
+.co-set summary::-webkit-details-marker{display:none}
+.co-set[open] summary{border-bottom:1px solid var(--border)}
+.co-set .tk-set{border:none;background:none;box-shadow:none;padding:4px 0}
+.co-set .tk-set::after{display:none}

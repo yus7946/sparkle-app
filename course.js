@@ -169,8 +169,38 @@ function coTidyHome(){
     const q=home.querySelector('.gw-quests');if(q)box.insertAdjacentElement('afterend',q);
   }
 }
+/* ---------- Talk タブの整理 ---------- */
+// 英語ジム・話すジムの帯はタイルに、ロールプレイは場面タブで1つずつ、設定は折りたたむ
+function coTidyTalk(){
+  const el=document.getElementById('screen-talk'),modes=el&&el.querySelector('.tk-modes');if(!modes||el.querySelector('#co-tiles'))return;
+  el.classList.add('co-talk');
+  const tile=(id,ic,t,d)=>`<button class="tk-mode" data-tile="${id}"><span class="tk-mode-ic">${ic}</span><span class="tk-mode-t">${t}</span><span class="tk-mode-d">${d}</span></button>`;
+  const tiles=[];
+  if(document.getElementById('sj-talk'))tiles.push(tile('sj-talk','⏱','話すジム','黙らない・止まらない・カタカナで言わない'));
+  if(document.getElementById('jp-talk'))tiles.push(tile('jp-talk','🇯🇵','英語ジム','日本人の5つのクセを診断して直す'));
+  modes.insertAdjacentHTML('afterbegin',tiles.join(''));
+  modes.querySelectorAll('[data-tile]').forEach(b=>b.onclick=()=>{const o=document.getElementById(b.dataset.tile);if(o)o.click()});
+  modes.insertAdjacentHTML('beforebegin','<div class="sec-title" id="co-tiles">練習メニュー</div>');
+  // ロールプレイ：場面を選んで、その場面の会話だけ出す
+  const groups=[...el.querySelectorAll('.tk-group')];
+  if(groups.length>1){
+    const t=talkData();let cur=Math.min(groups.length-1,t.scene||0);
+    const names=groups.map(g=>{const s=g.querySelector('.tk-group-h span');return s?s.textContent:''});
+    const row=document.createElement('div');row.className='pill-row co-scenes';
+    row.innerHTML=names.map((n,i)=>`<button class="pill${i===cur?' on':''}" data-sc="${i}">${esc(n)}</button>`).join('');
+    groups[0].insertAdjacentElement('beforebegin',row);
+    const show=i=>{groups.forEach((g,k)=>g.hidden=k!==i);row.querySelectorAll('[data-sc]').forEach(b=>b.classList.toggle('on',+b.dataset.sc===i))};
+    show(cur);
+    row.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{cur=+b.dataset.sc;t.scene=cur;commit();show(cur);sfx('tap')});
+  }
+  const note=el.querySelector('#tk-rp-list+.tk-note');if(note)note.textContent='相手のセリフを聞いて、マイクで自由に答えよう。採点と、より自然な言い方が出ます。';
+  // 設定は折りたたむ
+  const set=el.querySelector('.tk-set'),h=set&&set.previousElementSibling;
+  if(set){const d=document.createElement('details');d.className='co-set';d.innerHTML='<summary>⚙ 設定（ヒント・訳・相手の話す速さ）</summary>';set.insertAdjacentElement('beforebegin',d);d.appendChild(set);if(h&&h.classList.contains('sec-title'))h.remove()}
+}
 function coInstall(){
   planTasksForToday=function(){return coTasks()};
+  if(typeof renderTalkHub==='function'){const _th=renderTalkHub;renderTalkHub=function(){const r=_th.apply(this,arguments);try{coTidyTalk()}catch(e){}return r}}
   // ボーナスラウンドは使わない（レッスンは3ステップで完結）
   if(typeof hbSplit==='function')hbSplit=function(){const all=coTasks(),core=all;return{all,core,bonus:[],bonusLeft:[],coreDone:core.every(t=>t.done)}};
   const _rh=renderHome;renderHome=function(){const r=_rh.apply(this,arguments);try{coTidyHome()}catch(e){}return r};
