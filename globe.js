@@ -62,7 +62,7 @@ function* sgBuildGen(W,H){
   // 3) 色づけ
   const nz=sgNoise(CW,CH,W>1024?6:5,7);yield;
   const tex=new Uint8ClampedArray(W*H*3),sea=new Float32Array(W*H);
-  const C={forest:[30,82,42],grass:[98,128,60],trop:[22,74,34],boreal:[44,76,52],tundra:[126,122,100],sand:[212,182,128],sand2:[178,136,90],ice:[238,243,248]};
+  const C={forest:[30,82,42],grass:[98,128,60],trop:[22,74,34],boreal:[44,76,52],tundra:[126,122,100],sand:[196,168,118],sand2:[168,128,84],ice:[238,243,248]};
   const mix=(c,d,t)=>{c[0]+=(d[0]-c[0])*t;c[1]+=(d[1]-c[1])*t;c[2]+=(d[2]-c[2])*t};
   for(let y=0;y<H;y++){
     const lat=90-(y+0.5)/H*180,al=Math.abs(lat),cl=Math.cos(lat*Math.PI/180);
@@ -76,9 +76,10 @@ function* sgBuildGen(W,H){
         const c=C.grass.slice();mix(c,C.forest,sgCl(n*1.6-0.3));mix(c,C.trop,trop*0.75);mix(c,C.boreal,north);mix(c,C.tundra,tun);
         // 砂漠の範囲はノイズでふちをゆらし、まっすぐな帯に見えないようにする
         const n2=nz[((y*5>>1)%CH)*CW+((x*5>>1)%CW)],n3=nz[((y*3>>1)%CH)*CW+(((x+W/3)*3>>1)%CW)],jl=lon+(n-0.5)*16+(n2-0.5)*9,jb=lat+(n-0.5)*10+(n3-0.5)*7;
-        let dry=Math.max(sgBox(jl,jb,-17,58,15,33),sgBox(jl,jb,34,60,14,32),sgBox(jl,jb,116,146,-31,-19,6),sgBox(jl,jb,76,112,38,45,5)*0.5,
-          sgBox(jl,jb,-117,-103,25,37,4)*0.8,sgBox(jl,jb,13,26,-28,-18,4),sgBox(jl,jb,-75,-68,-30,-17,3),sgBox(jl,jb,60,75,23,31,4)*0.7);
-        dry=sgCl(dry*(0.7+0.6*n));
+        let dry=Math.max(sgBox(jl,jb,-17,58,15,33,9),sgBox(jl,jb,34,60,14,32,9),sgBox(jl,jb,116,146,-31,-19,10),
+          sgBox(jl,jb,-117,-103,25,37,7),sgBox(jl,jb,13,26,-28,-18,7),sgBox(jl,jb,-75,-68,-30,-17,5),sgBox(jl,jb,62,73,24,30,6)*0.8);
+        // 半透明に混ぜるとぼやけた染みに見えるので、細かいノイズでしきい値を切って、ふちを自然な形でくっきりさせる
+        dry=sgSm(0.46,0.6,dry+(n2-0.5)*0.9+(n-0.5)*0.35)*0.88;
         const sd=C.sand.slice();mix(sd,C.sand2,sgCl(n*1.4-0.2));mix(c,sd,dry);
         const ice=Math.max(lat<-60?1:0,sgBox(lon,lat,-56,-18,59,85,4)*0.95,sgSm(70,80,al)*0.9);
         mix(c,C.ice,ice);
@@ -100,7 +101,7 @@ function* sgBuildGen(W,H){
 }
 function sgBuild(W,H){const g=sgBuildGen(W||SG_W,H||SG_H);let r;do{r=g.next()}while(!r.done);return r.value}
 // 2048px のテクスチャは IndexedDB に保存（色の作り方を変えたら SG_TEX_V を上げる）
-const SG_TEX_V='hi4-'+SG_HI,SG_HI_FLAG='sparkle_globe_hi';
+const SG_TEX_V='hi6-'+SG_HI,SG_HI_FLAG='sparkle_globe_hi';
 function sgIdb(){return new Promise((res,rej)=>{const r=indexedDB.open('sparkle-globe',1);r.onupgradeneeded=()=>r.result.createObjectStore('t');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
 async function sgLoadHi(){try{const db=await sgIdb();return await new Promise(res=>{const q=db.transaction('t').objectStore('t').get(SG_TEX_V);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(e){return null}}
 async function sgSaveHi(t){try{const db=await sgIdb();const tx=db.transaction('t','readwrite');tx.objectStore('t').clear();tx.objectStore('t').put(t,SG_TEX_V);tx.oncomplete=()=>{try{localStorage.setItem(SG_HI_FLAG,SG_TEX_V)}catch(e){}}}catch(e){}}
@@ -157,22 +158,22 @@ function sgMount(host,opt){
     const v=Math.min(H-1,Math.max(0,((0.5-lat/Math.PI)*H)|0));
     const dif=sx*L[0]+sy*L[1]+z*L[2],dh=Math.max(0,sx*Hh[0]+sy*Hh[1]+z*Hh[2]),rm=Math.pow(1-z,2.4);
     pI[n]=(j*D+i)*4;vR[n]=v*W;vC[n]=Math.min(CH-1,v>>1)*CW;lonT[n]=lon/(2*Math.PI)*W;
-    shd[n]=0.07+1.0*sgSm(-0.18,0.62,dif);spc[n]=Math.pow(dh,170)*0.26;rim[n]=rm*(0.25+0.75*sgSm(-0.35,0.55,dif));alp[n]=a*255;n++;
+    shd[n]=0.07+1.0*sgSm(-0.18,0.62,dif);spc[n]=Math.pow(dh,170)*0.26;rim[n]=Math.pow(1-z,4)*(0.2+0.8*sgSm(-0.35,0.55,dif));alp[n]=a*255;n++;
   }};
   if(T)prep();
   if(!T||T!==sgTexHi)sgBuildHi(t=>{if(cv.isConnected){T=t;prep()}});
-  const glow=ctx.createRadialGradient(cx,cy,R*0.92,cx,cy,R*1.3);
-  glow.addColorStop(0,'rgba(120,190,255,.32)');glow.addColorStop(0.3,'rgba(80,160,255,.1)');glow.addColorStop(1,'rgba(40,120,255,0)');
+  // 大気の光は地球のすぐ外側だけ（広くぼかすと画面全体がもやっと見える）
+  const glow=ctx.createRadialGradient(cx,cy,R*0.98,cx,cy,R*1.12);
+  glow.addColorStop(0,'rgba(140,200,255,.22)');glow.addColorStop(0.45,'rgba(90,160,255,.06)');glow.addColorStop(1,'rgba(40,120,255,0)');
 
   const drawEarth=(cLon,cOff)=>{
-    const{tex,sea,cloud,W,CW}=T,cT=(cLon+180)/360*W,cC=cT/2+cOff*W/SG_W;
+    const{tex,sea,W}=T,cT=(cLon+180)/360*W;
     for(let k=0;k<n;k++){
       let u=(lonT[k]+cT)%W;if(u<0)u+=W;
       const t=vR[k]+(u|0),t3=t*3;
-      let cu=(lonT[k]/2+cC)%CW;if(cu<0)cu+=CW;
-      const c=cloud[vC[k]+(cu|0)],s=shd[k],sp=spc[k]*sea[t]*(1-c),rm=rim[k],p=pI[k];
-      const r=tex[t3]+(242-tex[t3])*c,g=tex[t3+1]+(246-tex[t3+1])*c,b=tex[t3+2]+(252-tex[t3+2])*c;
-      px[p]=r*s+sp*255+rm*30;px[p+1]=g*s+sp*240+rm*80;px[p+2]=b*s+sp*225+rm*160;px[p+3]=alp[k];
+            const s=shd[k],sp=spc[k]*sea[t],rm=rim[k],p=pI[k];
+      // 雲は描かない（ぼやけた白いもやに見えるため）。大気のふちも細く控えめに
+      px[p]=tex[t3]*s+sp*255+rm*14;px[p+1]=tex[t3+1]*s+sp*240+rm*44;px[p+2]=tex[t3+2]*s+sp*225+rm*96;px[p+3]=alp[k];
     }
     octx.putImageData(img,0,0);
   };
@@ -227,7 +228,7 @@ function sgMount(host,opt){
     const dt=last?Math.min(0.05,(ts-last)/1000):0;last=ts;
     if(!drag&&!reduce){cLon+=vel*dt;vel+=(-5.5-vel)*Math.min(1,dt*1.5);th+=dt*0.75;cOff+=dt*1.2}
     ctx.clearRect(0,0,S,S);
-    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,R*1.3,0,7);ctx.fill();
+    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,R*1.12,0,7);ctx.fill();
     drawOrbit(false);drawTrail(th,false);if(Math.sin(th)<=0)drawPlane(th);
     if(T){drawEarth(cLon,cOff);ctx.drawImage(off,cx-R,cy-R)}
     drawCities(cLon,ts);
