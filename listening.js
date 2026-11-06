@@ -461,7 +461,7 @@ async function lxRecStart(){
     stream.getTracks().forEach(t=>t.stop());
     if(!lxSh||s._cancel)return;
     const blob=new Blob(chunks,{type:rec.mimeType||'audio/webm'});
-    if(s.recUrl)URL.revokeObjectURL(s.recUrl);s.recUrl=URL.createObjectURL(blob);
+    if(s.recUrl)URL.revokeObjectURL(s.recUrl);s.recUrl=URL.createObjectURL(blob);s.recBlob=blob;
     const modelSec=(performance.now()-s._t0)/1000;
     try{
       const ctx=new (window.AudioContext||window.webkitAudioContext)();const buf=await ctx.decodeAudioData(await blob.arrayBuffer());ctx.close&&ctx.close();
@@ -472,7 +472,7 @@ async function lxRecStart(){
       const segSec=buf.duration/N,first=env.findIndex(v=>v>th),last=N-1-[...env].reverse().findIndex(v=>v>th);let gaps=0,run=0;
       for(let i=first;i<=last;i++){if(env[i]<th)run++;else{if(run*segSec>=0.7)gaps++;run=0}}
       s.recWave=env.map(v=>`<i style="height:${Math.max(4,Math.round(v/mx*100))}%"></i>`).join('');
-      s.recInfo=`${buf.duration.toFixed(1)}秒 · 止まった回数 ${gaps}回`;
+      s.recInfo=`${buf.duration.toFixed(1)}秒 · 止まった回数 ${gaps}回`;s.recGaps=gaps;s.recSec=buf.duration;
       s.recTip=gaps===0?'一度も止まらずに言えました！ 次は速さ 1.1x に挑戦してみよう。':gaps<=2?`途中で${gaps}回止まりました。止まった所の文を ↻ でくり返してから、もう一度。`:'止まる所が多めです。速さを 0.9x に下げて、まず止まらずに最後まで追いかけよう。';
       if(gaps===0)sfx('correct');
       s.recs=(s.recs||0)+1;void modelSec;
@@ -489,12 +489,12 @@ function lxShSay(){
   const btn=document.getElementById('lx-sh-say');if(btn){btn.disabled=true;btn.textContent='🎤 聞いています…'}
   tkListen({lang:'en-US',maxMs:Math.max(5000,x.t.split(/\s+/).length*900),
     onInterim:t=>{const h=document.getElementById('lx-sh-heard');if(h)h.textContent='聞き取り中：'+t},
-    onDone:(text)=>{
+    onDone:(text,meta)=>{
       if(!lxSh)return;
       if(!text){s.scores[s.i]={v:null,heard:'（声が聞き取れませんでした。もう一度どうぞ）'};return lxShRender()}
       const r=tkAlign(text,x.t);
       r.words.forEach((w,k)=>{if(!r.marks[k])lxMissAdd(w)});
-      s.scores[s.i]={v:r.score,heard:text,html:r.words.map((w,k)=>`<span class="lx-w ${r.marks[k]?'ok':'ng'}">${esc(w)}</span>`).join(' ')};
+      s.scores[s.i]={v:r.score,heard:text,html:r.words.map((w,k)=>`<span class="lx-w ${r.marks[k]?'ok':'ng'}">${esc(w)}</span>`).join(' '),words:r.words,marks:r.marks,subs:r.subs,sec:meta&&meta.sec};
       sfx(r.score>=80?'correct':'tap');lxShRender();
     },
     onError:code=>{showToast(typeof tkSrErrorMsg==='function'?tkSrErrorMsg(code):'音声認識を開始できませんでした');s.scores[s.i]=null;lxShRender()}});

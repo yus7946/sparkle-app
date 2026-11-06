@@ -1,0 +1,96 @@
+/* ===== シャドーイング・スタジオ（shadow.js） ===== */
+.sd-wrap{padding-bottom:8px}
+.sd-wrap .back-row{margin-bottom:8px}
+.sd-streak{margin-left:auto;display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:800;color:var(--text-muted);padding:5px 10px;border-radius:999px;border:1px solid var(--border)}
+.sd-streak svg{width:14px;height:14px}
+.sd-streak.on{color:#b86e00;background:color-mix(in srgb,var(--gold) 18%,transparent);border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
+.sd-k{font-size:9.5px;font-weight:800;letter-spacing:.16em;color:var(--sparkle)}
+
+/* 今週の課題 */
+.sd-week{position:relative;padding:14px 16px 14px;border-radius:24px;color:#fff;overflow:hidden;isolation:isolate;
+  background:linear-gradient(150deg,#2b7fe0 0%,#1a56a8 55%,#123d80 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 16px 32px -18px rgba(18,61,128,.8)}
+.sd-week::before{content:"";position:absolute;right:-50px;top:-60px;width:180px;height:180px;border-radius:50%;z-index:-1;background:radial-gradient(circle,rgba(79,163,247,.5),rgba(79,163,247,0) 70%)}
+.sd-week .sd-k{color:#ffd76a}
+.sd-week-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sd-acc{font-size:10px;opacity:.8}
+.sd-title{display:block;font-family:var(--font-heading);font-weight:400;font-size:var(--text-xl);line-height:1.25;margin-top:4px}
+.sd-meta{display:block;font-size:11px;opacity:.8;margin-top:2px}
+.sd-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:12px 0 8px}
+.sd-day{display:flex;flex-direction:column;align-items:center;gap:3px}
+.sd-day i{position:relative;width:100%;height:38px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden}
+.sd-day i::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--h);background:linear-gradient(180deg,#7ee2b8,#3ccf8e);border-radius:9px 9px 0 0}
+.sd-day span{font-size:9.5px;font-weight:700;opacity:.75;font-variant-numeric:tabular-nums}
+.sd-day.now i{box-shadow:0 0 0 2px #ffd76a}
+.sd-day.now span{opacity:1;color:#ffd76a}
+.sd-day.done span{opacity:1}
+.sd-gain{font-size:11.5px;opacity:.9;margin-bottom:8px}
+.sd-gain b{font-size:var(--text-sm);font-variant-numeric:tabular-nums}
+.sd-gain em{font-style:normal;font-weight:800;color:#7ee2b8;margin-left:2px}
+.sd-week .btn-gold{margin-top:2px}
+.sd-ba{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
+.sd-ba:empty{display:none}
+.sd-ba span{font-size:10.5px;opacity:.8;margin-right:2px}
+.sd-ba button{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 11px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.14);color:#fff;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.sd-ba button svg{width:12px;height:12px}
+
+/* コーチのメモ */
+.sd-note{margin-top:10px;padding:12px 14px;border-radius:20px;background:var(--surface-2,rgba(255,255,255,.75));border:1px solid var(--border)}
+.sd-note-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sd-note-h span{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--text-primary)}
+.sd-note-h svg{width:14px;height:14px;color:var(--gold)}
+.sd-note-h small{font-size:10px;color:var(--text-muted)}
+.sd-pt{display:flex;flex-direction:column;gap:1px;padding:6px 0;border-top:1px solid var(--border)}
+.sd-pt:first-of-type{border-top:none;padding-top:0}
+.sd-pt b{font-size:12.5px}
+.sd-pt small{font-size:11px;line-height:1.55;color:var(--text-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sd-how b{display:block;font-size:13px;margin-bottom:3px}
+.sd-how small{font-size:11.5px;line-height:1.6;color:var(--text-secondary)}
+
+/* レベル */
+.sd-lv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.sd-lv button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px;border-radius:14px;border:1px solid var(--border);background:var(--surface-2,rgba(255,255,255,.7));color:var(--text-primary);font:inherit;cursor:pointer}
+.sd-lv b{font-size:12px}
+.sd-lv small{font-size:9.5px;color:var(--text-muted)}
+.sd-lv button.on{background:color-mix(in srgb,var(--sparkle) 12%,transparent);border-color:var(--sparkle)}
+.sd-lv button.on b{color:var(--sparkle)}
+.sd-foot{display:flex;justify-content:space-between;align-items:center;margin:10px 4px 0;font-size:11px;color:var(--text-muted)}
+.sd-foot b{color:var(--text-primary)}
+.sd-link{background:none;border:none;padding:4px 0;min-height:0;font:inherit;font-size:11px;font-weight:700;color:var(--sparkle);cursor:pointer}
+
+/* 音読：カラオケ表示とポーズ再生 */
+.sd-ov{display:grid;grid-template-columns:1.3fr 1.1fr auto;gap:6px}
+.sd-ov .btn{min-height:44px;padding:0 10px;font-size:13px}
+.sd-rate{min-width:56px}
+.sd-ov-st{min-height:18px;margin:6px 2px 0;font-size:12px;font-weight:700;color:var(--sparkle)}
+#lx-sh-root .lx-sh-row.sd-now{background:color-mix(in srgb,var(--sparkle) 9%,transparent);border-radius:10px}
+#lx-sh-root .lx-sh-row.sd-now .lx-sh-line span{opacity:.45;transition:opacity .12s,color .12s}
+#lx-sh-root .lx-sh-row.sd-now .lx-sh-line span.sd-lit{opacity:1;color:var(--sparkle)}
+#lx-sh-root .lx-sh-row.sd-turn{background:color-mix(in srgb,var(--gold) 16%,transparent)}
+#lx-sh-root .lx-sh-row.sd-turn .lx-sh-line span{color:var(--text-primary)}
+
+/* 添削レポート */
+.sd-rep-h{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:22px;background:var(--surface-2,rgba(255,255,255,.75));border:1px solid var(--border);margin-bottom:10px}
+.sd-rep-h>div:first-child{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sd-rep-h b{font-family:var(--font-heading);font-weight:400;font-size:var(--text-xl)}
+.sd-rep-h small{font-size:11.5px;color:var(--text-secondary)}
+.sd-pts{display:flex;flex-direction:column;gap:8px}
+.sd-pt-c{padding:11px 13px;border-radius:18px;background:var(--surface-2,rgba(255,255,255,.75));border:1px solid var(--border);display:flex;flex-direction:column;gap:5px}
+.sd-pt-t{display:flex;align-items:center;gap:8px}
+.sd-pt-t i{width:22px;height:22px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--sparkle-2),var(--sparkle))}
+.sd-pt-t b{flex:1;font-size:13.5px}
+.sd-pt-t span{font-size:10.5px;font-weight:700;color:var(--ember)}
+.sd-pt-c>small{font-size:11.5px;line-height:1.6;color:var(--text-secondary)}
+.sd-ex{display:flex;flex-wrap:wrap;gap:5px}
+.sd-ex u{text-decoration:none;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--ember) 12%,transparent);color:color-mix(in srgb,var(--ember) 85%,var(--text-primary))}
+.sd-try{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;background:none;border:none;padding:2px 0;min-height:0;font:inherit;font-size:11.5px;font-weight:700;color:var(--sparkle);cursor:pointer}
+.sd-try svg{width:13px;height:13px}
+.sd-good{display:flex;align-items:center;gap:6px;margin:10px 4px 0;font-size:12px;font-weight:700;color:var(--enchanted)}
+.sd-good svg{width:16px;height:16px}
+.sd-script{margin-top:10px}
+.sd-script p{font-size:13.5px;line-height:1.75;margin:0 0 6px}
+.sd-script span.ok{color:var(--text-primary)}
+.sd-script span.ng{color:var(--ember);font-weight:800;text-decoration:underline wavy color-mix(in srgb,var(--ember) 60%,transparent);text-underline-offset:3px}
+.sd-script span.wk.ok{color:var(--text-muted)}
+.sd-script span.na{color:var(--text-muted)}
+.sd-rep .tk-fb-btns{margin-top:14px}
+@media (prefers-color-scheme: dark){.sd-note,.sd-lv button,.sd-rep-h,.sd-pt-c{background:rgba(255,255,255,.05)}}

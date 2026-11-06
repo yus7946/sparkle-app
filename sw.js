@@ -1,5 +1,5 @@
 // Sparkle Service Worker — offline-first for the shell
-const CACHE = 'sparkle-v33';
+const CACHE = 'sparkle-v34';
 const ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const ASSETS = [
   './polish.css',
   './compact.css',
   './passport.css',
+  './shadow.css',
   './theme.css',
   './backup.js',
   './toeic_core.js',
@@ -35,6 +36,7 @@ const ASSETS = [
   './course.js',
   './legal.js',
   './passport.js',
+  './shadow.js',
   './compact.js',
   './theme.js',
   './icons.js',
