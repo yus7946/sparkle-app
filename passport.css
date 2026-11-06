@@ -1,0 +1,103 @@
+/* ===== Passport：街ごとの旅行気分（passport.js） ===== */
+#screen-passport{padding-top:4px}
+.pp-top{display:flex;align-items:center;justify-content:space-between;margin:0 2px 6px}
+.pp-ttl{display:flex;align-items:center;gap:6px;color:var(--text-primary)}
+.pp-ttl svg{width:18px;height:18px;color:var(--text-muted)}
+.pp-ttl b{font-family:var(--font-heading);font-weight:400;font-size:var(--text-lg)}
+.pp-count{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)}
+.pp-count b{font-size:var(--text-sm);color:var(--text-primary);font-variant-numeric:tabular-nums}
+.pp-count i{width:52px;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--sparkle) var(--p),color-mix(in srgb,var(--text-primary) 10%,transparent) var(--p))}
+
+/* 街のチップ（横にスクロール） */
+.pp-chips{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;margin:0 -16px 8px;padding:7px 16px 2px;scrollbar-width:none}
+.pp-chips::-webkit-scrollbar{display:none}
+.pp-chip{position:relative;flex:0 0 auto;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:0;min-width:62px;padding:6px 8px 5px;border-radius:16px;font:inherit;cursor:pointer;
+  background:var(--surface-2,rgba(255,255,255,.7));border:1px solid var(--border);color:var(--text-primary)}
+.pp-chip b{font-size:13px;font-weight:800;letter-spacing:.06em}
+.pp-chip span{font-size:9.5px;color:var(--text-muted);white-space:nowrap}
+.pp-chip i{display:flex;gap:3px;margin-top:3px}
+.pp-chip u{width:5px;height:5px;border-radius:50%;background:color-mix(in srgb,var(--text-primary) 16%,transparent);text-decoration:none}
+.pp-chip u.on{background:var(--enchanted)}
+.pp-chip em{position:absolute;top:-6px;right:-2px;font-style:normal;font-size:8px;font-weight:800;letter-spacing:.06em;padding:1px 5px;border-radius:999px;background:var(--gold);color:#2a1d00}
+.pp-chip.on{background:linear-gradient(160deg,var(--sparkle-2),var(--sparkle));border-color:transparent;color:#fff;box-shadow:0 8px 18px -10px color-mix(in srgb,var(--sparkle) 80%,transparent)}
+.pp-chip.on span{color:rgba(255,255,255,.85)}
+.pp-chip.on u{background:rgba(255,255,255,.35)}
+.pp-chip.on u.on{background:#fff}
+.pp-chip.clear:not(.on){border-color:color-mix(in srgb,var(--enchanted) 55%,transparent)}
+
+/* 景色のカード */
+.pp-dest{position:relative;height:clamp(206px,30vh,290px);border-radius:26px;overflow:hidden;color:#fff;isolation:isolate;touch-action:pan-y;
+  box-shadow:0 18px 36px -18px color-mix(in srgb,var(--ink) 80%,transparent);background:var(--ink)}
+.pp-svg{position:absolute;inset:0;width:100%;height:100%;z-index:-2;display:block}
+.pp-shade{position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--ink) 55%,transparent) 0%,transparent 34%,transparent 58%,color-mix(in srgb,var(--ink) 70%,transparent) 100%)}
+.pp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:14px 16px 0}
+.pp-head>div:first-child{display:flex;flex-direction:column;min-width:0}
+.pp-k{font-size:9px;font-weight:800;letter-spacing:.24em;opacity:.8}
+.pp-city{font-family:var(--font-heading);font-weight:400;font-size:clamp(28px,8.5vw,36px);line-height:1.05;letter-spacing:-.01em;text-shadow:0 2px 14px rgba(0,0,0,.25)}
+.pp-head small{font-size:11px;opacity:.85;margin-top:2px}
+.pp-clock{display:flex;flex-direction:column;align-items:flex-end;padding:6px 10px;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.pp-clock b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.pp-clock small{font-size:9px;opacity:.85;margin:0;white-space:nowrap}
+.pp-foot{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.pp-hi{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:8px;text-align:left;padding:8px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.18);color:#fff;font:inherit;cursor:pointer;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);max-width:62%}
+.pp-hi b{font-size:var(--text-base);font-weight:800;grid-column:1}
+.pp-hi small{font-size:9.5px;opacity:.85;grid-column:1;line-height:1.35}
+.pp-hi svg{grid-column:2;grid-row:1 / span 2;opacity:.9}
+.pp-hi:active{transform:scale(.97)}
+.pp-fl{display:grid;grid-template-columns:auto auto auto;align-items:center;column-gap:5px;justify-items:center;padding:7px 10px;border-radius:14px;background:rgba(255,255,255,.92);color:#1a2a44}
+.pp-fl span{font-size:12px;font-weight:800;letter-spacing:.08em}
+.pp-fl svg{transform:rotate(90deg);color:var(--sparkle)}
+.pp-fl small{grid-column:1 / -1;font-size:9px;color:#5a6a82;white-space:nowrap}
+.pp-nav{position:absolute;top:50%;width:32px;height:32px;margin-top:-16px;border-radius:50%;border:none;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.18);cursor:pointer;opacity:.8}
+.pp-nav[hidden]{display:none}
+.pp-nav.l{left:8px}.pp-nav.r{right:8px}
+
+.pp-tip{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin:8px 4px 6px;font-size:12px;color:var(--text-secondary)}
+.pp-tip span{font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--sparkle)}
+.pp-tip em{font-style:normal;font-size:10.5px;color:var(--text-muted);margin-left:auto}
+
+/* 搭乗券 */
+.pp-tix{display:flex;flex-direction:column;gap:6px}
+.pp-tk{position:relative;display:flex;align-items:stretch;width:100%;min-height:54px;padding:0;border-radius:16px;font:inherit;text-align:left;cursor:pointer;color:var(--text-primary);overflow:hidden;
+  background:var(--surface-2,rgba(255,255,255,.8));border:1px solid var(--border);box-shadow:var(--gl-shadow,0 8px 20px -14px rgba(0,0,0,.3))}
+.pp-tk:active{transform:scale(.985)}
+.pp-tk-l{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:56px;flex-shrink:0;background:color-mix(in srgb,var(--tk) 14%,transparent);border-right:2px dashed color-mix(in srgb,var(--tk) 35%,transparent)}
+.pp-tk-av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff}
+.pp-tk-l small{font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--text-muted)}
+.pp-tk-b{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:0;padding:6px 10px}
+.pp-tk-b b{font-size:var(--text-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-tk-b small{font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-tk-b span{font-size:9.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-tk-r{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 12px;color:var(--sparkle)}
+.pp-tk-r svg{width:16px;height:16px}
+.pp-board{font-size:9px;font-weight:800;letter-spacing:.14em}
+.pp-stamp{font-size:10px;font-weight:900;letter-spacing:.1em;color:var(--enchanted);border:2px solid currentColor;border-radius:8px;padding:3px 6px;transform:rotate(-10deg);opacity:.9}
+.pp-tk.done{border-color:color-mix(in srgb,var(--enchanted) 45%,transparent)}
+
+/* 景色の動き */
+.pp-tw{animation:ppTw 2.6s ease-in-out infinite}
+@keyframes ppTw{0%,100%{opacity:.25}50%{opacity:1}}
+.pp-wave{animation:ppWave 6s linear infinite}
+@keyframes ppWave{to{transform:translateX(40px)}}
+.pp-sway{animation:ppSway 4.5s ease-in-out infinite alternate}
+@keyframes ppSway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.8deg)}}
+.pp-glow{animation:ppGlow 4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+@keyframes ppGlow{from{transform:scale(.92);opacity:.25}to{transform:scale(1.08);opacity:.45}}
+.pp-shim{animation:ppShim 2.4s ease-in-out infinite alternate}
+@keyframes ppShim{from{opacity:.55;transform:translateX(-3px)}to{opacity:1;transform:translateX(3px)}}
+.pp-fly{animation:ppFly 16s linear infinite}
+@keyframes ppFly{from{transform:translateX(-120px)}to{transform:translateX(420px)}}
+.pp-fw{animation:ppFw 2.8s ease-out infinite;opacity:0}
+@keyframes ppFw{0%{transform:scale(.2);opacity:0}15%{opacity:1}70%{transform:scale(1.15);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+.pp-beam{animation:ppBeam 5s ease-in-out infinite alternate}
+@keyframes ppBeam{from{opacity:.4}to{opacity:1}}
+.pp-eye{animation:ppSpin 60s linear infinite}
+@keyframes ppSpin{to{transform:rotate(360deg)}}
+.pp-bus{animation:ppBus 14s linear infinite}
+@keyframes ppBus{from{transform:translateX(-40px)}to{transform:translateX(400px)}}
+.pp-boat{animation:ppBoat 22s linear infinite}
+@keyframes ppBoat{from{transform:translateX(-60px)}to{transform:translateX(400px)}}
+@media (prefers-reduced-motion: reduce){.pp-dest *{animation:none!important}}
+@media (prefers-color-scheme: dark){.pp-tk,.pp-chip:not(.on){background:rgba(255,255,255,.06)}}

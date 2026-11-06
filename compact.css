@@ -1,0 +1,106 @@
+/* ========== 1画面に収める（compact.js の折りたたみ＋各タブの詰め） ========== */
+
+/* ---------- 折りたたみ ---------- */
+.cp-fold{margin:6px 0}
+.cp-fold-h{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;padding:8px 12px;border-radius:14px;border:1px solid var(--border);
+  background:color-mix(in srgb,var(--surface,#fff) 55%,transparent);color:var(--text-primary);font:inherit;text-align:left;cursor:pointer}
+.cp-fold-h .cp-t{font-size:12.5px;font-weight:800}
+.cp-fold-h .cp-s{flex:1;min-width:0;font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.cp-chev{flex-shrink:0;color:var(--text-muted);transition:transform .25s var(--ease-out)}
+.cp-fold.open>.cp-fold-h .cp-chev{transform:rotate(180deg)}
+.cp-fold-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease-out)}
+.cp-fold.open>.cp-fold-b{grid-template-rows:1fr}
+.cp-fold-i{overflow:hidden;min-height:0}
+.cp-fold.open>.cp-fold-b>.cp-fold-i{padding-top:8px}
+/* 見出し（sec-title）をそのまま開閉ボタンにしたもの */
+.cp-head-title{cursor:pointer;border:none;background:none;min-height:0;padding:0;border-radius:0;margin-top:14px!important;margin-bottom:0!important}
+.cp-head-title .cp-s{flex:1;text-align:right;font-family:var(--font-body,inherit);font-size:11px;font-weight:600}
+.cp-fold.open>.cp-head-title{margin-bottom:4px!important}
+/* ヒーローの中に置く折りたたみ（暗い背景・明るい背景どちらでも読める） */
+.cp-in-hero{margin:10px 0 0}
+.cp-in-hero>.cp-fold-h{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);color:inherit}
+.cp-in-hero>.cp-fold-h .cp-s,.cp-in-hero>.cp-fold-h .cp-chev{color:inherit;opacity:.7}
+.tk-hero .cp-in-hero>.cp-fold-h{background:color-mix(in srgb,var(--surface,#fff) 55%,transparent);border-color:var(--border)}
+.cp-mini>.cp-fold-h{min-height:34px;padding:6px 12px;background:transparent}
+@media (prefers-reduced-motion: reduce){.cp-fold-b,.cp-chev{transition:none}}
+
+/* ---------- ホーム ---------- */
+#screen-home.cp-on .focus-card{padding:16px;margin-bottom:12px;border-radius:26px}
+#screen-home.cp-on .focus-head{margin-bottom:8px;align-items:center}
+#screen-home.cp-on .focus-head .spk-mini{transform:scale(.78);transform-origin:left center;margin-right:-10px}
+#screen-home.cp-on .focus-greet{font-size:var(--text-lg)}
+#screen-home.cp-on .focus-ring{width:44px;height:44px}
+#screen-home.cp-on .co-week{margin-top:6px}
+#screen-home.cp-on .co-steps{margin:4px 0 10px;gap:5px}
+#screen-home.cp-on .co-step{min-height:48px;padding:7px 12px}
+#screen-home.cp-on .co-steps-h{margin-top:6px}
+#screen-home.cp-on .co-step:not(.next) .co-step-b small{display:none}
+#screen-home.cp-on .co-step:not(.next){min-height:42px}
+/* 目標の2枚：見出しと数字を1行に */
+#screen-home.cp-on .gw-goal{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:8px;row-gap:5px}
+#screen-home.cp-on .gw-goal-h{grid-column:1}
+#screen-home.cp-on .gw-goal-v{grid-column:2;text-align:right;font-size:var(--text-base)}
+#screen-home.cp-on .gw-goal .gw-bar,#screen-home.cp-on .gw-goal-s{grid-column:1 / -1}
+#screen-home.cp-on .co-note{display:none}
+#screen-home.cp-on .gw-goals{margin-top:4px;gap:8px}
+#screen-home.cp-on .gw-goal{padding:10px 12px;gap:4px;border-radius:16px}
+#screen-home.cp-on .gw-goal-v{font-size:var(--text-lg)}
+#screen-home.cp-on .gw-goal-s{font-size:10px}
+#screen-home.cp-on .cp-fold .login-strip{margin-top:0}
+#screen-home.cp-on .focus-card .cp-fold{margin:4px 0}
+#screen-home.cp-on .focus-card .cp-fold-h{min-height:34px;padding:5px 12px}
+#screen-home.cp-on .co-theme{font-size:var(--text-base)}
+#screen-home.cp-on #co-start{min-height:44px;margin-top:2px}
+#screen-home.cp-on .co-free,#screen-home.cp-on #co-free{margin-top:8px}
+#screen-home.cp-on>*{margin-bottom:10px}
+
+/* ---------- Talk ---------- */
+#screen-talk.cp-on .tk-hero{padding:14px 16px;margin-bottom:12px}
+#screen-talk.cp-on .tk-h{font-size:var(--text-2xl);margin:2px 0 0}
+#screen-talk.cp-on .call-entry{padding:10px 12px;margin-bottom:10px;border-radius:22px}
+#screen-talk.cp-on .call-entry-av{width:46px;height:46px}
+#screen-talk.cp-on .call-entry-av svg{width:40px;height:40px}
+#screen-talk.cp-on .call-entry-b small{display:none}
+#screen-talk.cp-on #co-tiles{margin:12px 2px 8px}
+#screen-talk.cp-on .tk-modes{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+#screen-talk.cp-on .tk-mode{align-items:center;text-align:center;padding:10px 6px;gap:5px;border-radius:16px;min-height:0}
+#screen-talk.cp-on .tk-mode>*:not(.tk-mode-ic):not(.tk-mode-t):not(b):not(.tk-best){display:none}
+#screen-talk.cp-on .tk-mode-t,#screen-talk.cp-on .tk-mode b{font-size:12px;line-height:1.3}
+#screen-talk.cp-on .tk-wide{padding:10px 12px;margin-bottom:6px}
+#screen-talk.cp-on .tk-wide small{display:none}
+
+/* ---------- TOEIC ---------- */
+#screen-toeic.cp-on .toeic-hero{padding:16px}
+#screen-toeic.cp-on .toeic-target{margin-top:6px}
+#screen-toeic.cp-on .toeic-meter{margin-top:10px}
+#screen-toeic.cp-on .toeic-badge{display:none}
+#screen-toeic.cp-on .toeic-target{margin-top:0}
+#screen-toeic.cp-on .dtabs{margin-bottom:10px}
+#screen-toeic.cp-on #toeic-tab-body .p6-banner{padding:10px 12px;margin-bottom:8px}
+#screen-toeic.cp-on #toeic-tab-body .p6-banner small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#screen-toeic.cp-on #toeic-tab-body .p6-banner-b{min-width:0}
+#screen-toeic.cp-on #mock-entry{padding:12px 14px}
+
+/* ---------- Profile ---------- */
+#screen-profile.cp-on>.sec-title:first-child{margin-top:12px}
+#screen-profile.cp-on .spk-hero{display:grid;grid-template-columns:104px 1fr;align-items:center;text-align:left;column-gap:10px;padding:12px 14px;margin-bottom:10px}
+#screen-profile.cp-on .spk-hero>*{grid-column:2}
+#screen-profile.cp-on .spk-hero .spark-lv{position:static;justify-self:start;margin:0 0 4px;transform:none}
+#screen-profile.cp-on .spk-hero .spk-stage{grid-column:1;grid-row:1 / span 6;width:104px;height:104px;margin:0}
+#screen-profile.cp-on .spk-hero .spark-bubble{margin:4px 0;font-size:12px;max-width:none}
+#screen-profile.cp-on .spk-hero .spark-line{font-size:12px}
+#screen-profile.cp-on .spk-hero .spark-xp{position:static;width:100%;margin-top:6px;left:auto;right:auto;bottom:auto}
+#screen-profile.cp-on .spk-hero .spk-next{margin-top:2px}
+#screen-profile.cp-on .dtabs{margin-bottom:10px}
+#screen-profile.cp-on .stat-grid{grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+#screen-profile.cp-on .stat-card{padding:9px 4px;margin:0}
+#screen-profile.cp-on .stat-card svg{width:16px;height:16px;margin-bottom:2px}
+#screen-profile.cp-on .stat-val{font-size:var(--text-lg);line-height:1.2}
+#screen-profile.cp-on .stat-lbl{font-size:9px;line-height:1.25}
+#screen-profile.cp-on #diag-entry{padding:10px 14px;margin-bottom:6px}
+#screen-profile.cp-on #diag-entry small,#screen-profile.cp-on #diag-entry .card-sub{display:none}
+#screen-profile.cp-on #spk-room-entry{padding:8px 12px;margin:10px 0 6px}
+#screen-profile.cp-on .spk-room-entry-pv{transform:scale(.8)}
+
+/* 次のレッスンの帯は細く（中身を隠しすぎない） */
+.co-nextbar{padding:6px 8px 6px 6px;border-radius:18px}
