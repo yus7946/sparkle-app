@@ -104,3 +104,15 @@
 
 /* 次のレッスンの帯は細く（中身を隠しすぎない） */
 .co-nextbar{padding:6px 8px 6px 6px;border-radius:18px}
+
+/* ---------- iPhone（上のステータスバー・下のホームバーぶん狭い）でも1画面に ---------- */
+.hdr-in{padding-top:6px;padding-bottom:6px;min-height:50px}
+.co-nextbar{bottom:calc(77px + var(--safe-b));min-height:0}
+.co-nextbar>*:first-child{transform:scale(.9)}
+#screen-talk.cp-on .tk-kicker{display:none}
+#screen-talk.cp-on .tk-hero{padding-top:12px}
+#screen-talk.cp-on .tk-mode{padding:8px 6px}
+#screen-talk.cp-on #co-tiles{margin:10px 2px 6px}
+#screen-passport .pp-dest{height:clamp(190px,25vh,280px)}
+#screen-talk.cp-on .call-entry{padding:8px 12px}
+#screen-talk.cp-on .tk-wide{padding:8px 12px}

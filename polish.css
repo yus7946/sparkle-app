@@ -60,6 +60,14 @@ body::before{opacity:.55;filter:blur(24px)}
 .login-dot.done{background:color-mix(in srgb,var(--gold) 16%,transparent);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
 .login-dot.cur{background:color-mix(in srgb,var(--sparkle) 10%,transparent);border-color:var(--sparkle);box-shadow:0 6px 14px -8px color-mix(in srgb,var(--sparkle) 70%,transparent)}
 
+/* ---------- 上の帯：スマホのステータスバー（時計・電池）の下にずらす ----------
+   viewport-fit=cover＋半透明ステータスバーで画面の最上部まで描くため、その高さぶん余白を足す。
+   帯のすりガラスはステータスバーの裏まで伸びるので、見た目はつながったまま。 */
+:root{--safe-t:env(safe-area-inset-top,0px)}
+.hdr{padding-top:var(--safe-t)}
+/* スクロール位置の基準も帯の下に（見出しへのジャンプが帯に隠れないように） */
+html{scroll-padding-top:calc(64px + var(--safe-t))}
+
 /* ---------- 見出し・数字 ---------- */
 .sec-title{margin:22px 2px 10px;font-size:var(--text-base)}
 .result-score,.tk-stat-v,.gw-goal-v,.co-min{font-variant-numeric:tabular-nums}
