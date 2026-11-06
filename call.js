@@ -101,8 +101,8 @@ const CL_SPEEDS=[[0.8,'ゆっくり'],[0.92,'ふつう'],[1,'ナチュラル']];
 function callRate(){const c=callData();if(c.rate)return c.rate;return typeof sjLv==='function'?sjLv().rate:(talkData().rate||0.92)}
 const CL_ANDROID=/Android/i.test(navigator.userAgent);
 const CL_IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-// iOS 17+：話す間は「再生」、聞く間は「録音」に切り替える（マイクのあと声が小さくなる・受話口から出るのを防ぐ）
-function clAudio(type){try{if(navigator.audioSession)navigator.audioSession.type=type}catch(e){}}
+// iOS の navigator.audioSession の切り替えは使わない（戻し損ねると、ほかの画面の声が小さく・受話口から出ることがあるため）
+function clAudio(){}
 const CL_IC={
   bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
   kb:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6.5 14h11"/>',
@@ -471,7 +471,9 @@ function clBannerMaybe(){
     <button class="no" aria-label="あとで"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <button class="ok" aria-label="応答">${CL_PH_OK}</button>`;
   document.body.appendChild(b);
-  if(typeof sfx==='function')sfx('unlock');try{clVib([200,100,200])}catch(e){}
+  // 画面に一度も触れていないうちは音を鳴らさない（触れる前に鳴らすと、端末が効果音を止めたままにするため）
+  const touched=!navigator.userActivation||navigator.userActivation.hasBeenActive;
+  if(touched){if(typeof sfx==='function')sfx('unlock');clVib([200,100,200])}
   const close=()=>{if(!b.isConnected)return;b.classList.add('out');setTimeout(()=>b.remove(),300)};
   b.querySelector('.no').onclick=close;
   b.querySelector('.ok').onclick=()=>{b.remove();callRing(t.id)};
