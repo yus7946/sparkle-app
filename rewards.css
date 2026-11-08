@@ -1,0 +1,110 @@
+/* ===== 旅のごほうび（rewards.js）。ぼかしは使わず、くっきりした面で見せる ===== */
+#rw-ov{position:fixed;inset:0;z-index:330;color:#fff;overflow:auto;animation:clIn .3s var(--ease-out);
+  background:radial-gradient(circle at 50% 28%,rgba(43,127,224,.34) 0,rgba(43,127,224,.1) 170px,rgba(43,127,224,0) 300px),linear-gradient(180deg,#0f2a4a 0%,#081a38 60%,#060f22 100%)}
+.rw-in{min-height:100%;max-width:440px;margin:0 auto;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px))}
+.rw-k{font-size:10px;font-weight:800;letter-spacing:.2em;color:#ffd76a}
+.rw-h{font-family:var(--font-heading);font-weight:400;font-size:26px;line-height:1.2;text-align:center}
+.rw-sub{font-size:12px;opacity:.75;margin-top:-6px}
+.rw-link{background:none;border:none;min-height:0;padding:6px;color:rgba(255,255,255,.75);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.rw-btns{display:grid;grid-template-columns:1fr 1.6fr;gap:8px;width:100%}
+.rw-btns .btn{min-height:48px;padding:0 10px}
+
+/* 絵はがき */
+.rw-post{width:100%;border-radius:20px;overflow:hidden;background:#fffaf0;color:#2a2438;box-shadow:0 24px 50px -22px rgba(0,0,0,.8);transform:rotate(-1.2deg);animation:rwPost .55s var(--ease-out)}
+@keyframes rwPost{from{opacity:0;transform:translateY(26px) rotate(-5deg)}to{opacity:1;transform:rotate(-1.2deg)}}
+.rw-post-s{position:relative;height:clamp(150px,24vh,210px)}
+.rw-post-s .pp-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rw-mark{position:absolute;right:12px;top:12px;width:62px;height:62px;border-radius:50%;border:2px solid rgba(255,255,255,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transform:rotate(10deg)}
+.rw-mark b{font-size:14px;letter-spacing:.06em}.rw-mark small{font-size:8.5px}
+.rw-post-b{display:flex;flex-direction:column;gap:7px;padding:14px 16px 12px}
+.rw-post-b b{font-size:16px;line-height:1.5;font-weight:700}
+.rw-post-b small{font-size:12px;line-height:1.65;color:#6a6474}
+.rw-sign{align-self:flex-end;font-family:var(--font-heading);font-size:14px;color:#2b7fe0}
+
+/* パック */
+.rw-pack{position:relative;width:176px;height:244px;margin:10px 0;border:none;border-radius:16px;cursor:pointer;color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;
+  background:linear-gradient(150deg,#ffd76a 0%,var(--ink) 42%,#4fa3f7 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),0 26px 50px -20px rgba(0,0,0,.85);animation:rwWiggle 1.8s ease-in-out infinite}
+.rw-pack span{font-family:var(--font-heading);font-size:44px}
+.rw-pack em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.28em}
+.rw-pack i{position:absolute;top:-40%;bottom:-40%;width:34%;left:-50%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-16deg);animation:rwShine 2.4s ease-in-out infinite}
+.rw-pack.open{animation:rwOpen .42s ease-in forwards}
+@keyframes rwWiggle{0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-3deg)}84%{transform:rotate(3deg)}92%{transform:rotate(-2deg)}}
+@keyframes rwShine{0%,50%{left:-50%}100%{left:130%}}
+@keyframes rwOpen{to{transform:scale(1.35);opacity:0}}
+
+/* カード */
+.rw-cards{display:flex;gap:10px;width:100%;justify-content:center}
+.rw-card{flex:1;max-width:280px;min-height:230px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:18px;background:linear-gradient(160deg,var(--ink),#0f2a4a);border:2px solid rgba(255,255,255,.28);animation:rwFlip .55s var(--ease-out)}
+.rw-card.r2{border-color:#7ee2b8}
+.rw-card.r3{border-color:#ffd76a;box-shadow:0 0 0 3px rgba(255,215,106,.25),0 18px 40px -18px rgba(255,215,106,.7)}
+@keyframes rwFlip{from{opacity:0;transform:rotateY(80deg) scale(.9)}to{opacity:1;transform:none}}
+.rw-card-t{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;letter-spacing:.1em;opacity:.9}
+.rw-card-t em,.rw-tile em{font-style:normal;color:#ffd76a;letter-spacing:0}
+.rw-card>b{flex:1;display:flex;align-items:center;font-size:20px;line-height:1.35}
+.rw-card>small{font-size:12px;line-height:1.55;opacity:.82}
+.rw-card-f{display:flex;justify-content:space-between;align-items:center}
+.rw-card-f i{font-style:normal;font-size:10px;opacity:.75}
+.rw-card-f u{text-decoration:none;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:#ffd76a;color:#2a1d00}
+.rw-card-f u.dup{background:rgba(255,255,255,.18);color:#fff}
+.rw-row{display:flex;justify-content:center}
+.rw-say{height:36px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.rw-prog{display:flex;align-items:center;gap:10px;width:100%;font-size:11px;font-weight:700;opacity:.9}
+.rw-prog span{white-space:nowrap}
+.rw-prog i{flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,#ffd76a var(--p),rgba(255,255,255,.16) var(--p))}
+.rw-next{width:100%;box-sizing:border-box;padding:10px 14px;border-radius:14px;border:1px dashed rgba(255,215,106,.55);display:flex;flex-direction:column;gap:2px}
+.rw-next span{font-size:10px;font-weight:800;color:#ffd76a;letter-spacing:.04em}
+.rw-next b{font-size:13.5px;line-height:1.45}
+
+/* はじめてのプラン */
+.rw-egg{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 34% 28%,#fff,#e3efff 55%,#b9d6ff)}
+.rw-egg svg{width:92px;height:92px}
+.rw-list{width:100%;display:flex;flex-direction:column;gap:8px;margin:4px 0 6px}
+.rw-list>div{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13)}
+.rw-list i{width:28px;height:28px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:800;background:#ffd76a;color:#2a1d00}
+.rw-list span{display:flex;flex-direction:column;gap:1px}
+.rw-list b{font-size:13.5px}.rw-list small{font-size:11px;opacity:.75;line-height:1.5}
+
+/* ホームの見出しのチップ・Passport の入口 */
+.rw-chip{display:inline-block;vertical-align:1px;margin-left:6px;padding:2px 8px;border:none;border-radius:999px;font:inherit;font-size:10px;font-weight:800;min-height:0;color:var(--sparkle);background:color-mix(in srgb,var(--sparkle) 12%,transparent)}
+.rw-chip.ready{color:#2a1d00;background:#ffd76a;cursor:pointer;animation:rwWiggle 1.8s ease-in-out infinite}
+.rw-al-open{height:28px;padding:0 10px;margin-left:6px;border-radius:999px;border:1px solid color-mix(in srgb,var(--sparkle) 40%,transparent);background:color-mix(in srgb,var(--sparkle) 10%,transparent);color:var(--sparkle);font:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+#screen-passport .pp-top{gap:4px}#screen-passport .pp-ttl{margin-right:auto}
+
+/* アルバム */
+.rw-count{margin-left:auto;font-size:13px;font-weight:800;color:var(--sparkle)}
+.rw-seg{display:flex;margin:0 0 8px}.rw-seg button{flex:1}
+.rw-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.rw-tile{display:flex;flex-direction:column;gap:3px;min-height:92px;padding:10px 11px;border-radius:15px;text-align:left;font:inherit;cursor:pointer;color:var(--text-primary);background:var(--surface-2,rgba(255,255,255,.8));border:1.5px solid var(--border)}
+.rw-tile.r2{border-color:color-mix(in srgb,var(--enchanted) 60%,transparent)}
+.rw-tile.r3{border-color:#e0b23c}
+.rw-tile em{font-size:10px;color:#d39a14}
+.rw-tile b{font-size:12.5px;line-height:1.35}
+.rw-tile small{font-size:10.5px;line-height:1.4;color:var(--text-muted)}
+.rw-tile.lock{cursor:default;opacity:.6;background:transparent;border-style:dashed}
+.rw-odds{margin:10px 2px 0;font-size:10.5px;line-height:1.6;color:var(--text-muted)}
+.rw-eps{display:flex;flex-direction:column;gap:8px}
+.rw-ep{display:flex;flex-direction:column;gap:3px;padding:11px 13px;border-radius:15px;background:var(--surface-2,rgba(255,255,255,.8));border:1px solid var(--border)}
+.rw-ep span{font-size:10px;font-weight:800;color:var(--sparkle);letter-spacing:.04em}
+.rw-ep b{font-size:13.5px;line-height:1.45}.rw-ep small{font-size:11.5px;line-height:1.55;color:var(--text-secondary)}
+.rw-ep.lock{border-style:dashed;background:transparent}
+
+/* Plus ページの追加 */
+.pl-price.best{position:relative;border-color:var(--gold)}
+.pl-you{margin:0 0 10px;padding:11px 14px;border-radius:16px;font-size:12.5px;line-height:1.65;background:color-mix(in srgb,var(--sparkle) 9%,transparent);border:1px solid color-mix(in srgb,var(--sparkle) 22%,transparent);color:var(--text-primary)}
+.pl-faq{margin-top:8px;border:1px solid var(--border);border-radius:14px;padding:0 13px;background:var(--surface-2,rgba(255,255,255,.7))}
+.pl-faq summary{cursor:pointer;padding:11px 0;font-size:13px;font-weight:700}
+.pl-faq p{margin:0 0 11px;font-size:12px;line-height:1.65;color:var(--text-secondary)}
+@media (prefers-reduced-motion: reduce){#rw-ov,#rw-ov *,.rw-chip.ready{animation:none!important}}
+@media (prefers-color-scheme: dark){.rw-tile,.rw-ep{background:rgba(255,255,255,.06)}}
+
+/* 1画面に収める調整 */
+#rw-ov{overflow-x:hidden}
+#screen-passport .pp-top{flex-wrap:nowrap}
+#screen-passport .pp-ttl b{white-space:nowrap}
+#screen-passport .pp-count{white-space:nowrap}
+#screen-home.cp-on .gw-goal-s{display:none}
+#screen-home.cp-on .co-week{margin-top:2px}
+#screen-home.cp-on .focus-card{padding:14px}
+#screen-profile.cp-on #spk-room-entry{padding:4px 12px}
+#screen-profile.cp-on .spk-room-entry-pv{width:44px;height:44px;transform:none}
+#screen-profile.cp-on .spk-room-entry-pv svg{width:44px;height:44px}

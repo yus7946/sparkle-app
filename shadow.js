@@ -98,6 +98,7 @@ function sdHome(){
   window.scrollTo(0,0);
 }
 function sdStart(){
+  if(typeof plusGate==='function'&&!sdStart._ok){return plusGate('shadow',1,'day',()=>{sdStart._ok=true;try{sdStart()}finally{sdStart._ok=false}})}
   if(typeof lxUnlock==='function')lxUnlock();
   const wk=sdWeek(),src=sdSrc(wk);
   lxShadowOpen({id:src.id,script:src.script,lang:src.lang,narr:src.narr,title:'Day '+sdDayN(wk)},{studio:true,back:'studio'});

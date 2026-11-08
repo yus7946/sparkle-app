@@ -12,7 +12,7 @@ const PLAN_ROWS=[
   ['毎日のメニュー・単語・Part 1〜7 ドリル','○','○'],
   ['日本人のための英語ジム（5つのクセ）','○','○'],
   ['Spark の育成・着せかえ・チーム','○','○'],
-  ['シャドーイング（5ステップ）','1日1本','無制限'],
+  ['シャドーイング・スタジオ（コーチのメモつき）','1日1回','無制限'],
   ['録音して聞き比べ（波形・止まった回数）','1日1回','無制限'],
   ['本番形式の模試（音声のみ）','週1回','無制限'],
   ['英語のクセ再診断・変化のレポート','初回のみ','30日ごと'],
@@ -43,13 +43,17 @@ function openPlus(from){
       <div class="pl-s">続けるための機能は、ずっと無料。<br>上達を早める「分析」と「量」が Plus です。</div>
       ${PLAN.beta?'<div class="pl-beta">いまはβ期間のため、Plus の機能もすべて無料で使えます</div>':''}
       ${from&&!PLAN.beta?'<div class="pl-beta">今日の無料回数を使い切りました。Plus なら回数を気にせず続けられます</div>':''}</div>
+    ${(()=>{const days=Object.keys(PROG.xpDaily||{}).length,sh=Object.values(PROG.lxShadowDays||{}).reduce((x,y)=>x+y,0),calls=(PROG.call&&PROG.call.hist||[]).length;return days>1?`<div class="pl-you">これまで <b>${days}日</b> 学習、シャドーイング <b>${sh}本</b>、Spark との通話 <b>${calls}回</b>。Plus は、この積み重ねを「回数の上限なし」と「詳しい分析」で加速します。</div>`:''})()}
     <div class="card pl-table"><div class="pl-row pl-head"><span></span><b>無料</b><b>Plus</b></div>
       ${PLAN_ROWS.map(r=>`<div class="pl-row"><span>${r[0]}</span><i>${r[1]}</i><i class="pl-plus">${r[2]}</i></div>`).join('')}</div>
     <div class="pl-prices">
-      <button class="card pl-price${reg&&reg.plan==='y'?' on':''}" data-plan="y"><span class="pl-save">33%おトク</span><b>年額 ¥${PLAN.price.y.toLocaleString()}</b><small>月あたり ¥${Math.round(PLAN.price.y/12)}</small></button>
+      <button class="card pl-price best${reg&&reg.plan==='y'?' on':''}" data-plan="y"><span class="pl-save">おすすめ · 33%おトク</span><b>年額 ¥${PLAN.price.y.toLocaleString()}</b><small>月あたり ¥${Math.round(PLAN.price.y/12)}</small></button>
       <button class="card pl-price${reg&&reg.plan==='m'?' on':''}" data-plan="m"><b>月額 ¥${PLAN.price.m}</b><small>いつでも解約できる予定</small></button>
     </div>
     <div class="hb-note" style="text-align:center">${reg?'✓ 事前登録ずみ（'+(reg.plan==='y'?'年額':'月額')+'）。正式版の準備ができたらお知らせします':'正式版はまだ準備中です。プランを選ぶと事前登録になり、料金は発生しません。'}</div>
+    <details class="pl-faq"><summary>事前登録で料金はかかりますか？</summary><p>かかりません。決済の情報も入力しません。正式版の準備ができたらアプリ内でお知らせします。</p></details>
+    <details class="pl-faq"><summary>無料版はなくなりますか？</summary><p>毎日のレッスン・単語・ドリル・Spark の育成・絵はがき・おみやげは、無料のまま使えるようにします。</p></details>
+    <details class="pl-faq"><summary>学習の記録はどこに保存されますか？</summary><p>お使いの端末の中です。機種変更のときは Profile の「バックアップ」から引き継げます。</p></details>
     <button class="btn btn-secondary btn-block" id="pl-share" style="margin-top:12px">Sparkle を友だちに紹介する</button>`;
   document.getElementById('pl-back').onclick=()=>go('home');
   el.querySelectorAll('[data-plan]').forEach(b=>b.onclick=async()=>{await plusInterest(b.dataset.plan);showToast('事前登録しました。ありがとうございます！');openPlus()});
